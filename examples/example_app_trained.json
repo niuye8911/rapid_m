@@ -1,0 +1,10 @@
+{
+  "model_type": "LINEAR", 
+  "machine_id": 0, 
+  "params": {
+    "CPU": 0.1, 
+    "IO": 0.2
+  }, 
+  "name": "exampleApp", 
+  "TRAINED": true
+}
