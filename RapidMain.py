@@ -10,10 +10,37 @@
 
 import optparse
 import sys
+from enum import Enum
+
+from Utility import *
+
+
+class Mode(Enum):
+    TRAIN_SLOWDOWN = "TRAIN_SLOWDOWN"
+    TRAIN_ENV = "TRAIN_ENV"
+    TRAIN_CLUSTER = "TRAIN_CLUSTER"
+    GET_BUCKETS = "GET_BUCKETS"
 
 
 def main(argv):
-    pass
+    parser = genParser()
+    options, args = parser.parse_args()
+
+    # determine modes and pass params to different routine
+    mode = filter(lambda x: x.value is options.mode, Mode)
+    # validate the parameters
+    checkParams(mode, options)
+
+
+def checkParams(mode, options):
+    if mode is Mode.TRAIN_SLOWDOWN:  # Rajanya's work starts here
+        return not_none(options.app_file, options.app_measurements)
+    elif mode is Mode.TRAIN_ENV:  # Abdal's work starts here
+        return not_none(options.env_measurements)
+    elif mode is Mode.GET_CLUSTER:  # Asheley's work starts here
+        return not_none(options.app_profiles)
+    elif mode is Mode.GET_BUCKETS:  # All our work starts here
+        return not_none(options.active_apps)
 
 
 def genParser():
@@ -21,14 +48,14 @@ def genParser():
     # for slow-down training
     parser.add_option('--path2app', dest="app_file")
     parser.add_option('--appdata', dest="app_measurements")
-    # for slow-down prediction
-    parser.add_option('--env', dest="environment")
     # for environment training
     parser.add_option('--envdata', dest="env_measurements")
-    # for environment prediction
-    parser.add_option('--envpfs', dest="active_profiles")
     # for clustering
     parser.add_option('--apppfs', dest="app_profiles")
+    # for bucket selection
+    parser.add_option('--apps', dest="active_apps")
+    # for mode
+    parser.add_option('--mode', dest="mode")
     return parser
 
 
