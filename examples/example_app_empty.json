@@ -1,7 +1,6 @@
 {
-  "model_type": "LINEAR", 
+  "CLUSTERED": false, 
   "machine_id": 0, 
-  "params": {}, 
   "name": "exampleApp", 
   "TRAINED": false
 }

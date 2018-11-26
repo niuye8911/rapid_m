@@ -1,10 +1,22 @@
 {
-  "model_type": "LINEAR", 
-  "machine_id": 0, 
+  "name": "exampleApp", 
+  "num_of_cluster": 3, 
+  "cluster_info": {
+    "second": [
+      "config3", 
+      "config4"
+    ], 
+    "first": [
+      "config1", 
+      "config2"
+    ]
+  }, 
   "params": {
     "CPU": 0.1, 
     "IO": 0.2
   }, 
-  "name": "exampleApp", 
-  "TRAINED": true
+  "TRAINED": true, 
+  "CLUSTERED": true, 
+  "machine_id": 0, 
+  "accuracy": 0.8
 }

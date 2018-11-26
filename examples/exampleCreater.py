@@ -19,7 +19,7 @@ def createExampleAppAfterTrained():
         example_app['CLUSTERED'] = True
         example_app['accuracy'] = 0.80
         example_app['num_of_cluster'] = 3
-        example_app['cluster_info'] = {"first": list("config1", "config2"), "second": list("config3", "config4")}
+        example_app['cluster_info'] = {"first": ["config1", "config2"], "second": ["config3", "config4"]}
     with open('../examples/example_app_trained.json', 'w') as example_app_file:
         json.dump(example_app, example_app_file, indent=2)
 
