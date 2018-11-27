@@ -24,5 +24,26 @@ def createExampleAppAfterTrained():
         json.dump(example_app, example_app_file, indent=2)
 
 
+def createExampleMachine():
+    example_machine = dict()
+    example_machine['name'] = "exampleMachine"
+    example_machine['TRAINED'] = False
+    example_machine['id'] = 0
+    with open('../examples/example_machine_empty.json', 'w') as example_machine_file:
+        json.dump(example_machine, example_machine_file, indent=2)
+
+
+def createExampleMachineAfterTrained():
+    example_machine = dict()
+    example_machine['name'] = "exampleMachine"
+    example_machine['TRAINED'] = True
+    example_machine['id'] = 1
+    example_machine['mmodel'] = {"CPU": [0.2, 0.3], "IO": [0.3, 0.4]}
+    with open('../examples/example_machine_trained.json', 'w') as example_machine_file:
+        json.dump(example_machine, example_machine_file, indent=2)
+
+
 createExampleApp()
 createExampleAppAfterTrained()
+createExampleMachine()
+createExampleMachineAfterTrained()
