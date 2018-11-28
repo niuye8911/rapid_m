@@ -6,7 +6,8 @@ def train(machine_file, measurements):
     '''
     Train the Machine Model using a proper model
     :param machine_file: the path to the machine file (string)
-    :param measurements: a csv file containing all the combined system profile measurements
+    :param measurements: a csv file containing all the combined system
+    profile measurements
     :return: void, but write the model to the file
     '''
 
@@ -19,7 +20,8 @@ def train(machine_file, measurements):
 
         # TODO:END of Abdall's work*******
 
-        # Note: the final goal of this function is to write the model back to app file
+        # Note: the final goal of this function is to write the model back to
+        # app file
         app['params'] = model
         app['TRAINED'] = True
         app['accuracy'] = accuracy
@@ -32,6 +34,7 @@ def train(machine_file, measurements):
 
 def dummyTrainer(measurements):
     # I do nothing
-    dummy_model = {'attribute1': {'a': 0.2, 'b': 3}, 'attribute2': {'a': 0.3, 'b': 1}}
+    dummy_model = {'attribute1': {'a': 0.2, 'b': 3},
+                   'attribute2': {'a': 0.3, 'b': 1}}
     dummy_accuracy = 0.2
     return dummy_model, dummy_accuracy

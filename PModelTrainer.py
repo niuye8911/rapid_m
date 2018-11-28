@@ -22,7 +22,8 @@ def train(app_file, measurements):
 
         # TODO:END of Rajanya's work*******
 
-        # Note: the final goal of this function is to write the model back to app file
+        # Note: the final goal of this function is to write the model back to
+        # app file
         app['params'] = model
         app['TRAINED'] = True
         app['accuracy'] = accuracy
@@ -35,6 +36,7 @@ def train(app_file, measurements):
 
 def dummyTrainer(measurements):
     # I do nothing
-    dummy_model = {'attribute1': {'a': 0.2, 'b': 3}, 'attribute2': {'a': 0.3, 'b': 1}}
+    dummy_model = {'attribute1': {'a': 0.2, 'b': 3},
+                   'attribute2': {'a': 0.3, 'b': 1}}
     dummy_accuracy = 0.2
     return dummy_model, dummy_accuracy
