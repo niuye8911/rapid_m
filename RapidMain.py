@@ -1,13 +1,5 @@
 """
  This is supposed to be the entry of backend solver
- functionality provided:
-    1) trainSlowDown(): train an app's slow-down model given a list of
-    environment + slow-down measurement
-    2) trainEnvironment(): train the environment predictor given a list of
-    pairs of environment
-    3) getCluster(): provide a list of clusters given a list of profiles
-    4) getBucket(): this is the core function that selects buckets during
-    runtime
   Author:
     Liu Liu
     11/2018
