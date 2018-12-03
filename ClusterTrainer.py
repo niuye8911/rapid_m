@@ -6,6 +6,7 @@
 """
 
 import csv
+from collections import OrderedDict
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -29,31 +30,37 @@ def cluster(app_file, app_profile):
     # get the app object
     app = App(app_file)
     if not app.isClustered():
-        # initialize the cluster information
-        cluster_distance = 0.0
-        cluster_info = {}
-        num_of_cluster = -1
-
         # Z: the linkage matrix
         # c: the coefficient distance
-        Z, c = hCluster(app_profile)
+        observations, Z, c = hCluster(app_profile)
         k = determine_k(Z)
         clusters = fcluster(Z, k, criterion='maxclust')
 
-        # Note: the final goal of this function is to write the cluster-info
-        # back to app file
-        app['CLUSTERED'] = True
-        app['cluster_info'] = cluster_info
-        app['num_of_cluster'] = num_of_cluster
-        with open(app_file, 'w') as output:
-            json.dump(app, output, indent=2)
+        # write result to object
+        write_cluster_info(app, clusters, observations, k)
 
-        RAPID_info("clustering for " + app['name'], str(cluster_distance))
+        with open(app_file, 'w') as output:
+            json.dump(app.__dict__, output, indent=2)
+
+        RAPID_info("clustering for " + app.name, str(c))
 
 
 def determine_k(Z):
     # call Rajanya's work
     return 5
+
+
+def write_cluster_info(app, clusters, observations, k):
+    # init cluster_info
+    cluster_info = OrderedDict()
+    for i in range(1, k + 1):
+        cluster_info[app.name + str(i)] = []
+    # fill in the dict
+    for i in range(0, len(clusters)):
+        cluster_info[app.name + str(clusters[i])].append(observations[i])
+    app.cluster_info = cluster_info
+    app.num_of_cluster = k
+    app.CLUSTERED = True
 
 
 def hCluster(measurements):
@@ -63,14 +70,14 @@ def hCluster(measurements):
         features = f.readline().strip(',\n').split(",")
         # init the clustering data
         data = np.empty((0, len(features)))
-        cluster_info = {}
+        observations = []
 
         for line in f:
-            observations = line.partition(",")
-            config_name = observations[0]
-            observation_data = map(lambda x: float(x), observations[
+            observation = line.partition(",")
+            config_name = observation[0]
+            observation_data = map(lambda x: float(x), observation[
                 2].strip(',\n').split(","))
-            cluster_info[config_name] = observation_data
+            observations.append(config_name)
             data = np.append(data, [observation_data], axis=0)
 
     if data.size == 0:
@@ -79,7 +86,7 @@ def hCluster(measurements):
     # hierarchal clustering
     Z = linkage(data, 'ward')
     c, coph_dists = cophenet(Z, pdist(data))
-    return Z, c
+    return observations, Z, c
 
 
 def draw(Z):
