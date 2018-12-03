@@ -1,3 +1,10 @@
+"""
+ Clustering app's configs based on prediction accuracy of slow-down
+  Author:
+    Ashley Dunn / Liu Liu
+    12/2018
+"""
+
 import csv
 
 import numpy as np
