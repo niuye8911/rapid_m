@@ -28,14 +28,15 @@ def main(argv):
     options, args = parser.parse_args()
 
     # determine modes and pass params to different routine
-    flow = filter(lambda x: x.value is options.flow, Flow)
+    flow = filter(lambda x: x.value == options.flow, Flow)[0]
+
     # validate the parameters
     checkParams(flow, options)
 
     if flow is Flow.TRAIN_SLOWDOWN:
         # train the slow-down by calling Rajanya's work
         p_accuracy = PModelTrainer.train(options.app_file,
-                                       options.app_measurements)
+                                         options.app_measurements)
         # do something about the accuracy
 
     elif flow is Flow.TRAIN_CLUSTER:
@@ -55,7 +56,7 @@ def checkParams(flow, options):
         return not_none([options.app_file, options.app_measurements])
     elif flow is Flow.TRAIN_ENV:  # Abdal's work starts here
         return not_none([options.env_measurements, options.machine_file])
-    elif flow is Flow.GET_CLUSTER:  # Asheley's work starts here
+    elif flow is Flow.TRAIN_CLUSTER:  # Asheley's work starts here
         return not_none([options.app_profiles])
     elif flow is Flow.GET_BUCKETS:  # All our work starts here
         return not_none([options.active_apps])

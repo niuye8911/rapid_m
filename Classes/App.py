@@ -14,7 +14,7 @@
 import json
 from enum import Enum
 
-from rapid_m_backend_server import Utility as util
+import Utility as util
 
 
 class PModelType(Enum):
@@ -40,8 +40,8 @@ class App:
             app = json.load(app_json)
             self.name = app['name']
             self.machine_id = app['machine_id']
-            self.model_type = filter(lambda x: x.value is app['model_type'],
-                                     PModelType)
+            self.model_type = None if 'model_type' not in app else filter(
+                lambda x: x.value == app['model_type'], PModelType)
             self.TRAINED = app['TRAINED']
             self.CLUSTERED = app['CLUSTERED']
             if app['TRAINED']:
