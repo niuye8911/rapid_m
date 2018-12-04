@@ -33,7 +33,7 @@ def cluster(app_file, app_profile):
         # Z: the linkage matrix
         # c: the coefficient distance
         observations, Z, c = hCluster(app_profile)
-        k = determine_k(Z)
+        k = determine_k(Z, observations)
         clusters = fcluster(Z, k, criterion='maxclust')
 
         # write result to object
@@ -45,19 +45,31 @@ def cluster(app_file, app_profile):
         RAPID_info("clustering for " + app.name, str(c))
 
 
-def determine_k(Z):
-    # call Rajanya's work
-    return 5
+def determine_k(Z, observations):
+    # iterate through different cluster numbers
+    for num_of_cluster in range(1, len(Z) + 2):
+        clusters = fcluster(Z, num_of_cluster, criterion='maxclust')
+        cluster_list = get_cluster_list(clusters, observations, num_of_cluster)
+        # check the average accuracy
+
+    return num_of_cluster
+
+
+def get_cluster_list(clusters, observations, k):
+    cluster_info_list = []
+    for i in range(1, k + 1):
+        cluster_info_list[i] = []
+    for i in range(0, len(clusters)):
+        cluster_info_list[clusters[i] - 1].append(observations[i])
+    return cluster_info_list
 
 
 def write_cluster_info(app, clusters, observations, k):
     # init cluster_info
     cluster_info = OrderedDict()
+    cluster_info_list = get_cluster_list(clusters, observations, k)
     for i in range(1, k + 1):
-        cluster_info[app.name + str(i)] = []
-    # fill in the dict
-    for i in range(0, len(clusters)):
-        cluster_info[app.name + str(clusters[i])].append(observations[i])
+        cluster_info[app.name + str(i)] = cluster_info_list[i - 1]
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True

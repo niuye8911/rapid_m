@@ -1,3 +1,10 @@
+"""
+ Clustering app's configs based on prediction accuracy of slow-down
+  Author:
+    Rajanya Dhar / Liu Liu
+    12/2018
+"""
+
 from Classes.App import *
 from Utility import *
 
@@ -6,7 +13,6 @@ def train(app_file, measurements):
     '''
     Train the app using a proper model
     :param app_file: the path to the app file (string)
-    :param app: app object of type (App)
     :param measurements: a csv file containing all the slow-down measurements
     :return: void, but write the model to the file
     '''
