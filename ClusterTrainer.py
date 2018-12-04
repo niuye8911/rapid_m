@@ -5,7 +5,6 @@
     12/2018
 """
 
-import csv
 from collections import OrderedDict
 
 import numpy as np
@@ -14,54 +13,63 @@ from scipy.cluster.hierarchy import cophenet
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist
 
-from Classes.App import *
-from Utility import *
+
+def parseProfile(measurements):
+    with open(measurements, 'r') as f:
+        # get all the features
+        features = f.readline().strip(',\n').split(",")
+        # init the clustering data
+        data = np.empty((0, len(features)))
+        observations = OrderedDict()
+
+        for line in f:
+            observation = line.partition(",")
+            config_name = observation[0]
+            observation_data = map(lambda x: float(x), observation[
+                2].strip(',\n').split(","))
+            observations[config_name] = observation_data
+            data = np.append(data, [observation_data], axis=0)
+
+    if data.size == 0:
+        print("error reading csv file")
+
+    return observations, data
 
 
-def cluster(app_file, app_profile):
+def cluster(observations, data, k):
     '''
     Train the app using a proper model
-    :param app_file: the path to the app file (string)
     :param app_profile: a csv file containing all the configuration with
     their measurements
+    :param k: number of clusters to cluster
     :return: void, but write the clusters to the file
     '''
 
-    # get the app object
-    app = App(app_file)
-    if not app.isClustered():
-        # Z: the linkage matrix
-        # c: the coefficient distance
-        observations, Z, c = hCluster(app_profile)
-        k = determine_k(Z, observations)
-        clusters = fcluster(Z, k, criterion='maxclust')
-
-        # write result to object
-        write_cluster_info(app, clusters, observations, k)
-
-        with open(app_file, 'w') as output:
-            json.dump(app.__dict__, output, indent=2)
-
-        RAPID_info("clustering for " + app.name, str(c))
-
-
-def determine_k(Z, observations):
-    # iterate through different cluster numbers
-    for num_of_cluster in range(1, len(Z) + 2):
-        clusters = fcluster(Z, num_of_cluster, criterion='maxclust')
-        cluster_list = get_cluster_list(clusters, observations, num_of_cluster)
-        # check the average accuracy
-
-    return num_of_cluster
+    # Z: the linkage matrix
+    # c: the coefficient distance
+    Z, c = hCluster(observations, data)
+    # get the clusters
+    clusters = fcluster(Z, k, criterion='maxclust')
+    # get the cluster list
+    cluster_list = get_cluster_list(clusters, observations, k)
+    return observations, cluster_list, c
 
 
 def get_cluster_list(clusters, observations, k):
+    observations = observations.keys()
     cluster_info_list = []
     for i in range(1, k + 1):
         cluster_info_list[i] = []
     for i in range(0, len(clusters)):
         cluster_info_list[clusters[i] - 1].append(observations[i])
     return cluster_info_list
+
+
+def hCluster(observations, data):
+    # hierarchal clustering
+    Z = linkage(data, 'ward')
+    c, coph_dists = cophenet(Z, pdist(data))
+    return observations, Z, c
 
 
 def write_cluster_info(app, clusters, observations, k):
@@ -73,33 +81,6 @@ def write_cluster_info(app, clusters, observations, k):
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True
-
-
-def hCluster(measurements):
-    with open(measurements, 'r') as f:
-        csv_data = csv.reader(f, delimiter=',')
-        # get all the features
-        features = f.readline().strip(',\n').split(",")
-        # init the clustering data
-        data = np.empty((0, len(features)))
-        observations = []
-
-        for line in f:
-            observation = line.partition(",")
-            config_name = observation[0]
-            observation_data = map(lambda x: float(x), observation[
-                2].strip(',\n').split(","))
-            observations.append(config_name)
-            data = np.append(data, [observation_data], axis=0)
-
-    if data.size == 0:
-        print("error reading csv file")
-
-    # hierarchal clustering
-    Z = linkage(data, 'ward')
-    c, coph_dists = cophenet(Z, pdist(data))
-    return observations, Z, c
-
 
 def draw(Z):
     # view of basic Dendrogram with all clusters
