@@ -7,6 +7,7 @@
 
 import optparse
 import sys
+from enum import Enum
 
 import ClusterTrainer
 import MModelTrainer
@@ -62,8 +63,12 @@ def checkParams(flow, options):
         return not_none([options.env_measurements, options.machine_file])
     elif flow is Flow.TRAIN_CLUSTER:  # Asheley's work starts here
         return not_none([options.app_profiles])
-    elif flow is Flow.GET_BUCKETS:  # All our work starts here
+    elif flow is Flow.GET_BUCKETS:  # runtime compute
         return not_none([options.active_apps])
+    elif flow is Flow.INIT:  # All our work starts here
+        return not_none([options.app_file,
+                         options.app_measurements, options.app_profiles,
+                         options.dir])
 
 
 def genParser():
@@ -80,6 +85,8 @@ def genParser():
     parser.add_option('--apps', dest="active_apps")
     # for mode
     parser.add_option('--flow', dest="flow")
+    # for server maintainance
+    parser.add_option('--dir', dest="dir")
     return parser
 
 
