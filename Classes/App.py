@@ -12,14 +12,6 @@
 '''
 import json
 from collections import OrderedDict
-from enum import Enum
-
-import Utility as util
-
-
-class PModelType(Enum):
-    LINEAR = "LINEAR"
-    LOGISTIC = "LOGISTIC"
 
 
 class App:
@@ -40,26 +32,21 @@ class App:
             app = json.load(app_json)
             self.name = app['name']
             self.machine_id = app['machine_id']
-            self.model_type = None if 'model_type' not in app else filter(
-                lambda x: x.value == app['model_type'], PModelType)
+            self.model_type = None if 'model_type' not in app else app[
+                'model_type']
             self.TRAINED = app['TRAINED']
             self.CLUSTERED = app['CLUSTERED']
             if app['TRAINED']:
-                self.model_params = self.readParams(app['params'])
+                self.model_params = self.readParams(app['model_params'])
                 self.TRAINED = True
             if app['CLUSTERED']:
                 self.num_of_cluster = app['num_of_cluster']
-                self.cluster_info = self.readClusterInfo(app['cluster_info'])
+                self.cluster_info = app['cluster_info']
+                self.CLUSTERED = True
 
     def readParams(self, params_json):
-        params = json.load(params_json)
-        for attr, value in params:
-            if attr in self.model_params.keys():
-                util.RAPID_warn("duplicated attribute", attr)
-            self.model_params[attr] = float(value)
-
-    def readClusterInfo(self, cluster_json):
-        pass
+        for bucket_name, bucket_info in params_json.items():
+            self.model_params[bucket_name] = bucket_info
 
     def isTrained(self):
         return self.TRAINED

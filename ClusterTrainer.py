@@ -81,10 +81,12 @@ def write_cluster_info(app, cluster_info_list):
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True
+    app.model_type = "LINEAR"
 
 
 def get_cluster_name(app_name, id):
     return app_name + str(id)
+
 
 def draw(Z):
     # view of basic Dendrogram with all clusters

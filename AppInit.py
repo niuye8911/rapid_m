@@ -7,6 +7,7 @@
 
 from Classes.App import *
 from Classes.PModel import *
+from Classes.SlowDownProfile import *
 from ClusterTrainer import *
 from Utility import *
 
@@ -31,8 +32,8 @@ def init(app_file, performance_file, profile_file):
             model.write_pmodel_info(app, get_cluster_name(app.name, id))
             id += 1
         app.TRAINED = True
-    # write the app to file
-    write_to_file(app_file, app)
+        # write the app to file
+        write_to_file(app_file, app)
 
 
 def write_to_file(app_file, app):
@@ -54,7 +55,6 @@ def determine_k(slowDownProfile, profile_file):
         # c: score
         id = 1
         accuracy = []
-        average_accuracy = 99.
         model_list = []
         for cluster in cluster_list:
             # create model file
