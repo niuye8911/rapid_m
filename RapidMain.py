@@ -53,7 +53,8 @@ def main(argv):
 
     elif flow is Flow.INIT:
         # cluster the app profile and check accuracuy
-        init(options.app_file, options.app_measurements, options.app_profiles)
+        init(options.app_file, options.app_measurements,
+             options.app_profiles, options.dir)
 
 
 def checkParams(flow, options):

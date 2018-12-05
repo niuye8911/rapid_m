@@ -15,7 +15,7 @@ MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .06
 
 
-def init(app_file, performance_file, profile_file):
+def init(app_file, performance_file, profile_file, directory):
     # load in the file
     app = App(app_file)
     # check if the app is clustered
@@ -23,7 +23,8 @@ def init(app_file, performance_file, profile_file):
         RAPID_info("clustering for ", app.name)
         # read in the slow-down file
         slowDownProfile = SlowDownProfile(performance_file, app.name)
-        model_list, cluster_list = determine_k(slowDownProfile, profile_file)
+        model_list, cluster_list = determine_k(slowDownProfile, profile_file,
+                                               directory, app.name)
         # write cluster info to app
         write_cluster_info(app, cluster_list)
         # write slow-down model to app
@@ -41,7 +42,7 @@ def write_to_file(app_file, app):
         json.dump(app.__dict__, output, indent=2)
 
 
-def determine_k(slowDownProfile, profile_file):
+def determine_k(slowDownProfile, profile_file, directory, app_name):
     # iterate through different cluster numbers
     observations, data = parseProfile(profile_file)
     model_list = []
@@ -58,7 +59,7 @@ def determine_k(slowDownProfile, profile_file):
         model_list = []
         for cluster in cluster_list:
             # create model file
-            tmp_model_file = "./tmp" + str(id) + ".pkl"
+            tmp_model_file = directory + "/" + app_name + str(id) + ".pkl"
             id += 1
             # prepare data for training and validating
             clusterDF = slowDownProfile.getSubdata(cluster)
