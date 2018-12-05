@@ -1,1 +1,1 @@
-__all__ = ["Utility", "ClusterTrainer"]
+__all__ = ["Utility", "ClusterTrainer", "AppInit"]

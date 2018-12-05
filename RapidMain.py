@@ -13,7 +13,7 @@ import ClusterTrainer
 import MModelTrainer
 import PModelTrainer
 from Utility import *
-
+from AppInit import *
 
 # flows supported by this learner
 class Flow(Enum):
@@ -28,7 +28,7 @@ def main(argv):
     options, args = parser.parse_args()
 
     # determine modes and pass params to different routine
-    flow = filter(lambda x: x.value == options.flow, Flow)[0]
+    flow = next(filter(lambda x: x.value == options.flow, Flow))
 
     # validate the parameters
     checkParams(flow, options)
@@ -49,6 +49,10 @@ def main(argv):
         # train the environment predictor by calling Abdall's work
         m_accuracy = MModelTrainer.train(options.env_measurements)
         # do something about the accuracy
+
+    elif flow is Flow.GET_BUCKETS:
+        # cluster the app profile and check accuracuy
+        init(options.app_file, options.app_measurements, options.app_profiles)
 
 
 def checkParams(flow, options):

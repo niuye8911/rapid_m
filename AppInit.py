@@ -6,17 +6,20 @@
 """
 
 from Classes.App import *
+from Classes.SlowDownProfile import *
 from ClusterTrainer import cluster, parseProfile
 from Utility import *
 
-MAX_ITERATION = 10
+MAX_ITERATION = 5
 
 
 def init(app_file, performance_file, profile_file):
     app = App(app_file)
     # check if the app is clustered
     if not app.isClustered():
-        RAPID_info("clustering for " + app.name, str(c))
+        RAPID_info("clustering for ", app.name)
+        # read in the slow-down file
+        slowDownProfile = SlowDownProfile(performance_file, app.name)
         determine_k(profile_file)
 
 
@@ -33,6 +36,9 @@ def determine_k(profile_file):
         # get the clusters
         observations, cluster_list, c = cluster(observations, data,
                                                 num_of_cluster)
-        # write the resulting clusters to file? or in-memory
+        # observations: <config_name, profile>
+        # cluster_list:[[cluster_list]]
+        # c: score
+        # link Rajanya's work here
 
     return num_of_cluster

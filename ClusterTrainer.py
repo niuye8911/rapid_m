@@ -4,7 +4,7 @@
     Ashley Dunn / Liu Liu
     12/2018
 """
-
+import pandas as pd
 from collections import OrderedDict
 
 import numpy as np
@@ -12,12 +12,13 @@ from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import cophenet
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist
+from Classes.SlowDownProfile import *
 
-
+# parse the profile
 def parseProfile(measurements):
     with open(measurements, 'r') as f:
         # get all the features
-        features = f.readline().strip(',\n').split(",")
+        features = f.readline().strip(',\n').split(",")[1:]
         # init the clustering data
         data = np.empty((0, len(features)))
         observations = OrderedDict()
@@ -25,8 +26,8 @@ def parseProfile(measurements):
         for line in f:
             observation = line.partition(",")
             config_name = observation[0]
-            observation_data = map(lambda x: float(x), observation[
-                2].strip(',\n').split(","))
+            observation_data = list(map(lambda x: float(x), observation[
+                2].strip(',\n').split(",")))
             observations[config_name] = observation_data
             data = np.append(data, [observation_data], axis=0)
 
@@ -47,7 +48,7 @@ def cluster(observations, data, k):
 
     # Z: the linkage matrix
     # c: the coefficient distance
-    Z, c = hCluster(observations, data)
+    observations, Z, c = hCluster(observations, data)
     # get the clusters
     clusters = fcluster(Z, k, criterion='maxclust')
     # get the cluster list
@@ -56,10 +57,10 @@ def cluster(observations, data, k):
 
 
 def get_cluster_list(clusters, observations, k):
-    observations = observations.keys()
+    observations = list(observations.keys())
     cluster_info_list = []
     for i in range(1, k + 1):
-        cluster_info_list[i] = []
+        cluster_info_list.append([])
     for i in range(0, len(clusters)):
         cluster_info_list[clusters[i] - 1].append(observations[i])
     return cluster_info_list
