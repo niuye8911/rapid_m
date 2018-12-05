@@ -12,7 +12,7 @@ class SlowDownProfile:
     def getFeatures(self):
         # the first line contains all the features
         # the first column contains the
-        return pd.read_csv(self.raw_data, nrows=1).columns.tolist()[1:]
+        return pd.read_csv(self.raw_data, nrows=1).columns.tolist()[1:-1]
 
     def getSubdata(self, config_list):
         return self.dataFrame.loc[self.dataFrame['Configuration'].apply(lambda x: x in config_list)]

@@ -4,7 +4,6 @@
     Ashley Dunn / Liu Liu
     12/2018
 """
-import pandas as pd
 from collections import OrderedDict
 
 import numpy as np
@@ -12,7 +11,7 @@ from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import cophenet
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist
-from Classes.SlowDownProfile import *
+
 
 # parse the profile
 def parseProfile(measurements):
@@ -37,7 +36,7 @@ def parseProfile(measurements):
     return observations, data
 
 
-def cluster(observations, data, k):
+def get_k_cluster(observations, data, k):
     '''
     Train the app using a proper model
     :param app_profile: a csv file containing all the configuration with
@@ -73,15 +72,19 @@ def hCluster(observations, data):
     return observations, Z, c
 
 
-def write_cluster_info(app, clusters, observations, k):
-    # init cluster_info
+def write_cluster_info(app, cluster_info_list):
+    k = len(cluster_info_list)
     cluster_info = OrderedDict()
-    cluster_info_list = get_cluster_list(clusters, observations, k)
     for i in range(1, k + 1):
-        cluster_info[app.name + str(i)] = cluster_info_list[i - 1]
+        cluster_info[get_cluster_name(app.name, str(i))] = cluster_info_list[
+            i - 1]
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True
+
+
+def get_cluster_name(app_name, id):
+    return app_name + str(id)
 
 def draw(Z):
     # view of basic Dendrogram with all clusters

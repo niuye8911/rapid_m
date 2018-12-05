@@ -8,10 +8,10 @@
     5) model_params<attribute, value> (dict<string,float>)
     6) CLUSTERED (boolean)
     7) num_of_cluster (int)
-    8) cluster_info (TODO: TBD by Ashley and Liu)
+    8) cluster_info
 '''
-
 import json
+from collections import OrderedDict
 from enum import Enum
 
 import Utility as util
@@ -27,7 +27,7 @@ class App:
         self.name = ""
         self.machine_id = -1
         self.model_type = None
-        self.model_params = dict()
+        self.model_params = OrderedDict()
         self.TRAINED = False
         self.CLUSTERED = False
         self.num_of_cluster = -1

@@ -7,13 +7,12 @@
 
 import optparse
 import sys
-from enum import Enum
 
 import ClusterTrainer
 import MModelTrainer
 import PModelTrainer
-from Utility import *
 from AppInit import *
+
 
 # flows supported by this learner
 class Flow(Enum):
@@ -21,6 +20,7 @@ class Flow(Enum):
     TRAIN_ENV = "TRAIN_ENV"
     TRAIN_CLUSTER = "TRAIN_CLUSTER"
     GET_BUCKETS = "GET_BUCKETS"
+    INIT = "INIT"
 
 
 def main(argv):
@@ -50,7 +50,7 @@ def main(argv):
         m_accuracy = MModelTrainer.train(options.env_measurements)
         # do something about the accuracy
 
-    elif flow is Flow.GET_BUCKETS:
+    elif flow is Flow.INIT:
         # cluster the app profile and check accuracuy
         init(options.app_file, options.app_measurements, options.app_profiles)
 
