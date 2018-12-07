@@ -57,6 +57,7 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
         id = 1
         accuracy = []
         model_list = []
+        RAPID_info("Partition Lvl:", str(num_of_cluster))
         for cluster in cluster_list:
             # create model file
             tmp_model_file = directory + "/" + app_name + str(id) + ".pkl"
@@ -70,6 +71,8 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
             model_list.append(pModel)
             accuracy.append(mse)
         average_accuracy = sum(accuracy) / len(accuracy)
+        RAPID_info("MSE:",str(accuracy))
+        RAPID_info("average MSE:", str(average_accuracy))
         if average_accuracy <= SLOWDOWN_THRESHOLD:
             break
     return model_list, cluster_list

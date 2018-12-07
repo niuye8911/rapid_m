@@ -6,6 +6,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
+from Utility import *
+
 
 class PModel:
     def __init__(self, model_file):
@@ -22,8 +24,9 @@ class PModel:
         y = self.df['SLOWDOWN']
 
         x_train, self.x_test, y_train, self.y_test = train_test_split(x, y,
-                                                                      test_size=0.4,
+                                                                      test_size=0.3,
                                                                       random_state=101)
+        RAPID_info("TRAINED",x_train.shape[0])
 
         self.model = LinearRegression()
         self.model.fit(x_train, y_train)
@@ -36,8 +39,10 @@ class PModel:
         # load the model from disk
         if not self.TRAINED:
             self.model = self.loadFromFile(self.model_file, 'rb')
+            RAPID_warn("PMODEL","USED before TRAINED")
         y_pred = self.model.predict(self.x_test)
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
+        self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)
         return self.mse, self.r2
 
