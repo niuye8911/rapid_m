@@ -52,7 +52,7 @@ def get_k_cluster(observations, data, k):
     clusters = fcluster(Z, k, criterion='maxclust')
     # get the cluster list
     cluster_list = get_cluster_list(clusters, observations, k)
-    return observations, cluster_list, c
+    return observations, cluster_list, c, Z
 
 
 def get_cluster_list(clusters, observations, k):
@@ -91,13 +91,13 @@ def get_cluster_name(app_name, id):
 def draw(Z):
     # view of basic Dendrogram with all clusters
     plt.figure(figsize=(25, 10))
-    plt.title('Hierarchical Clustering Dendrogram')
     plt.xlabel('sample index')
     plt.ylabel('distance')
     dendrogram(
         Z,
         leaf_rotation=90.,  # rotates the x axis labels
         leaf_font_size=8.,  # font size for the x axis labels
+        truncate_mode='lastp',
     )
     plt.show()
 
