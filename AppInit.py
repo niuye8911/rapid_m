@@ -48,9 +48,9 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
     model_list = []
     for num_of_cluster in range(1, MAX_ITERATION):
         # get the clusters
-        observations, cluster_list, c = get_k_cluster(observations,
-                                                      data,
-                                                      num_of_cluster)
+        observations, cluster_list, c, Z = get_k_cluster(observations,
+                                                         data,
+                                                         num_of_cluster)
         # observations: <config_name, profile>
         # cluster_list:[[cluster_list]]
         # c: score
@@ -71,7 +71,7 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
             model_list.append(pModel)
             accuracy.append(mse)
         average_accuracy = sum(accuracy) / len(accuracy)
-        RAPID_info("MSE:",str(accuracy))
+        RAPID_info("MSE:", str(accuracy))
         RAPID_info("average MSE:", str(average_accuracy))
         if average_accuracy <= SLOWDOWN_THRESHOLD:
             break
