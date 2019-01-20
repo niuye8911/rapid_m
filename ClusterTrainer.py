@@ -25,8 +25,9 @@ def parseProfile(measurements):
         for line in f:
             observation = line.partition(",")
             config_name = observation[0]
-            observation_data = list(map(lambda x: float(x), observation[
-                2].strip(',\n').split(",")))
+            observation_data = list(
+                map(lambda x: float(x),
+                    observation[2].strip(',\n').split(",")))
             observations[config_name] = observation_data
             data = np.append(data, [observation_data], axis=0)
 
@@ -76,8 +77,8 @@ def write_cluster_info(app, cluster_info_list):
     k = len(cluster_info_list)
     cluster_info = OrderedDict()
     for i in range(1, k + 1):
-        cluster_info[get_cluster_name(app.name, str(i))] = cluster_info_list[
-            i - 1]
+        cluster_info[get_cluster_name(app.name,
+                                      str(i))] = cluster_info_list[i - 1]
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True
@@ -120,9 +121,12 @@ def draw(Z):
                 y = d[1]
                 if y > annotate_above:
                     plt.plot(x, y, 'o', c=c)
-                    plt.annotate("%.3f" % y, (x, y), xytext=(0, -5),
-                                 textcoords='offset points',
-                                 va='top', ha='center')
+                    plt.annotate(
+                        "%.3f" % y, (x, y),
+                        xytext=(0, -5),
+                        textcoords='offset points',
+                        va='top',
+                        ha='center')
             if max_d:
                 plt.axhline(y=max_d, c='k')
         return ddata

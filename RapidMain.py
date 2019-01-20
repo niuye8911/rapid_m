@@ -53,8 +53,8 @@ def main(argv):
 
     elif flow is Flow.INIT:
         # cluster the app profile and check accuracuy
-        init(options.app_file, options.app_measurements,
-             options.app_profiles, options.dir)
+        init(options.app_file, options.app_measurements, options.app_profiles,
+             options.dir)
 
 
 def checkParams(flow, options):
@@ -67,9 +67,10 @@ def checkParams(flow, options):
     elif flow is Flow.GET_BUCKETS:  # runtime compute
         return not_none([options.active_apps])
     elif flow is Flow.INIT:  # All our work starts here
-        return not_none([options.app_file,
-                         options.app_measurements, options.app_profiles,
-                         options.dir])
+        return not_none([
+            options.app_file, options.app_measurements, options.app_profiles,
+            options.dir
+        ])
 
 
 def genParser():

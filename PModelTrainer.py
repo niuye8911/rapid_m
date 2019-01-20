@@ -42,7 +42,15 @@ def train(app_file, measurements):
 
 def dummyTrainer(measurements):
     # I do nothing
-    dummy_model = {'attribute1': {'a': 0.2, 'b': 3},
-                   'attribute2': {'a': 0.3, 'b': 1}}
+    dummy_model = {
+        'attribute1': {
+            'a': 0.2,
+            'b': 3
+        },
+        'attribute2': {
+            'a': 0.3,
+            'b': 1
+        }
+    }
     dummy_accuracy = 0.2
     return dummy_model, dummy_accuracy
