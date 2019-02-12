@@ -4,17 +4,17 @@
         "budget": "100",
         "name": "swaptions",
         "startTime": "5000",
-        "appPath": "/home/liuliu/Research/mara_bench/parsec-3.0/pkgs/apps/swaptions/inst/amd64-linux.gcc-serial/bin/swaptions",
+        "appPath": "/home/liuliu/Research/mara_bench/parsec-3.0/pkgs/apps/swaptions/src/swaptions",
         "appMet":"/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/swaptionMet.py",
         "appXML":"/home/liuliu/Research/rapidlib-linux/modelConstr/source/outputs/swaptions-default.xml"
     },
     {
-        "budget": "200",
+        "budget": "150",
         "name": "ferret",
-        "startTime": "10000",
+        "startTime": "6000",
         "appPath": "/home/liuliu/Research/mara_bench/parsec-3.0/pkgs/apps/ferret/inst/amd64-linux.gcc-serial/bin/ferret",
         "appMet":"/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/ferretMet.py",
-        "appXML":"/home/liuliu/Research/rapidlib-linux/modelConstr/source/outputs/ferret-default.xml"
+        "appXML":"/home/liuliu/Research/mara_bench/parsec-3.0/pkgs/apps/ferret/run/ferret_finalized.xml"
     }
   ]
 }
