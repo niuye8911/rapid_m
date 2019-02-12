@@ -12,7 +12,8 @@ from enum import Enum
 import ClusterTrainer
 import MModelTrainer
 import PModelTrainer
-from AppInit import *
+from AppInit import init
+from Utility import not_none
 
 
 # flows supported by this learner
