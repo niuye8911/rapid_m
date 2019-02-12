@@ -18,14 +18,19 @@ def main(argv):
 
 def runAll():
     tasks = []
+    root_dir = os.getcwd()
     for app in all_apps:
         command = app['method'].getFullRunCommand(100, app['xml'])
-        print command
+        # create run dir
+        rundir = root_dir+'/'+app['name']+"_rundir"
+        if not os.path.isdir(rundir):
+            os.mkdir(rundir)
         delay = int(app['startTime'])/1000
-        tasks.append(threading.Timer(delay, run, [command]))
+        tasks.append({"task":threading.Timer(delay, run, [command]),"rundir":rundir})
     # run all tasks with delay
     for task in tasks:
-        task.start()
+        os.chdir(task['rundir'])
+        task['task'].start()
 
 def run(command):
     print " ".join(command)
