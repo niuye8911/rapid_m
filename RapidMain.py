@@ -28,7 +28,6 @@ class Flow(Enum):
 def main(argv):
     parser = genParser()
     options, args = parser.parse_args()
-
     # determine modes and pass params to different routine
     flow = next(filter(lambda x: x.value == options.flow, Flow))
 
@@ -48,8 +47,8 @@ def main(argv):
         # do something about the number
 
     elif flow is Flow.TRAIN_ENV:
-        # train the environment predictor by calling Abdall's work
-        m_accuracy = MModelTrainer.train(options.env_measurements)
+        # train the environment predictor by calling Liu's work
+        m_accuracy = MModelTrainer.train(options.machine_file)
         # do something about the accuracy
 
     elif flow is Flow.INIT:
@@ -61,8 +60,8 @@ def main(argv):
 def checkParams(flow, options):
     if flow is Flow.TRAIN_SLOWDOWN:  # Rajanya's work starts here
         return not_none([options.app_file, options.app_measurements])
-    elif flow is Flow.TRAIN_ENV:  # Abdal's work starts here
-        return not_none([options.env_measurements, options.machine_file])
+    elif flow is Flow.TRAIN_ENV:  # Liu's work starts here
+        return not_none([options.machine_file])
     elif flow is Flow.TRAIN_CLUSTER:  # Asheley's work starts here
         return not_none([options.app_profiles])
     elif flow is Flow.GET_BUCKETS:  # runtime compute
@@ -81,7 +80,6 @@ def genParser():
     parser.add_option('--appdata', dest="app_measurements")
     # for environment training
     parser.add_option('--machine', dest="machine_file")
-    parser.add_option('--envdata', dest="env_measurements")
     # for clustering
     parser.add_option('--apppfs', dest="app_profiles")
     # for bucket selection

@@ -1,15 +1,5 @@
 {
-  "mmodel": {
-    "CPU": [
-      0.2,
-      0.3
-    ],
-    "IO": [
-      0.3,
-      0.4
-    ]
-  },
-  "name": "exampleMachine",
   "TRAINED": true,
-  "id": 1
+  "name": "liuliu-eel",
+  "machine_id": "a94c9d9b1a6743e8e61fd5481fca2580e9aaf81c"
 }
