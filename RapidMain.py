@@ -18,11 +18,11 @@ from Utility import not_none
 
 # flows supported by this learner
 class Flow(Enum):
-    TRAIN_SLOWDOWN = "TRAIN_SLOWDOWN"
-    TRAIN_ENV = "TRAIN_ENV"
-    TRAIN_CLUSTER = "TRAIN_CLUSTER"
-    GET_BUCKETS = "GET_BUCKETS"
-    INIT = "INIT"
+    TRAIN_SLOWDOWN = "TRAIN_SLOWDOWN"  # SLOWDOWN performance model
+    TRAIN_ENV = "TRAIN_ENV"  # M-Model
+    TRAIN_CLUSTER = "TRAIN_CLUSTER"  # Hierarchical Cluster
+    GET_BUCKETS = "GET_BUCKETS"  # runtime Cluster selection
+    INIT = "INIT"  # CLUSTER based on SLOWDOWN
 
 
 def main(argv):

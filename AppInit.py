@@ -8,6 +8,7 @@
 from Classes.App import *
 from Classes.PModel import *
 from Classes.SlowDownProfile import *
+from PModelTrainer import *
 from ClusterTrainer import *
 from Utility import *
 
@@ -23,15 +24,18 @@ def init(app_file, performance_file, profile_file, directory):
         RAPID_info("clustering for ", app.name)
         # read in the slow-down file
         slowDownProfile = SlowDownProfile(performance_file, app.name)
-        model_list, cluster_list = determine_k(slowDownProfile, profile_file,
-                                               directory, app.name)
+        pModelTrainer, cluster_list = determine_k(
+            slowDownProfile, profile_file, directory, app.name)
+
         # write cluster info to app
         write_cluster_info(app, cluster_list)
+
+        # write pModels to file
+        pModelTrainer.write_to_file(directory)
+
         # write slow-down model to app
-        id = 1
-        for model in model_list:
-            model.write_pmodel_info(app, get_cluster_name(app.name, id))
-            id += 1
+        pModelTrainer.dump_into_app(app)
+
         app.TRAINED = True
         # write the app to file
         write_to_file(app_file, app)
@@ -46,33 +50,17 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
     # iterate through different cluster numbers
     observations, data = parseProfile(profile_file)
     model_list = []
+    pModelTrainer = PModelTrainer(app_name, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION):
         # get the clusters
-        observations, cluster_list, c, Z = get_k_cluster(observations,
-                                                         data,
-                                                         num_of_cluster)
-        # observations: <config_name, profile>
-        # cluster_list:[[cluster_list]]
-        # c: score
-        id = 1
-        accuracy = []
-        model_list = []
+        observations, cluster_list, c, Z = get_k_cluster(
+            observations, data, num_of_cluster)
         RAPID_info("Partition Lvl:", str(num_of_cluster))
-        for cluster in cluster_list:
-            # create model file
-            tmp_model_file = directory + "/" + app_name + str(id) + ".pkl"
-            id += 1
-            # prepare data for training and validating
-            clusterDF = slowDownProfile.getSubdata(cluster)
-            pModel = PModel(tmp_model_file)
-            pModel.setDF(clusterDF, slowDownProfile.getFeatures())
-            pModel.train()
-            mse, r2 = pModel.validate()
-            model_list.append(pModel)
-            accuracy.append(mse)
-        average_accuracy = sum(accuracy) / len(accuracy)
-        RAPID_info("MSE:", str(accuracy))
-        RAPID_info("average MSE:", str(average_accuracy))
-        if average_accuracy <= SLOWDOWN_THRESHOLD:
+        print(len(cluster_list))
+        pModelTrainer.updateCluster(cluster_list)
+        pModelTrainer.train()
+        mse = pModelTrainer.getMSE()
+        RAPID_info("average MSE:", str(mse))
+        if mse <= SLOWDOWN_THRESHOLD:
             break
-    return model_list, cluster_list
+    return pModelTrainer, cluster_list

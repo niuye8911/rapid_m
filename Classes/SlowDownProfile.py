@@ -2,6 +2,7 @@
 
 import pandas as pd
 
+
 class SlowDownProfile:
     def __init__(self, csv_file, app_name):
         self.raw_data = csv_file
@@ -15,4 +16,7 @@ class SlowDownProfile:
         return pd.read_csv(self.raw_data, nrows=1).columns.tolist()[1:-1]
 
     def getSubdata(self, config_list):
-        return self.dataFrame.loc[self.dataFrame['Configuration'].apply(lambda x: x in config_list)]
+        if config_list is None or config_list == []:
+            return self.dataFrame
+        return self.dataFrame.loc[self.dataFrame['Configuration'].apply(
+            lambda x: x in config_list)]
