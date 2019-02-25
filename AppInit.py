@@ -49,7 +49,6 @@ def write_to_file(app_file, app):
 def determine_k(slowDownProfile, profile_file, directory, app_name):
     # iterate through different cluster numbers
     observations, data = parseProfile(profile_file)
-    model_list = []
     pModelTrainer = PModelTrainer(app_name, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION):
         # get the clusters
@@ -59,8 +58,8 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
         print(len(cluster_list))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()
-        mse = pModelTrainer.getMSE()
-        RAPID_info("average MSE:", str(mse))
-        if mse <= SLOWDOWN_THRESHOLD:
+        diff = pModelTrainer.getDiff()
+        RAPID_info("average DIFF:", str(diff))
+        if diff <= SLOWDOWN_THRESHOLD:
             break
     return pModelTrainer, cluster_list

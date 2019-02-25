@@ -47,6 +47,12 @@ class PModelTrainer:
         self.p_models = list(
             map(lambda x: self.pModelTrain(x, features), clusterDFs))
 
+    def getDiff(self):
+        diffs = list(map(lambda x: x.diff, self.p_models))
+        if diffs is None or diffs == []:
+            return -1.
+        return sum(diffs) / len(diffs)
+
     def getMSE(self):
         mses = list(map(lambda x: x.mse, self.p_models))
         if mses is None or mses == []:

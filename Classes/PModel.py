@@ -39,7 +39,10 @@ class PModel:
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)
-        return self.mse, self.r2
+        # relative error
+        diff = abs(self.y_test - y_pred) / self.y_test
+        self.diff = sum(diff) / len(diff)
+        return self.diff, self.r2
 
     def loadFromFile(self, model_file):
         self.model = pickle.load(open(model_file, 'rb'))
@@ -58,4 +61,6 @@ class PModel:
         app.model_params[name] = dict()
         app.model_params[name]["file"] = self.output_loc
         app.model_params[name]["mse"] = self.mse
+        app.model_params[name]["mae"] = self.mae
+        app.model_params[name]["diff"] = self.diff
         app.model_params[name]["r2"] = self.r2
