@@ -3,5 +3,4 @@
 LICENSE
 **/*.csv
 output/*
-test/*
 .idea/*
