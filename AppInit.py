@@ -13,10 +13,10 @@ from ClusterTrainer import *
 from Utility import *
 
 MAX_ITERATION = 5
-SLOWDOWN_THRESHOLD = .06
+SLOWDOWN_THRESHOLD = .07
 
 
-def init(app_file, performance_file, profile_file, directory):
+def init(app_file, performance_file, profile_file, directory, DRAW=True):
     # load in the file
     app = App(app_file)
     # check if the app is clustered
@@ -24,7 +24,7 @@ def init(app_file, performance_file, profile_file, directory):
         RAPID_info("clustering for ", app.name)
         # read in the slow-down file
         slowDownProfile = SlowDownProfile(performance_file, app.name)
-        pModelTrainer, cluster_list = determine_k(
+        pModelTrainer, cluster_list, Z = determine_k(
             slowDownProfile, profile_file, directory, app.name)
 
         # write cluster info to app
@@ -39,6 +39,9 @@ def init(app_file, performance_file, profile_file, directory):
         app.TRAINED = True
         # write the app to file
         write_to_file(app_file, app)
+        # whether to show the cluster result
+        if DRAW:
+            draw(Z)
 
 
 def write_to_file(app_file, app):
@@ -50,7 +53,7 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
     # iterate through different cluster numbers
     observations, data = parseProfile(profile_file)
     pModelTrainer = PModelTrainer(app_name, slowDownProfile)
-    for num_of_cluster in range(1, MAX_ITERATION):
+    for num_of_cluster in range(1, MAX_ITERATION + 1):
         # get the clusters
         observations, cluster_list, c, Z = get_k_cluster(
             observations, data, num_of_cluster)
@@ -62,4 +65,4 @@ def determine_k(slowDownProfile, profile_file, directory, app_name):
         RAPID_info("average DIFF:", str(diff))
         if diff <= SLOWDOWN_THRESHOLD:
             break
-    return pModelTrainer, cluster_list
+    return pModelTrainer, cluster_list, Z

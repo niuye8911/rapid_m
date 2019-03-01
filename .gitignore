@@ -4,3 +4,4 @@ LICENSE
 **/*.csv
 output/*
 .idea/*
+.DS_Store
