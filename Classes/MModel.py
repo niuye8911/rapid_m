@@ -41,9 +41,21 @@ class MModel:
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)
-        print(self.mse, self.mae, self.r2)
-        # relative error
-        return self.mse
+        diffs = self.diffOfTwoMatrix(y_pred, self.y_test)
+        self.diff = sum(diffs) / len(diffs)
+
+    def diffOfTwoMatrix(self, y_pred, y_test):
+        diffs = []
+        for i in range(0, y_test.shape[0]):
+            yPred = y_pred[i]
+            yTest = y_test.iloc[i].values
+            diff = [
+                abs((test - pred) / test) if test != 0 else 0
+                for pred, test in zip(yPred, yTest)
+            ]
+            diffs.append(sum(diff) / len(diff))
+        print(sorted(diffs))
+        return diffs
 
     def loadFromFile(self, model_file):
         self.model = pickle.load(open(model_file, 'rb'))
@@ -64,3 +76,4 @@ class MModel:
         machine.model_params['MModel']["mse"] = self.mse
         machine.model_params['MModel']["mae"] = self.mae
         machine.model_params['MModel']["r2"] = self.r2
+        machine.model_params['MModel']["diff"] = self.diff
