@@ -26,8 +26,6 @@ class EnvProfile:
         updated_header = [x for x in header if not EnvProfile.match(x)]
         # 2/3 of the csv are features
         featureLen = len(header) * 2 / 3
-        print(header)
-        print(updated_header)
         return header[0:int(featureLen)]
 
     @staticmethod
@@ -39,7 +37,7 @@ class EnvProfile:
         # the first line contains all the features
         header = pd.read_csv(self.raw_data, nrows=1).columns.tolist()
         # 2/3 of the csv are features
-        featureLen = len(header) * 1 / 3
+        featureLen = len(header) * 2 / 3
         return header[int(featureLen):]
 
     def getX(self):

@@ -44,6 +44,7 @@ class MModelTrainer:
         mModel = MModel()
         mModel.setX(X)
         mModel.setY(Y)
+        mModel.setYLabel(self.machineProfile.getYLabel())
         mModel.train()
         mModel.validate()
         return mModel
