@@ -13,6 +13,7 @@ import ClusterTrainer
 import MModelTrainer
 import PModelTrainer
 from AppInit import init
+from MachineInit import trainEnv
 from Utility import not_none
 
 
@@ -48,7 +49,8 @@ def main(argv):
 
     elif flow is Flow.TRAIN_ENV:
         # train the environment predictor by calling Liu's work
-        m_accuracy = MModelTrainer.train(options.machine_file)
+        trainEnv(options.machine_file, options.machine_measurements,
+                 options.dir)
         # do something about the accuracy
 
     elif flow is Flow.INIT:
@@ -61,7 +63,7 @@ def checkParams(flow, options):
     if flow is Flow.TRAIN_SLOWDOWN:  # Rajanya's work starts here
         return not_none([options.app_file, options.app_measurements])
     elif flow is Flow.TRAIN_ENV:  # Liu's work starts here
-        return not_none([options.machine_file])
+        return not_none([options.machine_file, options.machine_measurements])
     elif flow is Flow.TRAIN_CLUSTER:  # Asheley's work starts here
         return not_none([options.app_profiles])
     elif flow is Flow.GET_BUCKETS:  # runtime compute
@@ -79,7 +81,8 @@ def genParser():
     parser.add_option('--path2app', dest="app_file")
     parser.add_option('--appdata', dest="app_measurements")
     # for environment training
-    parser.add_option('--machine', dest="machine_file")
+    parser.add_option('--path2machine', dest="machine_file")
+    parser.add_option('--envdata', dest="machine_measurements")
     # for clustering
     parser.add_option('--apppfs', dest="app_profiles")
     # for bucket selection

@@ -1,35 +1,29 @@
 '''
     Class for a machine profile
     A Machine profile contains information:
-    1) name (string)
-    2) id (int)
-    3) TRAINED (boolean)
-    4) model_type (enum MModelType)
-    5) model_params<attribute, value> (dict<string,list<float,float>>)
+    1) host_name (string)
+    2) TRAINED (boolean)
+    3) model_params<attribute, value>
 '''
 
 import json
 from enum import Enum
 import hashlib
-import socket
+from collections import OrderedDict
 
 
 class Machine:
     def __init__(self, filePath=""):
-        self.name = ""
-        self.machine_id = -1
+        self.host_name = -1
         self.TRAINED = False
+        self.model_params = OrderedDict()
         if filePath:
             self.fromFile(filePath)
 
     def fromFile(self, file):
         with open(file) as machine_json:
             machine = json.load(machine_json)
-            self.name = machine['name']
-            if self.name == "":
-                self.name = socket.gethostname()
-            self.machine_id = hashlib.sha1(self.name.encode(
-                'utf-8')).hexdigest() if 'id' not in machine else machine['id']
+            self.host_name = machine['host_name']
             self.TRAINED = machine['TRAINED']
 
     def isTrained(self):

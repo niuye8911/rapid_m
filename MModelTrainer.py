@@ -1,47 +1,59 @@
+"""
+ Train an machine to predict the combined system profile
+  Author:
+    Liu Liu
+    03/2019
+"""
+
 from Classes.Machine import *
+from Classes.MModel import *
 from Utility import *
+import os
 
 
-def train(machine_file):
-    '''
-    Train the Machine Model using a proper model
-    :param machine_file: the path to the machine file (string)
-    :param measurements: a csv file containing all the combined system
-    profile measurements
-    :return: void, but write the model to the file
-    '''
+class MModelTrainer:
+    def __init__(self, host_name, machineProfile):
+        '''
+        :param host_name: the name of the machine
+        :param machineProfile: formatted data of environment
+        '''
+        self.host_name = host_name
+        self.machineProfile = machineProfile
+        self.m_model = None
 
-    # only training the current machine
+    def train(self):
+        '''
+        Train a machine model based on the measurement
+        '''
+        # train all data frame
+        X = self.machineProfile.getX()
+        Y = self.machineProfile.getY()
+        self.m_model = self.mModelTrain(X, Y)
 
-    machine = Machine(machine_file)
-    if not machine.isTrained():
+    def getMSE(self):
+        return self.m_model.mse
 
-        # TODO:Abdall's work goes here*******
+    def getMAE(self):
+        return self.m_model.mae
 
-        model, accuracy = dummyTrainer()
+    def getR2(self):
+        return self.m_model.r2
 
-        # TODO:END of Abdall's work*******
+    def mModelTrain(self, X, Y):
+        mModel = MModel()
+        mModel.setX(X)
+        mModel.setY(Y)
+        mModel.train()
+        mModel.validate()
+        return mModel
 
-        # machine file
-        machine.TRAINED = True
-        with open(machine_file, 'w') as output:
-            json.dump(machine.__dict__, output, indent=2)
+    def write_to_file(self, dir_name=''):
+        id = 1
+        if dir_name != '' and not os.path.isdir(dir_name):
+            # create the dir if not exist
+            os.mkdir(dir_name)
 
-        RAPID_info("environment prediction for " + machine.name, str(accuracy))
-        return accuracy
+        self.m_model.write_to_file(dir_name + "/" + self.host_name + ".pkl")
 
-
-def dummyTrainer():
-    # I do nothing
-    dummy_model = {
-        'attribute1': {
-            'a': 0.2,
-            'b': 3
-        },
-        'attribute2': {
-            'a': 0.3,
-            'b': 1
-        }
-    }
-    dummy_accuracy = 0.2
-    return dummy_model, dummy_accuracy
+    def dump_into_machine(self, machine_file):
+        self.m_model.dump_into_machine(machine_file)
