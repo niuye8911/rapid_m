@@ -5,9 +5,9 @@
     03/2019
 """
 
-from Classes.Machine import *
-from Classes.MModel import *
 from Classes.EnvProfile import *
+from Classes.MModel import *
+from Classes.Machine import *
 from MModelTrainer import *
 from Utility import *
 

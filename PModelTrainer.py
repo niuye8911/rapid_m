@@ -5,11 +5,12 @@
     12/2018
 """
 
+import os
+
 from Classes.App import *
 from Classes.PModel import *
 from Classes.SlowDownProfile import *
 from Utility import *
-import os
 
 
 class PModelTrainer:

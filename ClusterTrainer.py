@@ -4,9 +4,8 @@
     Ashley Dunn / Liu Liu
     12/2018
 """
-from collections import OrderedDict
-
 import numpy as np
+from collections import OrderedDict
 from scipy.cluster.hierarchy import cophenet
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist

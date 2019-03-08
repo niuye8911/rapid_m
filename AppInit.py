@@ -8,8 +8,8 @@
 from Classes.App import *
 from Classes.PModel import *
 from Classes.SlowDownProfile import *
-from PModelTrainer import *
 from ClusterTrainer import *
+from PModelTrainer import *
 from Utility import *
 
 MAX_ITERATION = 5

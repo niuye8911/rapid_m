@@ -1,6 +1,6 @@
 from functools import reduce
-from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 
 
 def RAPID_warn(prefix, message):

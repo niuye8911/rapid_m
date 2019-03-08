@@ -5,10 +5,11 @@
     03/2019
 """
 
-from Classes.Machine import *
-from Classes.MModel import *
-from Utility import *
 import os
+
+from Classes.MModel import *
+from Classes.Machine import *
+from Utility import *
 
 
 class MModelTrainer:
