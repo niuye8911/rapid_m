@@ -1,3 +1,5 @@
+# The base class for profiling data in RAPID_M
+
 import pandas as pd
 
 
@@ -26,8 +28,7 @@ class RapidProfile:
         '''
         @param excludes: a vector containing all unwanted feature string
         '''
-        match_func = lambda feature: reduce((lambda x, y: (y in feature) or x),
-                                            excludes, False)
+        match_func = lambda feature: reduce((lambda x, y: (y in feature) or x), excludes, False)
         self.x = filter(lambda feature: not match_func(feature), self.x)
         return
 
