@@ -1,19 +1,22 @@
 # This is the parser for an App's profile
 
 import pandas as pd
+from RapidProfile import RapidProfile
 
 
-class SlowDownProfile:
+class SlowDownProfile(RapidProfile):
+    INDEX = {"Configuration"}
+
     def __init__(self, csv_file, app_name):
-        self.raw_data = csv_file
-        self.dataFrame = pd.read_csv(csv_file)
-        self.features = self.getFeatures()
         self.appName = app_name
+        RapidProfile.__init__(self, csv_file)
+        self.setYLabel('SLOWDOWN')
+        # scale the data using the scalar
+        self.cleanData()
+        self.scale()
 
     def getFeatures(self):
-        # the first line contains all the features
-        # the first column contains the
-        return pd.read_csv(self.raw_data, nrows=1).columns.tolist()[1:-1]
+        return self.x
 
     def getSubdata(self, config_list):
         if config_list is None or config_list == []:

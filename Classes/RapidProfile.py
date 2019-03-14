@@ -24,7 +24,6 @@ class RapidProfile:
         self.x = pd.read_csv(self.raw_file, nrows=1).columns.tolist()[1:-1]
         # default y = last column
         self.y = pd.read_csv(self.raw_file, nrows=1).columns.tolist()[-1]
-        self.cleanData()
 
     def setXLabel(self, x):
         '''determine the X vector(features)'''
@@ -70,8 +69,6 @@ class RapidProfile:
     def cleanData(self):
         ''' clean the PCM data to correct form '''
         # drop the excluded column
-        #self.dataFrame.drop(
-        #        list(RapidProfile.EXCLUDED_FEATURES), axis=1, inplace=True)
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
         # re-calculate the numerical value
         # 1) INST
