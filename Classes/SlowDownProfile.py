@@ -1,17 +1,18 @@
 # This is the parser for an App's profile
 
 import pandas as pd
-from RapidProfile import RapidProfile
+from Classes.RapidProfile import *
 
 
 class SlowDownProfile(RapidProfile):
     INDEX = {"Configuration"}
 
-    def __init__(self, csv_file, app_name):
+    def __init__(self, df, app_name):
         self.appName = app_name
-        RapidProfile.__init__(self, csv_file)
+        RapidProfile.__init__(self, df)
         self.setYLabel('SLOWDOWN')
         # scale the data using the scalar
+        self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
         self.cleanData()
         self.scale()
 

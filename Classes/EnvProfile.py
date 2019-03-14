@@ -2,46 +2,51 @@
 
 import pandas as pd
 from functools import reduce
+from Classes.RapidProfile import RapidProfile
 
 
 class EnvProfile:
-    EXCLUDED_FEATURES = {"ACYC"}
-
     def __init__(self, csv_file, host_name):
-        self.raw_data = csv_file
-        self.dataFrame = pd.read_csv(csv_file)
-        self.features = self.getFeatures()
+        RapidProfile.__init__(self, csv_file)
         self.hostName = host_name
 
+    def partitionData(self):
+        self.x = pd.read_csv(self.raw_file, nrows=1).columns.tolist()
+        length = len(self.x)
+        self.sys1DF = RapidProfile(self.dataFrame(self.x[0:length * 1 / 3]))
+        self.sys2DF = RapidProfile(
+            self.dataFrame(self.x[length * 1 / 3:length * 2 / 3]))
+        self.combinedDF = RapidProfile(self.dataFrame(self.x[length * 2 / 3:]))
+
     def cleanFeatures(self):
-        self.dataFrame.drop(
-            self.dataFrame.columns[list(EnvProfile.EXCLUDED_FEATURES)],
-            axis=1,
-            inplace=True)
+        self.sys1DF.cleanLabelByExactName(
+            map(lambda x: x + '-1', RapidProfile.EXCLUDED_FEATURES))
+        self.sys2DF.cleanLabelByExactName(
+            map(lambda x: x + '-2', RapidProfile.EXCLUDED_FEATURES))
+        self.combinedDF.cleanLabelByExactName(
+            map(lambda x: x + '-C', RapidProfile.EXCLUDED_FEATURES))
+
+    def cleanData(self):
+        self.sys1DF.cleanData()
+        self.sys2DF.cleanData()
+        self.combinedDF.cleanData()
+
+    def scaleAll(self):
+        self.sys1DF.scale()
+        self.sys2DF.scale()
+        self.combinedDF.scale()
 
     def getFeatures(self):
-        # the first line contains all the features
-        header = pd.read_csv(self.raw_data, nrows=1).columns.tolist()
-        # clean the features
-        updated_header = [x for x in header if not EnvProfile.match(x)]
-        # 2/3 of the csv are features
-        featureLen = len(header) * 2 / 3
-        return header[0:int(featureLen)]
-
-    @staticmethod
-    def match(feature):
-        return reduce((lambda x, y: ((y + "-") in feature) or x),
-                      EnvProfile.EXCLUDED_FEATURES, False)
+        return self.sys1DF.x + self.sys2DF.x
 
     def getYLabel(self):
-        # the first line contains all the features
-        header = pd.read_csv(self.raw_data, nrows=1).columns.tolist()
-        # 2/3 of the csv are features
-        featureLen = len(header) * 2 / 3
-        return header[int(featureLen):]
+        return self.combinedDF.x
 
     def getX(self):
-        return self.dataFrame[self.features]
+        return pd.concaat(
+            [self.sys1DF.dataFrame[self.sys1DF.x], self.sys2DF[self.sys2DF.x]],
+            axis=1,
+            join="inner")
 
     def getY(self):
-        return self.dataFrame[self.getYLabel()]
+        return self.combinedDF.dataFrame[self.combinedDF.x]

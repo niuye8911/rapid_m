@@ -11,6 +11,7 @@ from Classes.SlowDownProfile import *
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
+import pandas as pd
 
 MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .07
@@ -23,7 +24,8 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
     if not app.isClustered():
         RAPID_info("clustering for ", app.name)
         # read in the slow-down file
-        slowDownProfile = SlowDownProfile(performance_file, app.name)
+        slowDownProfile = SlowDownProfile(
+            pd.read_csv(performance_file), app.name)
         pModelTrainer, cluster_list, Z = determine_k(
             slowDownProfile, profile_file, directory, app.name)
 
@@ -42,6 +44,8 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
         # whether to show the cluster result
         if DRAW:
             draw(Z)
+        # write the scaled perf-file to disk
+        slowDownProfile.writeOut(app.name + "-perf_scaled.csv")
 
 
 def write_to_file(app_file, app):

@@ -1,1 +1,4 @@
-__all__ = ["App", "SystemState", "SlowDownProfile", "envProfile", "Machine"]
+__all__ = [
+    "App", "RapidProfile", "SystemState", "SlowDownProfile", "envProfile",
+    "Machine"
+]

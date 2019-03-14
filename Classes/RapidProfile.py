@@ -12,18 +12,17 @@ class RapidProfile:
     EXCLUDED_FEATURES = {
         "ACYC", "AFREQ", "FREQ", "INSTnom", "L2MISS", "L3MISS", "PhysIPC",
         'C0res%', 'C10res%', 'C1res%', 'C2res%', 'C3res%', 'C6res%', 'C7res%',
-        'C8res%', 'C9res%', 'Configuration'
+        'C8res%', 'C9res%', 'Proc Energy (Joules)', 'Configuration'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
 
-    def __init__(self, csv_file):
-        self.raw_file = csv_file
-        self.dataFrame = pd.read_csv(csv_file)
+    def __init__(self, df):
+        self.dataFrame = df
         # default x = first N-1 row
-        self.x = pd.read_csv(self.raw_file, nrows=1).columns.tolist()[1:-1]
+        self.x = df.columns.values.tolist()[1:-1]
         # default y = last column
-        self.y = pd.read_csv(self.raw_file, nrows=1).columns.tolist()[-1]
+        self.y = df.columns.values.tolist()[-1]
 
     def setXLabel(self, x):
         '''determine the X vector(features)'''
@@ -68,8 +67,6 @@ class RapidProfile:
 
     def cleanData(self):
         ''' clean the PCM data to correct form '''
-        # drop the excluded column
-        self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
         # re-calculate the numerical value
         # 1) INST
         self.dataFrame['INST'] = self.dataFrame['INST'].div(
