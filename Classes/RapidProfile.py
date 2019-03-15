@@ -10,9 +10,29 @@ from functools import reduce
 class RapidProfile:
     # pre_determined excluded system footprint that won't affect perf
     EXCLUDED_FEATURES = {
-        "ACYC", "AFREQ", "FREQ", "INSTnom", "PhysIPC",'L2MISS','L3MISS',
-        'C0res%', 'C10res%', 'C1res%', 'C2res%', 'C3res%', 'C6res%', 'C7res%',
-        'C8res%', 'C9res%', 'Proc Energy (Joules)', 'Configuration', 'TIME(ticks)', 'SLOWDOWN'
+        "ACYC",
+        "AFREQ",
+        "FREQ",
+        'C0res%',
+        'C10res%',
+        'C1res%',
+        'C2res%',
+        'C3res%',
+        'C6res%',
+        'C7res%',
+        'C8res%',
+        'C9res%',
+        "PhysIPC",
+        "L2MISS",
+        "L3MISS",
+        'Proc Energy (Joules)',
+        'Configuration',
+        'TIME(ticks)',
+        'SLOWDOWN',
+        'EXEC',
+        "INSTnom",
+        "INSTnom%",
+        "PhysIPC%",
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -43,7 +63,7 @@ class RapidProfile:
         @param excludes: a vector containing all unwanted feature string
         note that the 'x' has already been cleaned up by cleanData()
         '''
-        match_func = lambda feature: reduce((lambda x, y: (y in feature) or x), excludes, False)
+        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x), excludes, False)
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
@@ -69,23 +89,12 @@ class RapidProfile:
         ''' clean the PCM data to correct form '''
         # re-calculate the numerical value
         # 1) INST
-        self.dataFrame['INST'] = self.dataFrame['INST'].div(
-            self.dataFrame['TIME(ticks)'])
-
+        #TODO: WHY INST IS SO IMPORTANT
+        self.dataFrame['INST'] = self.dataFrame['ACYC'].div(
+            self.dataFrame['INST'])
         # 2) READ / WRITE
-        self.dataFrame['READ'] = self.dataFrame['READ'].mul(1000.).div(
+        self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
             self.dataFrame['TIME(ticks)'])
-        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(1000.).div(
-            self.dataFrame['TIME(ticks)']).mul(1000)
-
-        # 3) L2 / L3 missing
-        self.dataFrame['L2MISS'] = self.dataFrame['L2MISS'].mul(100).div(
+        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(4200.) / (
             self.dataFrame['TIME(ticks)'])
-        self.dataFrame['L3MISS'] = self.dataFrame['L2MISS'].mul(100).div(
-            self.dataFrame['TIME(ticks)'])
-
-    def writeOut(self, outfile):
-        ''' write the cleaned dataframe to csv '''
-        indexs = self.x + [self.y]
-        indexs = ['Configuration'] + indexs
-        self.dataFrame[indexs].to_csv(outfile, sep=',', index=False)
+        print(self.x)

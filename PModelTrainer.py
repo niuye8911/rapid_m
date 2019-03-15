@@ -94,4 +94,5 @@ class PModelTrainer:
         id = 1
         for model in self.p_models:
             model.dump_into_app(app, app.name + str(id))
+            print(model.model.coef_)
             id += 1

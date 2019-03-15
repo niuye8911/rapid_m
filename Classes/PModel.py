@@ -6,6 +6,7 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
 from Utility import *
+from sklearn import linear_model
 
 
 class PModel:
@@ -30,6 +31,8 @@ class PModel:
         RAPID_info("TRAINED", x_train.shape[0])
 
         self.model = LinearRegression()
+        #self.model = linear_model.Lasso(alpha=0.001)
+        #self.model = linear_model.BayesianRidge()
         self.model.fit(x_train, y_train)
         self.TRAINED = True
 

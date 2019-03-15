@@ -31,7 +31,7 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
 
         pModelTrainer, cluster_list, Z = determine_k(
             slowDownProfile, appSysProfile, directory, app.name)
-        exit(1)
+
         # write cluster info to app
         write_cluster_info(app, cluster_list)
 
@@ -43,7 +43,7 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
 
         app.TRAINED = True
         # write the app to file
-        write_to_file(app_file, app)
+        #write_to_file(app_file, app)
         # whether to show the cluster result
         if DRAW:
             draw(Z)
@@ -61,8 +61,7 @@ def determine_k(slowDownProfile, appSysProfile, directory, app_name):
     pModelTrainer = PModelTrainer(app_name, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION + 1):
         # get the clusters
-        cluster_list, c, Z = get_k_cluster(
-            appSysProfile, num_of_cluster)
+        cluster_list, c, Z = get_k_cluster(appSysProfile, num_of_cluster)
         RAPID_info("Partition Lvl:", str(num_of_cluster))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()

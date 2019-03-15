@@ -14,15 +14,20 @@ class SlowDownProfile(RapidProfile):
         self.setYLabel(['SLOWDOWN'])
         # scale the data using the scalar
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
-        #self.cleanData()
+        self.cleanData()
         self.scale()
 
     def getFeatures(self):
-        print(self.x)
         return self.x
 
     def getSubdata(self, config_list):
         if config_list is None or config_list == []:
             return self.dataFrame
-        return self.dataFrame.loc[self.dataFrame['Configuration'].apply(
-            lambda x: x in config_list),self.x+self.y]
+        return self.dataFrame.loc[self.dataFrame['Configuration'].
+                                  apply(lambda x: x in config_list), self.x +
+                                  self.y]
+
+    def writeOut(self, outfile):
+        ''' write the cleaned dataframe to csv '''
+        indexs = ['Configuration'] + self.x + self.y
+        self.dataFrame[indexs].to_csv(outfile, sep=',', index=False)
