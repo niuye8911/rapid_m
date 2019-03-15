@@ -11,31 +11,7 @@ from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist
 
 
-# parse the profile
-def parseProfile(measurements):
-    with open(measurements, 'r') as f:
-        # get all the features
-        features = f.readline().strip(',\n').split(",")[1:]
-        # init the clustering data
-        data = np.empty((0, len(features)))
-        observations = OrderedDict()
-
-        for line in f:
-            observation = line.partition(",")
-            config_name = observation[0]
-            observation_data = list(
-                map(lambda x: float(x),
-                    observation[2].strip(',\n').split(",")))
-            observations[config_name] = observation_data
-            data = np.append(data, [observation_data], axis=0)
-
-    if data.size == 0:
-        print("error reading csv file")
-
-    return observations, data
-
-
-def get_k_cluster(observations, data, k):
+def get_k_cluster(appSysProfile, k):
     '''
     Train the app using a proper model
     :param app_profile: a csv file containing all the configuration with
@@ -46,16 +22,16 @@ def get_k_cluster(observations, data, k):
 
     # Z: the linkage matrix
     # c: the coefficient distance
-    observations, Z, c = hCluster(observations, data)
+    Z, c = hCluster(appSysProfile.getData())
     # get the clusters
     clusters = fcluster(Z, k, criterion='maxclust')
     # get the cluster list
-    cluster_list = get_cluster_list(clusters, observations, k)
-    return observations, cluster_list, c, Z
+    cluster_list = get_cluster_list(clusters, appSysProfile, k)
+    return cluster_list, c, Z
 
 
-def get_cluster_list(clusters, observations, k):
-    observations = list(observations.keys())
+def get_cluster_list(clusters, appSysProfile, k):
+    observations = appSysProfile.getConfigs()
     cluster_info_list = []
     for i in range(1, k + 1):
         cluster_info_list.append([])
@@ -64,11 +40,11 @@ def get_cluster_list(clusters, observations, k):
     return cluster_info_list
 
 
-def hCluster(observations, data):
+def hCluster(data):
     # hierarchal clustering
     Z = linkage(data, 'ward')
     c, coph_dists = cophenet(Z, pdist(data))
-    return observations, Z, c
+    return Z, c
 
 
 def write_cluster_info(app, cluster_info_list):

@@ -10,17 +10,19 @@ class SlowDownProfile(RapidProfile):
     def __init__(self, df, app_name):
         self.appName = app_name
         RapidProfile.__init__(self, df)
-        self.setYLabel('SLOWDOWN')
+        self.setXLabel(self.x[1:-1])
+        self.setYLabel(['SLOWDOWN'])
         # scale the data using the scalar
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
-        self.cleanData()
+        #self.cleanData()
         self.scale()
 
     def getFeatures(self):
+        print(self.x)
         return self.x
 
     def getSubdata(self, config_list):
         if config_list is None or config_list == []:
             return self.dataFrame
         return self.dataFrame.loc[self.dataFrame['Configuration'].apply(
-            lambda x: x in config_list)]
+            lambda x: x in config_list),self.x+self.y]

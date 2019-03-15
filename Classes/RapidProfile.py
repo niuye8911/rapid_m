@@ -10,9 +10,9 @@ from functools import reduce
 class RapidProfile:
     # pre_determined excluded system footprint that won't affect perf
     EXCLUDED_FEATURES = {
-        "ACYC", "AFREQ", "FREQ", "INSTnom", "L2MISS", "L3MISS", "PhysIPC",
+        "ACYC", "AFREQ", "FREQ", "INSTnom", "PhysIPC",'L2MISS','L3MISS',
         'C0res%', 'C10res%', 'C1res%', 'C2res%', 'C3res%', 'C6res%', 'C7res%',
-        'C8res%', 'C9res%', 'Proc Energy (Joules)', 'Configuration'
+        'C8res%', 'C9res%', 'Proc Energy (Joules)', 'Configuration', 'TIME(ticks)', 'SLOWDOWN'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -20,9 +20,9 @@ class RapidProfile:
     def __init__(self, df):
         self.dataFrame = df
         # default x = first N-1 row
-        self.x = df.columns.values.tolist()[1:-1]
+        self.x = df.columns.values.tolist()
         # default y = last column
-        self.y = df.columns.values.tolist()[-1]
+        self.y = []
 
     def setXLabel(self, x):
         '''determine the X vector(features)'''
@@ -49,7 +49,7 @@ class RapidProfile:
 
     def createScalar(self):
         ''' create a persistent scaler for all data '''
-        data = self.dataFrame[self.x].values
+        data = self.dataFrame[self.x]
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
         self.scalar = min_max_scaler.fit(data)
         joblib.dump(self.scalar, 'RapidScalar.pkl')
@@ -73,10 +73,16 @@ class RapidProfile:
             self.dataFrame['TIME(ticks)'])
 
         # 2) READ / WRITE
-        self.dataFrame['READ'] = self.dataFrame['READ'].div(
+        self.dataFrame['READ'] = self.dataFrame['READ'].mul(1000.).div(
+            self.dataFrame['TIME(ticks)'])
+        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(1000.).div(
             self.dataFrame['TIME(ticks)']).mul(1000)
-        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].div(
-            self.dataFrame['TIME(ticks)']).mul(1000)
+
+        # 3) L2 / L3 missing
+        self.dataFrame['L2MISS'] = self.dataFrame['L2MISS'].mul(100).div(
+            self.dataFrame['TIME(ticks)'])
+        self.dataFrame['L3MISS'] = self.dataFrame['L2MISS'].mul(100).div(
+            self.dataFrame['TIME(ticks)'])
 
     def writeOut(self, outfile):
         ''' write the cleaned dataframe to csv '''

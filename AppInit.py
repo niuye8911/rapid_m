@@ -8,6 +8,7 @@
 from Classes.App import *
 from Classes.PModel import *
 from Classes.SlowDownProfile import *
+from Classes.AppSysProfile import *
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
@@ -26,9 +27,11 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
         # read in the slow-down file
         slowDownProfile = SlowDownProfile(
             pd.read_csv(performance_file), app.name)
-        pModelTrainer, cluster_list, Z = determine_k(
-            slowDownProfile, profile_file, directory, app.name)
+        appSysProfile = AppSysProfile(pd.read_csv(profile_file), app.name)
 
+        pModelTrainer, cluster_list, Z = determine_k(
+            slowDownProfile, appSysProfile, directory, app.name)
+        exit(1)
         # write cluster info to app
         write_cluster_info(app, cluster_list)
 
@@ -53,16 +56,14 @@ def write_to_file(app_file, app):
         json.dump(app.__dict__, output, indent=2)
 
 
-def determine_k(slowDownProfile, profile_file, directory, app_name):
+def determine_k(slowDownProfile, appSysProfile, directory, app_name):
     # iterate through different cluster numbers
-    observations, data = parseProfile(profile_file)
     pModelTrainer = PModelTrainer(app_name, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION + 1):
         # get the clusters
-        observations, cluster_list, c, Z = get_k_cluster(
-            observations, data, num_of_cluster)
+        cluster_list, c, Z = get_k_cluster(
+            appSysProfile, num_of_cluster)
         RAPID_info("Partition Lvl:", str(num_of_cluster))
-        print(len(cluster_list))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()
         diff = pModelTrainer.getDiff()
