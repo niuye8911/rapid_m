@@ -11,7 +11,6 @@ class RapidProfile:
     # pre_determined excluded system footprint that won't affect perf
     EXCLUDED_FEATURES = {
         "ACYC",
-        "AFREQ",
         "FREQ",
         'C0res%',
         'C10res%',
@@ -23,15 +22,12 @@ class RapidProfile:
         'C8res%',
         'C9res%',
         "PhysIPC",
-        "L2MISS",
-        "L3MISS",
         'Proc Energy (Joules)',
         'Configuration',
         'TIME(ticks)',
         'SLOWDOWN',
         'EXEC',
         "INSTnom",
-        "INSTnom%",
         "PhysIPC%",
     }
 
@@ -93,8 +89,8 @@ class RapidProfile:
         self.dataFrame['INST'] = self.dataFrame['ACYC'].div(
             self.dataFrame['INST'])
         # 2) READ / WRITE
-        self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
-            self.dataFrame['TIME(ticks)'])
-        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(4200.) / (
-            self.dataFrame['TIME(ticks)'])
+        #self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
+        #        self.dataFrame['TIME(ticks)'])
+        #        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(4200.) / (
+        #            self.dataFrame['TIME(ticks)'])
         print(self.x)

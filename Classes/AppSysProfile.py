@@ -9,7 +9,7 @@ class AppSysProfile(RapidProfile):
         self.setXLabel(self.x[1:])
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
         self.cleanData()
-        #self.scale()
+        self.scale()
 
     def getSysByConfig(self, config):
         return self.dataFrame.loc[self.dataFrame['Configuration'].
