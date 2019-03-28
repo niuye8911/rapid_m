@@ -59,7 +59,8 @@ class RapidProfile:
         @param excludes: a vector containing all unwanted feature string
         note that the 'x' has already been cleaned up by cleanData()
         '''
-        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x), excludes, False)
+        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x),
+                                            excludes, False)
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
@@ -93,4 +94,3 @@ class RapidProfile:
         #        self.dataFrame['TIME(ticks)'])
         #        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(4200.) / (
         #            self.dataFrame['TIME(ticks)'])
-        print(self.x)

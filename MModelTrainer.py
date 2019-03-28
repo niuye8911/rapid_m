@@ -50,7 +50,6 @@ class MModelTrainer:
         return mModel
 
     def write_to_file(self, dir_name=''):
-        id = 1
         if dir_name != '' and not os.path.isdir(dir_name):
             # create the dir if not exist
             os.mkdir(dir_name)

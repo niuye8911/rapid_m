@@ -10,6 +10,7 @@ from Classes.MModel import *
 from Classes.Machine import *
 from MModelTrainer import *
 from Utility import *
+import pandas as pd
 
 
 def trainEnv(machine_file, machine_measurements, directory, DRAW=True):
@@ -19,7 +20,8 @@ def trainEnv(machine_file, machine_measurements, directory, DRAW=True):
     if not machine.isTrained():
         RAPID_info("Training for ", machine.host_name)
         # read in the machine measurement file
-        envProfile = EnvProfile(machine_measurements, machine.host_name)
+        envProfile = EnvProfile(
+            pd.read_csv(machine_measurements), machine.host_name)
         mModelTrainer = MModelTrainer(machine.host_name, envProfile)
         mModelTrainer.train()
 
