@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from collections import OrderedDict
+from sklearn.preprocessing import PolynomialFeatures
 from Utility import *
 
 
@@ -33,7 +34,9 @@ class MModel:
         x_train, self.x_test, y_train, self.y_test = train_test_split(
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
-
+        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+        self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
+            self.x_test)
         self.model = LinearRegression()
         self.model.fit(x_train, y_train)
         self.TRAINED = True
