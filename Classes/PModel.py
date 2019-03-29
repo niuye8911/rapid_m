@@ -4,6 +4,7 @@ from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
 
 from Utility import *
 from sklearn import linear_model
@@ -25,14 +26,15 @@ class PModel:
     def train(self):
         x = self.df[self.features]
         y = self.df['SLOWDOWN']
-
         x_train, self.x_test, y_train, self.y_test = train_test_split(
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
-
         self.model = LinearRegression()
         #self.model = linear_model.Lasso(alpha=0.001)
         #self.model = linear_model.BayesianRidge()
+        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+        self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
+            self.x_test)
         self.model.fit(x_train, y_train)
         self.TRAINED = True
 
@@ -66,3 +68,21 @@ class PModel:
         app.model_params[name]["mae"] = self.mae
         app.model_params[name]["diff"] = self.diff
         app.model_params[name]["r2"] = self.r2
+
+    def drawPrediction(self, output):
+        predictions = self.model.predict(self.x_test)
+        observations = self.y_test
+        normed_pred = (predictions - min(observations)) / (
+            max(observations) - min(observations))
+        normed_obs = (observations - min(observations)) / (
+            max(observations) - min(observations))
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.xlabel('SlowDown Observation')
+        plt.ylabel('Prediction')
+        # plot the base line
+        x = [0, 1]
+        y = [0, 1]
+        plt.plot(x, y, 'r-')
+        plt.plot(normed_obs, normed_pred, 'x', color='black')
+        plt.savefig(output)
