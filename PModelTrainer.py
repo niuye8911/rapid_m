@@ -51,14 +51,14 @@ class PModelTrainer:
     def getDiff(self):
         diffs = list(map(lambda x: x.diff, self.p_models))
         if diffs is None or diffs == []:
-            return -1.
-        return sum(diffs) / len(diffs)
+            return [-1]
+        return diffs
 
     def getMSE(self):
         mses = list(map(lambda x: x.mse, self.p_models))
         if mses is None or mses == []:
-            return -1.
-        return sum(mses) / len(mses)
+            return [-1]
+        return mses
 
     def getMAE(self):
         maes = list(map(lambda x: x.mae, self.p_models))
@@ -88,6 +88,8 @@ class PModelTrainer:
         for model in self.p_models:
             model.write_to_file(dir_name + "/" + self.app_name + str(id) +
                                 ".pkl")
+            model.drawPrediction(dir_name + "/" + self.app_name + str(id) +
+                                 ".png")
             id += 1
 
     def dump_into_app(self, app):
