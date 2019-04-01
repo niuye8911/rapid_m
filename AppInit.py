@@ -68,6 +68,6 @@ def determine_k(slowDownProfile, appSysProfile, directory, app_name):
         diff = pModelTrainer.getDiff()
         r2 = pModelTrainer.getMSE()
         RAPID_info("average DIFF/MSE:", str(diff) + '/' + str(r2))
-        #if diff <= SLOWDOWN_THRESHOLD:
-        #    break
+        if diff <= SLOWDOWN_THRESHOLD:
+            break
     return pModelTrainer, cluster_list, Z
