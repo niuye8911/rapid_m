@@ -48,11 +48,20 @@ class PModelTrainer:
         self.p_models = list(
             map(lambda x: self.pModelTrain(x, features), clusterDFs))
 
+    def minButNotSingle(self, metrics):
+        id = -1
+        max = 0.0
+        for i in range(0, len(metrics)):
+            if metrics[i] >= max and len(self.cluster_list[i]) > 1:
+                id = i
+                max = metrics[i]
+        return id
+
     def getDiff(self):
         diffs = list(map(lambda x: x.diff, self.p_models))
         if diffs is None or diffs == []:
-            return [-1]
-        return diffs, diffs.index(max(diffs))
+            return [-1, -1]
+        return diffs, self.minButNotSingle(diffs)
 
     def getMSE(self):
         mses = list(map(lambda x: x.mse, self.p_models))

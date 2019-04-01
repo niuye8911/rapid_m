@@ -70,7 +70,10 @@ def determine_k(slowDownProfile, appSysProfile, directory, app_name):
         pModelTrainer.train()
         diff, largest_id = pModelTrainer.getDiff()
         r2, largest_r2_id = pModelTrainer.getMSE()
-        RAPID_info("average DIFF/MSE:", str(diff) + '/' + str(r2))
+        RAPID_info("average DIFF/MSE:", diff)
+        RAPID_info("largest_id:", largest_id)
+        RAPID_info("size:", str(list(map(lambda x: len(x), cluster_list))))
+        print("\n")
         if sum(diff) / len(diff) <= SLOWDOWN_THRESHOLD:
             break
     return pModelTrainer, cluster_list, Z
@@ -91,6 +94,9 @@ def determine_k_incremental(slowDownProfile, appSysProfile, directory,
         diff, target_id = pModelTrainer.getDiff()
         r2, tmp_id = pModelTrainer.getMSE()
         RAPID_info("average DIFF/MSE:", str(diff) + '/' + str(r2))
+        RAPID_info("largest_id:", target_id)
+        RAPID_info("size:", str(list(map(lambda x: len(x), cluster_list))))
+        print("\n")
         if sum(diff) / len(diff) <= SLOWDOWN_THRESHOLD:
             break
     return pModelTrainer, cluster_list, Z
