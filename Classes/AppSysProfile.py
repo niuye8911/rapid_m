@@ -15,11 +15,18 @@ class AppSysProfile(RapidProfile):
         return self.dataFrame.loc[self.dataFrame['Configuration'].
                                   apply(lambda x: x == config), self.x]
 
+    def getSubFrameByConfigs(self, configs):
+        return self.dataFrame.loc[
+            self.dataFrame['Configuration'].apply(lambda x: x in configs)]
+
     def getData(self):
         return self.dataFrame[self.x]
 
     def getConfigs(self):
         return self.dataFrame['Configuration'].values
+
+    def getX(self):
+        return self.x
 
     def writeOut(self, outfile):
         ''' write the cleaned dataframe to csv '''

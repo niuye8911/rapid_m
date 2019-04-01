@@ -11,6 +11,30 @@ from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 from scipy.spatial.distance import pdist
 
 
+def increment_cluster(appSysProfile, cluster_list, target_id):
+    '''
+    Rather than getting k clusteres, partition only the cluster with the highest
+    Error
+    '''
+    Z, c = hCluster(appSysProfile.getData())
+    # the first cut
+    if target_id == -1:
+        return get_cluster_list(
+            fcluster(Z, 1, criterion='maxclust'), appSysProfile.dataFrame,
+            1), Z
+    # else, cluster the target cluster into 2 parts
+    subFrame = appSysProfile.getSubFrameByConfigs(cluster_list[target_id])
+    x = appSysProfile.getX()
+    subZ, c = hCluster(subFrame[x])
+    clusters = fcluster(subZ, 2, criterion='maxclust')
+    updated_list = get_cluster_list(clusters, subFrame, 2)
+    # replace the original list by two updated list
+    del cluster_list[target_id]
+    cluster_list.insert(target_id, updated_list[0])
+    cluster_list.insert(target_id + 1, updated_list[1])
+    return cluster_list, Z
+
+
 def get_k_cluster(appSysProfile, k):
     '''
     Train the app using a proper model
@@ -19,19 +43,18 @@ def get_k_cluster(appSysProfile, k):
     :param k: number of clusters to cluster
     :return: void, but write the clusters to the file
     '''
-
     # Z: the linkage matrix
     # c: the coefficient distance
     Z, c = hCluster(appSysProfile.getData())
     # get the clusters
     clusters = fcluster(Z, k, criterion='maxclust')
     # get the cluster list
-    cluster_list = get_cluster_list(clusters, appSysProfile, k)
-    return cluster_list, c, Z
+    cluster_list = get_cluster_list(clusters, appSysProfile.dataFrame, k)
+    return cluster_list, Z
 
 
-def get_cluster_list(clusters, appSysProfile, k):
-    observations = appSysProfile.getConfigs()
+def get_cluster_list(clusters, df, k):
+    observations = df['Configuration'].values
     cluster_info_list = []
     for i in range(1, k + 1):
         cluster_info_list.append([])

@@ -52,13 +52,13 @@ class PModelTrainer:
         diffs = list(map(lambda x: x.diff, self.p_models))
         if diffs is None or diffs == []:
             return [-1]
-        return diffs
+        return diffs, diffs.index(max(diffs))
 
     def getMSE(self):
         mses = list(map(lambda x: x.mse, self.p_models))
         if mses is None or mses == []:
             return [-1]
-        return mses
+        return mses, mses.index(max(mses))
 
     def getMAE(self):
         maes = list(map(lambda x: x.mae, self.p_models))

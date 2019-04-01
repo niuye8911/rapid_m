@@ -17,6 +17,9 @@ import pandas as pd
 MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .07
 
+INCREMENTAL = "incremental"
+DIRECT_K = "direct_k"
+
 
 def init(app_file, performance_file, profile_file, directory, DRAW=True):
     # load in the file
@@ -29,7 +32,7 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
             pd.read_csv(performance_file), app.name)
         appSysProfile = AppSysProfile(pd.read_csv(profile_file), app.name)
 
-        pModelTrainer, cluster_list, Z = determine_k(
+        pModelTrainer, cluster_list, Z = determine_k_incremental(
             slowDownProfile, appSysProfile, directory, app.name)
 
         # write cluster info to app
@@ -60,14 +63,34 @@ def determine_k(slowDownProfile, appSysProfile, directory, app_name):
     # iterate through different cluster numbers
     pModelTrainer = PModelTrainer(app_name, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION + 1):
-        # get the clusters
-        cluster_list, c, Z = get_k_cluster(appSysProfile, num_of_cluster)
+        # partition the cluster with the hist error
+        cluster_list, Z = get_k_cluster(appSysProfile, num_of_cluster)
         RAPID_info("Partition Lvl:", str(num_of_cluster))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()
-        diff = pModelTrainer.getDiff()
-        r2 = pModelTrainer.getMSE()
+        diff, largest_id = pModelTrainer.getDiff()
+        r2, largest_r2_id = pModelTrainer.getMSE()
         RAPID_info("average DIFF/MSE:", str(diff) + '/' + str(r2))
-        if diff <= SLOWDOWN_THRESHOLD:
+        if sum(diff) / len(diff) <= SLOWDOWN_THRESHOLD:
+            break
+    return pModelTrainer, cluster_list, Z
+
+
+def determine_k_incremental(slowDownProfile, appSysProfile, directory,
+                            app_name):
+    # iterate through different cluster numbers
+    pModelTrainer = PModelTrainer(app_name, slowDownProfile)
+    cluster_list = []
+    target_id = -1
+    for num_of_cluster in range(1, MAX_ITERATION + 1):
+        cluster_list, Z = increment_cluster(appSysProfile, cluster_list,
+                                            target_id)
+        RAPID_info("Partition Lvl:", str(num_of_cluster))
+        pModelTrainer.updateCluster(cluster_list)
+        pModelTrainer.train()
+        diff, target_id = pModelTrainer.getDiff()
+        r2, tmp_id = pModelTrainer.getMSE()
+        RAPID_info("average DIFF/MSE:", str(diff) + '/' + str(r2))
+        if sum(diff) / len(diff) <= SLOWDOWN_THRESHOLD:
             break
     return pModelTrainer, cluster_list, Z
