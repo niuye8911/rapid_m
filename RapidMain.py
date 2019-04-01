@@ -37,14 +37,12 @@ def main(argv):
 
     if flow is Flow.TRAIN_SLOWDOWN:
         # train the slow-down by calling Rajanya's work
-        p_accuracy = PModelTrainer.train(options.app_file,
-                                         options.app_measurements)
+        PModelTrainer.train(options.app_file, options.app_measurements)
         # do something about the accuracy
 
     elif flow is Flow.TRAIN_CLUSTER:
         # cluster the slow-down by calling Asheley's work
-        num_of_cluster = ClusterTrainer.cluster(options.app_file,
-                                                options.app_profiles)
+        ClusterTrainer.cluster(options.app_file, options.app_profiles)
         # do something about the number
 
     elif flow is Flow.TRAIN_ENV:

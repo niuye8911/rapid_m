@@ -11,6 +11,7 @@ from Classes.Machine import *
 from MModelTrainer import *
 from Utility import *
 import pandas as pd
+import json
 
 
 def trainEnv(machine_file, machine_measurements, directory, DRAW=True):

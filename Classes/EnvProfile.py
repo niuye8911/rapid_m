@@ -47,12 +47,21 @@ class EnvProfile(RapidProfile):
         return self.combinedDF.x
 
     def getX(self):
-        return pd.concat([
+        concated_df = pd.concat([
             self.sys1DF.dataFrame[self.sys1DF.x],
             self.sys2DF.dataFrame[self.sys2DF.x]
         ],
-                         axis=1,
-                         join="inner")
+                         axis=1)
+        #reverse_df = pd.concat([
+        #    self.sys2DF.dataFrame[self.sys2DF.x],
+        #    self.sys1DF.dataFrame[self.sys1DF.x]
+        #],axis=1)
+        #concated_df = pd.concat([concated_df,reverse_df],axis=0)
+        #print(concated_df.shape)
+        return concated_df
 
     def getY(self):
-        return self.combinedDF.dataFrame[self.combinedDF.x]
+        result_df = self.combinedDF.dataFrame[self.combinedDF.x]
+        #print(result_df.shape)
+        #return pd.concat([result_df,result_df],axis=0)
+        return result_df

@@ -29,6 +29,8 @@ class RapidProfile:
         'EXEC',
         "INSTnom",
         "PhysIPC%",
+        # add some for testing
+
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
