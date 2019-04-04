@@ -9,7 +9,7 @@ class EnvProfile(RapidProfile):
     def __init__(self, df, host_name):
         RapidProfile.__init__(self, df)
         self.hostName = host_name
-        self.cleanData()
+        #self.cleanData()
         self.partitionData()
         self.cleanFeatures()
 

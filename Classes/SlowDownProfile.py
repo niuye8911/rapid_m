@@ -14,7 +14,7 @@ class SlowDownProfile(RapidProfile):
         self.setYLabel(['SLOWDOWN'])
         # scale the data using the scalar
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
-        self.cleanData()
+        #self.cleanData()
         #self.scale()
 
     def getFeatures(self):

@@ -37,7 +37,7 @@ class MModel:
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model = linear_model.Lasso(alpha=0.1, max_iter=10000000)
+        self.model = linear_model.Lasso(alpha=1, max_iter=1000000)
         self.model.fit(x_train_poly, y_train)
         self.TRAINED = True
 

@@ -11,7 +11,6 @@ class RapidProfile:
     # pre_determined excluded system footprint that won't affect perf
     EXCLUDED_FEATURES = {
         "ACYC",
-        "FREQ",
         'C0res%',
         'C10res%',
         'C1res%',
@@ -27,8 +26,9 @@ class RapidProfile:
         'SLOWDOWN',
         'EXEC',
         "INSTnom",
-        "PhysIPC%",
         # add some for testing
+        'L3MPI',
+        'L3MISS'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
