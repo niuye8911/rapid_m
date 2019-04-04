@@ -20,7 +20,7 @@ class SlowDownProfile(RapidProfile):
     def getFeatures(self):
         return self.x
 
-    def getSubdata(self, config_list):
+    def getSubdata(self, config_list=[]):
         if config_list is None or config_list == []:
             return self.dataFrame
         return self.dataFrame.loc[self.dataFrame['Configuration'].

@@ -15,7 +15,8 @@ from collections import OrderedDict
 
 
 class App:
-    def __init__(self, filePath=""):
+    def __init__(self, filePath="", overwrite=False):
+        '''if overwrite, the file will be overwritten by new content'''
         self.name = ""
         self.machine_id = -1
         self.model_type = None
@@ -24,6 +25,7 @@ class App:
         self.CLUSTERED = False
         self.num_of_cluster = -1
         self.cluster_info = dict()
+        self.overwrite = overwrite
         if filePath:
             self.fromFile(filePath)
 
@@ -37,7 +39,7 @@ class App:
             self.TRAINED = app['TRAINED']
             self.CLUSTERED = app['CLUSTERED']
             if app['TRAINED']:
-                self.model_params = self.readParams(app['model_params'])
+                self.readParams(app['model_params'])
                 self.TRAINED = True
             if app['CLUSTERED']:
                 self.num_of_cluster = app['num_of_cluster']

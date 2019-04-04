@@ -45,8 +45,10 @@ def init(app_file, performance_file, profile_file, directory, DRAW=True):
         pModelTrainer.dump_into_app(app)
 
         app.TRAINED = True
+
         # write the app to file
-        #write_to_file(app_file, app)
+        output_file = app_file if app.overwrite else directory + '/' + app.name + ".json"
+        write_to_file(output_file, app)
         # whether to show the cluster result
         if DRAW:
             draw(Z)

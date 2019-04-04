@@ -25,6 +25,7 @@ class Machine:
             machine = json.load(machine_json)
             self.host_name = machine['host_name']
             self.TRAINED = machine['TRAINED']
+            self.model_params = machine['model_params']
 
     def isTrained(self):
         return self.TRAINED
