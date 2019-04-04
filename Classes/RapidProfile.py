@@ -29,8 +29,6 @@ class RapidProfile:
         "INSTnom",
         "PhysIPC%",
         # add some for testing
-        'L3MPI',
-        'L2MPI'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
