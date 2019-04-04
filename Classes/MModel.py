@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from collections import OrderedDict
 from sklearn.preprocessing import PolynomialFeatures
 from Utility import *
+from sklearn import linear_model
 
 
 class MModel:
@@ -30,19 +31,18 @@ class MModel:
     def train(self):
         x = self.xDF
         y = self.yDF
-
         x_train, self.x_test, y_train, self.y_test = train_test_split(
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model = LinearRegression()
-        self.model.fit(x_train, y_train)
+        self.model = linear_model.Lasso(alpha=0.1, max_iter=10000000)
+        self.model.fit(x_train_poly, y_train)
         self.TRAINED = True
 
     def validate(self):
-        y_pred = self.model.predict(self.x_test)
+        y_pred = self.model.predict(self.x_test_poly)
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)

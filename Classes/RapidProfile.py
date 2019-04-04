@@ -21,7 +21,6 @@ class RapidProfile:
         'C7res%',
         'C8res%',
         'C9res%',
-        "PhysIPC",
         'Proc Energy (Joules)',
         'Configuration',
         'TIME(ticks)',
@@ -30,7 +29,8 @@ class RapidProfile:
         "INSTnom",
         "PhysIPC%",
         # add some for testing
-
+        'L3MPI',
+        'L2MPI'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -61,8 +61,7 @@ class RapidProfile:
         @param excludes: a vector containing all unwanted feature string
         note that the 'x' has already been cleaned up by cleanData()
         '''
-        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x),
-                                            excludes, False)
+        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x), excludes, False)
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
