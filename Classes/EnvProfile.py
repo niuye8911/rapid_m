@@ -9,8 +9,8 @@ class EnvProfile(RapidProfile):
     def __init__(self, df, host_name):
         RapidProfile.__init__(self, df)
         self.hostName = host_name
-        self.partitionData()
         self.cleanData()
+        self.partitionData()
         self.cleanFeatures()
 
     def partitionData(self):
@@ -28,12 +28,12 @@ class EnvProfile(RapidProfile):
             list(map(lambda x: x + '-C', RapidProfile.EXCLUDED_FEATURES)))
 
     def cleanData(self):
-        self.sys1DF.dataFrame['INST-1'] = self.sys1DF.dataFrame['ACYC-1'].div(
-            self.sys1DF.dataFrame['INST-1'])
-        self.sys2DF.dataFrame['INST-2'] = self.sys2DF.dataFrame['ACYC-2'].div(
-            self.sys2DF.dataFrame['INST-2'])
-        self.combinedDF.dataFrame['INST-C'] = self.combinedDF.dataFrame[
-            'ACYC-C'].div(self.combinedDF.dataFrame['INST-C'])
+        self.dataFrame['INST-1'] = self.dataFrame['ACYC-1'].div(
+            self.dataFrame['INST-1'])
+        self.dataFrame['INST-2'] = self.dataFrame['ACYC-2'].div(
+            self.dataFrame['INST-2'])
+        self.dataFrame['INST-C'] = self.dataFrame['ACYC-C'].div(
+            self.dataFrame['INST-C'])
 
     def scaleAll(self):
         self.sys1DF.scale()
@@ -51,7 +51,7 @@ class EnvProfile(RapidProfile):
             self.sys1DF.dataFrame[self.sys1DF.x],
             self.sys2DF.dataFrame[self.sys2DF.x]
         ],
-                         axis=1)
+                                axis=1)
         #reverse_df = pd.concat([
         #    self.sys2DF.dataFrame[self.sys2DF.x],
         #    self.sys1DF.dataFrame[self.sys1DF.x]
