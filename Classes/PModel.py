@@ -31,22 +31,22 @@ class PModel:
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
         #self.model = LinearRegression()
-        self.model = linear_model.Lasso(alpha=0.01, max_iter=100000)
+        self.model = linear_model.Lasso(alpha=0.1, max_iter=100000)
         #self.model = linear_model.BayesianRidge()
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model.fit(x_train, y_train)
+        self.model.fit(x_train_poly, y_train)
         self.TRAINED = True
 
     def validate(self):
-        self.y_pred = self.model.predict(self.x_test)
+        self.y_pred = self.model.predict(self.x_test_poly)
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, self.y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
         self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
-        diff = abs(self.y_test - self.y_pred) / self.y_test
-        self.diff = sum(diff) / len(diff)
+        self.diffs = abs(self.y_test - self.y_pred) / self.y_test
+        self.diff = sum(self.diffs) / len(self.diffs)
         return self.diff, self.r2
 
     def loadFromFile(self, model_file):

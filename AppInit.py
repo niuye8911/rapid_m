@@ -15,7 +15,7 @@ from Utility import *
 import pandas as pd
 
 MAX_ITERATION = 5
-SLOWDOWN_THRESHOLD = .07
+SLOWDOWN_THRESHOLD = .06
 
 INCREMENTAL = "incremental"
 DIRECT_K = "direct_k"
@@ -94,7 +94,7 @@ def determine_k_incremental(slowDownProfile, appSysProfile, directory,
         if [] in cluster_list:
             # go for traditional cluster
             cluster_list, Z = get_k_cluster(appSysProfile, num_of_cluster)
-            
+
         RAPID_info("Partition Lvl:", str(num_of_cluster))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()
