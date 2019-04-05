@@ -90,6 +90,11 @@ def determine_k_incremental(slowDownProfile, appSysProfile, directory,
     for num_of_cluster in range(1, MAX_ITERATION + 1):
         cluster_list, Z = increment_cluster(appSysProfile, cluster_list,
                                             target_id)
+        # if any cluster cannot be separated to another cluster
+        if [] in cluster_list:
+            # go for traditional cluster
+            cluster_list, Z = get_k_cluster(appSysProfile, num_of_cluster)
+            
         RAPID_info("Partition Lvl:", str(num_of_cluster))
         pModelTrainer.updateCluster(cluster_list)
         pModelTrainer.train()
