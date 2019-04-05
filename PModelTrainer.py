@@ -99,6 +99,8 @@ class PModelTrainer:
                                 ".pkl")
             model.drawPrediction(dir_name + "/" + self.app_name + str(id) +
                                  ".png")
+            model.printPrediction(dir_name + "/" + self.app_name + str(id) +
+                                 ".csv")
             id += 1
 
     def dump_into_app(self, app):

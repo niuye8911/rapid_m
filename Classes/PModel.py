@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
+import pandas as pd
 
 from Utility import *
 from sklearn import linear_model
@@ -35,16 +36,16 @@ class PModel:
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model.fit(x_train_poly, y_train)
+        self.model.fit(x_train, y_train)
         self.TRAINED = True
 
     def validate(self):
-        y_pred = self.model.predict(self.x_test_poly)
-        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
-        self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
-        self.r2 = r2_score(self.y_test, y_pred)
+        self.y_pred = self.model.predict(self.x_test)
+        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, self.y_pred))
+        self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
+        self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
-        diff = abs(self.y_test - y_pred) / self.y_test
+        diff = abs(self.y_test - self.y_pred) / self.y_test
         self.diff = sum(diff) / len(diff)
         return self.diff, self.r2
 
@@ -70,7 +71,7 @@ class PModel:
         app.model_params[name]["r2"] = self.r2
 
     def drawPrediction(self, output):
-        predictions = self.model.predict(self.x_test_poly)
+        predictions = self.y_pred
         observations = self.y_test
         normed_pred = (predictions - min(observations)) / (
             max(observations) - min(observations))
@@ -86,3 +87,8 @@ class PModel:
         plt.plot(x, y, 'r-')
         plt.plot(normed_obs, normed_pred, 'x', color='black')
         plt.savefig(output)
+
+    def printPrediction(self,outfile):
+        result = pd.DataFrame({'GT':self.y_test, 'Pred':self.y_pred})
+        overall = pd.concat([self.x_test, result],axis=1)
+        overall.to_csv(outfile)
