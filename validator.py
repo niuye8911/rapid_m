@@ -42,7 +42,7 @@ def validate(observation, app_summary, appsys, m_model):
     # relative error
     diff = abs(y_gt - y_pred) / y_gt
     diff = sum(diff) / len(diff)
-    print(diff)
+    print(mae)
 
 
 def genPred(observation, app_summary, appsys, m_model):
@@ -64,6 +64,7 @@ def genPred(observation, app_summary, appsys, m_model):
         env2 = app_env.values.tolist()
         env = env2[0] + env1
         env = np.reshape(env, (1, -1))
+        env = PolynomialFeatures(degree=2).fit_transform(env)
         debug_file.write(','.join(map(lambda x: str(x), env1)))
         debug_file.write(',')
         debug_file.write(','.join(map(lambda x: str(x), env2[0])))
