@@ -11,7 +11,7 @@ class EnvProfile(RapidProfile):
         self.hostName = host_name
         #self.cleanData()
         self.partitionData()
-        self.cleanFeatures()
+        #self.cleanFeatures()
 
     def partitionData(self):
         ind_len = int(len(self.x) / 3)

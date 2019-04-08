@@ -105,7 +105,10 @@ class PModelTrainer:
         self.printCI(dir_name)
 
     def printCI(self, dir_name=''):
-        diffs = np.array(list(map(lambda x: x.diffs, self.p_models))).flatten()
+        diffs = []
+        diff_list = list(map(lambda x: x.diffs, self.p_models))
+        for i in diff_list:
+            diffs = diffs + i
         n = len(diffs)
         m, se = np.mean(diffs), scipy.stats.sem(diffs)
         h = se * scipy.stats.t.ppf((1 + 0.95) / 2., n-1)

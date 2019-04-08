@@ -9,9 +9,19 @@ import pandas as pd
 
 from Utility import *
 from sklearn import linear_model
+from sklearn.linear_model import ElasticNet
+from sklearn import preprocessing
+from sklearn.feature_selection import RFE
+from sklearn.base import clone
 
 
 class PModel:
+    CANDIDATE_MODELS = {
+        'linear': LinearRegression(),
+        'lasso': linear_model.Lasso(alpha=1, max_iter=100000),
+        'EN': ElasticNet(random_state=0, max_iter=100000)
+    }
+
     def __init__(self):
         self.model = None
         self.TRAINED = False
@@ -31,23 +41,80 @@ class PModel:
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
         #self.model = LinearRegression()
-        self.model = linear_model.Lasso(alpha=0.1, max_iter=100000)
+        self.model = linear_model.Lasso(alpha=1, max_iter=100000)
         #self.model = linear_model.BayesianRidge()
+        #self.model =ElasticNet(random_state=0,max_iter=1000000)
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model.fit(x_train_poly, y_train)
+        # select the model and features
+        self.selectModelAndFeature(x_train, y_train)
         self.TRAINED = True
 
-    def validate(self):
-        self.y_pred = self.model.predict(self.x_test_poly)
-        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, self.y_pred))
+    def selectModelAndFeature(self, x_train, y_train):
+        # use the validate process to pick the most important 10 linear features
+        # scale the data
+        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        scalar = min_max_scaler.fit(x_train)
+        x_train_scaled = scalar.transform(x_train)
+        # iterate through all models
+        selected_features = []
+        selected_poly = False
+        min_mse = 99999
+        selected_model_name = ''
+        for model_name, model in PModel.CANDIDATE_MODELS.items():
+            rfe = RFE(model, 10)
+            fit = rfe.fit(x_train_scaled, y_train)
+            # get the feature names:
+            feature_names = list(
+                filter(lambda f: fit.ranking_[self.features.index(f)] == 1,
+                       self.features))
+            selected_x_train = x_train[feature_names]
+            selected_x_train_poly = PolynomialFeatures(
+                degree=2).fit_transform(selected_x_train)
+            selected_x_test_poly = PolynomialFeatures(degree=2).fit_transform(
+                self.x_test[feature_names])
+            # train 1st order
+            linear_model = clone(model)
+            linear_model.fit(selected_x_train, y_train)
+            diff, mse = self.validate(self.x_test[feature_names],linear_model)
+            if mse < min_mse:
+                selected_features = feature_names
+                selected_poly = False
+                selected_model_name = model_name
+                min_mse = mse
+                self.model = linear_model
+            # train the 2nd order
+            high_model = clone(model)
+            high_model.fit(selected_x_train_poly, y_train)
+            diff, mse = self.validate(selected_x_test_poly, high_model)
+            if mse < min_mse:
+                selected_poly = True
+                min_mse = mse
+                self.model= high_model
+        # set all members
+        self.polyFeature = selected_poly
+        self.features = selected_features
+        self.modelType = selected_model_name
+        if selected_poly:
+            self.x_test_selected = selected_x_test_poly
+        else:
+            self.x_test_selected = self.x_test[selected_features]
+
+    def validate(self, x=None, model=None):
+        if x is None:
+            x = self.x_test_selected
+        if model is None:
+            model = self.model
+        self.y_pred = model.predict(x)
+        self.mse = np.sqrt(
+            metrics.mean_squared_error(self.y_test, self.y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
         self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
-        self.diffs = abs(self.y_test - self.y_pred) / self.y_test
+        self.diffs = list(abs(self.y_test - self.y_pred) / self.y_test)
         self.diff = sum(self.diffs) / len(self.diffs)
-        return self.diff, self.r2
+        return self.diff, self.mse
 
     def loadFromFile(self, model_file):
         self.model = pickle.load(open(model_file, 'rb'))
@@ -69,6 +136,9 @@ class PModel:
         app.model_params[name]["mae"] = self.mae
         app.model_params[name]["diff"] = self.diff
         app.model_params[name]["r2"] = self.r2
+        app.model_params[name]["feature"] = self.features
+        app.model_params[name]["poly"] = self.polyFeature
+        app.model_params[name]["model_type"] = self.modelType
 
     def drawPrediction(self, output):
         predictions = self.y_pred
@@ -88,7 +158,7 @@ class PModel:
         plt.plot(normed_obs, normed_pred, 'x', color='black')
         plt.savefig(output)
 
-    def printPrediction(self,outfile):
-        result = pd.DataFrame({'GT':self.y_test, 'Pred':self.y_pred})
-        overall = pd.concat([self.x_test, result],axis=1)
+    def printPrediction(self, outfile):
+        result = pd.DataFrame({'GT': self.y_test, 'Pred': self.y_pred})
+        overall = pd.concat([self.x_test, result], axis=1)
         overall.to_csv(outfile)

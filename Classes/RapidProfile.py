@@ -24,11 +24,12 @@ class RapidProfile:
         'Configuration',
         'TIME(ticks)',
         'SLOWDOWN',
-        'EXEC',
-        "INSTnom",
+        #'EXEC',
+        #"INSTnom",
         # add some for testing
-        'L3MPI',
-        'L3MISS'
+        #'L3MPI',
+        #'L3MISS',
+        #'WRITE'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -63,21 +64,23 @@ class RapidProfile:
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
-    def createScalar(self):
+    def createScalar(self, writeout=False):
         ''' create a persistent scaler for all data '''
         data = self.dataFrame[self.x]
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
         self.scalar = min_max_scaler.fit(data)
-        joblib.dump(self.scalar, 'RapidScalar.pkl')
+        if writeout:
+            joblib.dump(self.scalar, 'RapidScalar.pkl')
 
-    def loadScalar(self):
+    def loadScalar(self, use_exist=False):
         ''' load an existing scalar '''
         if not Path(RapidProfile.SCALAR_PATH).is_file():
             self.createScalar()
         self.scalar = joblib.load('RapidScalar.pkl')
 
+
     def scale(self):
-        self.loadScalar()
+        self.createScalar()
         self.dataFrame[self.x] = pd.DataFrame(
             self.scalar.transform(self.dataFrame[self.x]))
 
