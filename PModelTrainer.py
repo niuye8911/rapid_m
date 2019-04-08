@@ -6,7 +6,7 @@
 """
 
 import os
-
+import scipy.stats
 from Classes.App import *
 from Classes.PModel import *
 from Classes.SlowDownProfile import *
@@ -99,11 +99,23 @@ class PModelTrainer:
                                 ".pkl")
             model.drawPrediction(dir_name + "/" + self.app_name + str(id) +
                                  ".png")
+            model.printPrediction(dir_name + "/" + self.app_name + str(id) +
+                                 ".csv")
             id += 1
+        self.printCI(dir_name)
+
+    def printCI(self, dir_name=''):
+        diffs = np.array(list(map(lambda x: x.diffs, self.p_models))).flatten()
+        n = len(diffs)
+        m, se = np.mean(diffs), scipy.stats.sem(diffs)
+        h = se * scipy.stats.t.ppf((1 + 0.95) / 2., n-1)
+        ci_upp = m+h
+        ci_low = m-h
+        print(m,ci_low,ci_upp)
 
     def dump_into_app(self, app):
         id = 1
         for model in self.p_models:
             model.dump_into_app(app, app.name + str(id))
-            print(model.model.coef_)
+            #print(model.model.coef_)
             id += 1
