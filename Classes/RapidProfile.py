@@ -24,12 +24,6 @@ class RapidProfile:
         'Configuration',
         'TIME(ticks)',
         'SLOWDOWN',
-        #'EXEC',
-        #"INSTnom",
-        # add some for testing
-        #'L3MPI',
-        #'L3MISS',
-        #'WRITE'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'

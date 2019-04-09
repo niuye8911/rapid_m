@@ -11,7 +11,7 @@ class EnvProfile(RapidProfile):
         self.hostName = host_name
         #self.cleanData()
         self.partitionData()
-        #self.cleanFeatures()
+        self.cleanFeatures()
 
     def partitionData(self):
         ind_len = int(len(self.x) / 3)
@@ -47,21 +47,22 @@ class EnvProfile(RapidProfile):
         return self.combinedDF.x
 
     def getX(self):
-        concated_df = pd.concat([
+        forward_df = pd.concat([
             self.sys1DF.dataFrame[self.sys1DF.x],
             self.sys2DF.dataFrame[self.sys2DF.x]
         ],
                                 axis=1)
-        #reverse_df = pd.concat([
-        #    self.sys2DF.dataFrame[self.sys2DF.x],
-        #    self.sys1DF.dataFrame[self.sys1DF.x]
-        #],axis=1)
-        #concated_df = pd.concat([concated_df,reverse_df],axis=0)
-        #print(concated_df.shape)
+        reverse_df = pd.concat([
+            self.sys2DF.dataFrame[self.sys2DF.x],
+            self.sys1DF.dataFrame[self.sys1DF.x]
+        ],axis=1)
+        concated_df = forward_df.append(reverse_df, ignore_index=True, sort=False)
         return concated_df
 
     def getY(self):
-        result_df = self.combinedDF.dataFrame[self.combinedDF.x]
+        forward_df = self.combinedDF.dataFrame[self.combinedDF.x]
         #print(result_df.shape)
         #return pd.concat([result_df,result_df],axis=0)
-        return result_df
+        concated_df = forward_df.append(forward_df, ignore_index=True, sort=False)
+        print(concated_df.shape)
+        return concated_df

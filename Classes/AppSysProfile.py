@@ -8,7 +8,7 @@ class AppSysProfile(RapidProfile):
         self.appName = app_name
         self.setXLabel(self.x[1:])
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
-        self.cleanData()
+        
         #self.scale()
 
     def getSysByConfig(self, config):
