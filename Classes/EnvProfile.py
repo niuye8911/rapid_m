@@ -3,13 +3,14 @@
 import pandas as pd
 from functools import reduce
 from Classes.RapidProfile import RapidProfile
+from collections import OrderedDict
 
 
 class EnvProfile(RapidProfile):
     def __init__(self, df, host_name):
         RapidProfile.__init__(self, df)
         self.hostName = host_name
-        #self.cleanData()
+        self.cleanData()
         self.partitionData()
         self.cleanFeatures()
 
@@ -18,6 +19,10 @@ class EnvProfile(RapidProfile):
         self.sys1DF = RapidProfile(self.dataFrame[self.x[0:ind_len]])
         self.sys2DF = RapidProfile(self.dataFrame[self.x[ind_len:2 * ind_len]])
         self.combinedDF = RapidProfile(self.dataFrame[self.x[2 * ind_len:]])
+        # create the scalar using the combined df
+        #self.combinedDF.scale(True)
+        #self.sys1DF.scale()
+        #self.sys2DF.scale()
 
     def cleanFeatures(self):
         self.sys1DF.cleanLabelByExactName(
@@ -28,12 +33,9 @@ class EnvProfile(RapidProfile):
             list(map(lambda x: x + '-C', RapidProfile.EXCLUDED_FEATURES)))
 
     def cleanData(self):
-        self.dataFrame['INST-1'] = self.dataFrame['ACYC-1'].div(
-            self.dataFrame['INST-1'])
-        self.dataFrame['INST-2'] = self.dataFrame['ACYC-2'].div(
-            self.dataFrame['INST-2'])
-        self.dataFrame['INST-C'] = self.dataFrame['ACYC-C'].div(
-            self.dataFrame['INST-C'])
+        super(EnvProfile, self).cleanData('-1')
+        super(EnvProfile, self).cleanData('-2')
+        super(EnvProfile, self).cleanData('-C')
 
     def scaleAll(self):
         self.sys1DF.scale()
@@ -53,16 +55,17 @@ class EnvProfile(RapidProfile):
         ],
                              axis=1)
         concated_df = self.reformat_dfs(self.sys1DF.dataFrame[self.sys1DF.x],
-                          self.sys2DF.dataFrame[self.sys2DF.x])
+                                        self.sys2DF.dataFrame[self.sys2DF.x])
         #second_df = pd.concat([
-    #        self.sys2DF.dataFrame[self.sys2DF.x],
-    #        self.sys1DF.dataFrame[self.sys1DF.x]
-    #    ],
-                            #  axis=1)
+        #        self.sys2DF.dataFrame[self.sys2DF.x],
+        #        self.sys1DF.dataFrame[self.sys1DF.x]
+        #    ],
+        #  axis=1)
         #concated_df = first_df.append(second_df, ignore_index=True, sort=False)
+        concated_df.to_csv('./cleaned_machine.csv')
         return concated_df
 
-    def reformat_dfs(self,df1, df2):
+    def reformat_dfs(self, df1, df2):
         ''' reformat the dfs so that we get a symetric matrix where each pair
         is represented by [smaller, sum] '''
         # the first row
@@ -72,23 +75,21 @@ class EnvProfile(RapidProfile):
         #second_columns = list(map(lambda x: x+'-sum', columns))
         #columns = first_columns + second_columns
         # reorder the data
-        combined_df = pd.concat([
-            df1,
-            df2
-        ],
-                             axis=1)
+        combined_df = pd.concat([df1, df2], axis=1)
         for index, row in combined_df.iterrows():
             for feature in columns:
-                f1 = row[feature+'-1']
-                f2 = row[feature+'-2']
-                row[feature+'-1'] = min(f1,f2)
-                row[feature+'-2'] = max(f1,f2)
+                f1 = row[feature + '-1']
+                f2 = row[feature + '-2']
+                row[feature + '-1'] = min(f1, f2)
+                row[feature + '-2'] = max(f1, f2)
         return combined_df
 
     def getY(self):
         forward_df = self.combinedDF.dataFrame[self.combinedDF.x]
-        #print(result_df.shape)
-        #return pd.concat([result_df,result_df],axis=0)
-        concated_df = forward_df.append(
-            forward_df, ignore_index=True, sort=False)
-        return forward_df
+        # get a dictionary of [feature, df]
+        result_Y = OrderedDict()
+        features = list(map(lambda x: x[0:-2], self.combinedDF.x))
+        for feature in features:
+            values = self.combinedDF.dataFrame[feature + '-C']
+            result_Y[feature] = values
+        return result_Y, forward_df

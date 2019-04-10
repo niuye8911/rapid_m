@@ -41,7 +41,7 @@ class PModel:
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
         #self.model = LinearRegression()
-        self.model = linear_model.Lasso(alpha=1, max_iter=100000)
+        #self.model = linear_model.Lasso(alpha=1, max_iter=100000)
         #self.model = linear_model.BayesianRidge()
         #self.model =ElasticNet(random_state=0,max_iter=1000000)
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
@@ -77,7 +77,7 @@ class PModel:
             # train 1st order
             linear_model = clone(model)
             linear_model.fit(selected_x_train, y_train)
-            diff, mse = self.validate(self.x_test[feature_names],linear_model)
+            diff, mse = self.validate(self.x_test[feature_names], linear_model)
             if mse < min_mse:
                 selected_features = feature_names
                 selected_poly = False
@@ -91,8 +91,10 @@ class PModel:
             if mse < min_mse:
                 selected_poly = True
                 min_mse = mse
-                self.model= high_model
-        # set all members
+                self.model = high_model
+
+
+# set all members
         self.polyFeature = selected_poly
         self.features = selected_features
         self.modelType = selected_model_name

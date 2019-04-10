@@ -18,13 +18,13 @@ def main(argv):
     options, args = parser.parse_args()
     app_summary = getApp(options.app_summary)
     app_name = app_summary.name
-    m_model = getMModel(options.machine_summary)
+    m_models = getMModel(options.machine_summary)
     observation = getObservation(options.observation, app_name)
     appsys = getAppSys(options.app_sys, app_name)
-    validate(observation, app_summary, appsys, m_model)
+    validate(observation, app_summary, appsys, m_models)
 
 
-def validate(observation, app_summary, appsys, m_model):
+def validate(observation, app_summary, appsys, m_models):
     '''validate the M+P model
     observation: the observated slowdown given an env
     app_summary: containing all the P_model for a specific bucket
@@ -34,7 +34,7 @@ def validate(observation, app_summary, appsys, m_model):
     configs = list(dataFrame['Configuration'])
     y_gt = np.array(dataFrame['SLOWDOWN'].values.tolist())
     # generate the predicted slow-down
-    y_pred = np.array(genPred(observation, app_summary, appsys, m_model))
+    y_pred = np.array(genPred(observation, app_summary, appsys, m_models))
     # validate the diff
     mse = np.sqrt(metrics.mean_squared_error(y_gt, y_pred))
     mae = metrics.mean_absolute_error(y_gt, y_pred)
@@ -45,17 +45,17 @@ def validate(observation, app_summary, appsys, m_model):
     print(mae)
 
 
-def genPred(observation, app_summary, appsys, m_model):
+def genPred(observation, app_summary, appsys, m_models):
     ''' generate the prediction of slow-down'''
     dataFrame = observation.getSubdata()
     y_pred = []
     debug_file = open('./tmp.csv', 'w')
-    debug_file.write(','.join(observation.x)+'\n')
+    debug_file.write(','.join(observation.x) + '\n')
     for index, row in dataFrame.iterrows():
         # take the config
         config = row['Configuration']
         # take the pmodel
-        p_model,features,isPoly = getPModel(config, app_summary)
+        p_model, features, isPoly = getPModel(config, app_summary)
         # take the added env
         added_env = row[observation.x]
         # take the app's footprint
@@ -64,29 +64,40 @@ def genPred(observation, app_summary, appsys, m_model):
         env1 = list(added_env)
         env2 = app_env.values.tolist()
         env = env2[0] + env1
-        env = np.reshape(env, (1, -1))
-        env_poly = PolynomialFeatures(degree=3).fit_transform(env)
+        # format the data
+        distance = int(len(env) / 2)
+        for i in range(0, distance):
+            f1 = env[i]
+            f2 = env[i + distance]
+            env[i] = min(f1, f2)
+            env[i + distance] = max(f1, f2)
+        env_poly = PolynomialFeatures(degree=2).fit_transform([env])
         debug_file.write(','.join(map(lambda x: str(x), env1)))
         debug_file.write('\n')
         debug_file.write(','.join(map(lambda x: str(x), env2[0])))
         debug_file.write('\n')
-        pred_env = m_model.predict(env_poly)[0]
+        # predic the values feature by feature
+        pred_env = []
+        for feature in observation.x:
+            model = m_models[feature]
+            value = model.predict(env_poly)[0]
+            pred_env.append(value)
         debug_file.write(','.join(map(lambda x: str(x), pred_env)))
         debug_file.write('\n')
         # filter out the unwanted env
         # predict the slowdown
-            # prepare data for the P model
+        # prepare data for the P model
         data_x = []
-        for i in range(0,len(observation.x)):
+        for i in range(0, len(observation.x)):
             if observation.x[i] in features:
                 data_x.append(pred_env[i])
+        data_x = [data_x]
         if isPoly:
             data_x = PolynomialFeatures(degree=2).fit_transform(data_x)
-        data_x = np.reshape(data_x, (1,-1))
         pred_slowdown = p_model.predict(data_x)
         y_pred.append(pred_slowdown[0])
-        debug_file.write(str(row['SLOWDOWN'])+',')
-        debug_file.write(str(pred_slowdown)+'\n\n')
+        debug_file.write(str(row['SLOWDOWN']) + ',')
+        debug_file.write(str(pred_slowdown) + '\n\n')
     debug_file.close()
     return y_pred
 
@@ -107,13 +118,16 @@ def getPModel(config, summary):
     if p_model_file == '':
         print("WARNING: no p model found")
         exit(0)
-    return pickle.load(open(p_model_file, 'rb')),features,poly
+    return pickle.load(open(p_model_file, 'rb')), features, poly
 
 
 def getMModel(summary_file):
     machine = Machine(summary_file)
-    mmodelfile = machine.model_params['MModel']['file']
-    return pickle.load(open(mmodelfile, 'rb'))
+    mmodelfiles = machine.model_params['MModelfile']
+    mmodels = {}
+    for feature, fileloc in mmodelfiles.items():
+        mmodels[feature] = pickle.load(open(fileloc, 'rb'))
+    return mmodels
 
 
 def getApp(summary_file):

@@ -28,8 +28,8 @@ class MModelTrainer:
         '''
         # train all data frame
         X = self.machineProfile.getX()
-        Y = self.machineProfile.getY()
-        self.m_model = self.mModelTrain(X, Y)
+        Y_dict, Y_all = self.machineProfile.getY()
+        self.m_model = self.mModelTrain(X, Y_dict, Y_all)
 
     def getMSE(self):
         return self.m_model.mse
@@ -40,10 +40,11 @@ class MModelTrainer:
     def getR2(self):
         return self.m_model.r2
 
-    def mModelTrain(self, X, Y):
+    def mModelTrain(self, X, Y_dict, Y_all):
         mModel = MModel()
         mModel.setX(X)
-        mModel.setY(Y)
+        mModel.setYDict(Y_dict)
+        mModel.setYAll(Y_all)
         mModel.setYLabel(self.machineProfile.getYLabel())
         mModel.train()
         mModel.validate()
@@ -54,7 +55,7 @@ class MModelTrainer:
             # create the dir if not exist
             os.mkdir(dir_name)
 
-        self.m_model.write_to_file(dir_name + "/" + self.host_name + ".pkl")
+        self.m_model.write_to_file(dir_name + "/" + self.host_name)
 
     def dump_into_machine(self, machine_file):
         self.m_model.dump_into_machine(machine_file)

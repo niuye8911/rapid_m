@@ -1,28 +1,40 @@
 {
+  "TRAINED": true,
   "host_name": "example_machine",
   "model_params": {
     "MModel": {
-      "mae": 64.03482248094691,
+      "mae": 0.024156475438009042,
+      "mse": 0.04584694810867011,
       "diff": {
-        "AFREQ-C": 0.009776611158033613,
-        "FREQ-C": 0.015098423947511203,
-        "INST-C": 0.047959171767027214,
-        "INSTnom%-C": 0.04503660201061223,
-        "IPC-C": 0.04633600074379931,
-        "L2HIT-C": 0.2337863468267912,
-        "L2MISS-C": 0.10743041453519031,
-        "L2MPI-C": 0.13047184766236092,
-        "L3HIT-C": 0.054015830037819346,
-        "PhysIPC%-C": 0.045831267936444965,
-        "PhysIPC-C": 0.04365337668959332,
-        "READ-C": 0.49600720767931156,
-        "WRITE-C": 2.6373965692704746
+        "AFREQ-C": 0.022506397939774943,
+        "EXEC-C": 0.03836327987562649,
+        "FREQ-C": 0.026751062925589136,
+        "INST-C": 0.03447413651398208,
+        "INSTnom-C": 0.038388933184059164,
+        "IPC-C": 0.03431217061372168,
+        "L2HIT-C": 0.165835949584012,
+        "L2MPI-C": 0.7218246470040165,
+        "L3HIT-C": 0.00475836348563717,
+        "PhysIPC%-C": 0.034330098766448235,
+        "READ-C": 0.05300559697947109,
+        "WRITE-C": 0.2946183265053675
       },
-      "r2": 0.7761527125710749,
-      "mse": 280.5398042723707,
-      "avg_diff": 0.3009845900203823,
-      "file": "output/machine/example_machine.pkl"
+      "avg_diff": 0.12243074694814217,
+      "r2": 0.683193793463648
+    },
+    "MModelfile": {
+      "L2MPI": "output/machine/example_machine_L2MPI.pkl",
+      "READ": "output/machine/example_machine_READ.pkl",
+      "PhysIPC%": "output/machine/example_machine_PhysIPC%.pkl",
+      "INSTnom": "output/machine/example_machine_INSTnom.pkl",
+      "WRITE": "output/machine/example_machine_WRITE.pkl",
+      "L3HIT": "output/machine/example_machine_L3HIT.pkl",
+      "AFREQ": "output/machine/example_machine_AFREQ.pkl",
+      "INST": "output/machine/example_machine_INST.pkl",
+      "IPC": "output/machine/example_machine_IPC.pkl",
+      "EXEC": "output/machine/example_machine_EXEC.pkl",
+      "L2HIT": "output/machine/example_machine_L2HIT.pkl",
+      "FREQ": "output/machine/example_machine_FREQ.pkl"
     }
-  },
-  "TRAINED": true
+  }
 }

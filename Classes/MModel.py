@@ -8,11 +8,16 @@ from collections import OrderedDict
 from sklearn.preprocessing import PolynomialFeatures
 from Utility import *
 from sklearn import linear_model
+from collections import OrderedDict
+from sklearn.linear_model import LassoCV
+from sklearn.linear_model import ElasticNet
+import pandas as pd
+from Utility import *
 
 
 class MModel:
     def __init__(self):
-        self.model = None
+        self.models = OrderedDict()
         self.TRAINED = False
         self.mse = -1.
         self.mae = -1.
@@ -22,27 +27,56 @@ class MModel:
     def setX(self, X):
         self.xDF = X
 
-    def setY(self, Y):
+    def setYDict(self, Y):
+        self.yDFs = Y
+
+    def setYAll(self, Y):
         self.yDF = Y
 
     def setYLabel(self, features):
         self.features = features
 
+    def trainSingleFeature(self, x, y, feature):
+        RAPID_info("TRAINING", feature)
+        y_feature = y[feature + '-C']
+        model = LassoCV(cv=3, max_iter=1000000).fit(x, y_feature)
+        return model
+
     def train(self):
         x = self.xDF
-        y = self.yDF
+        y = self.yDFs
+        y_all = self.yDF
+        # first get the test data
         x_train, self.x_test, y_train, self.y_test = train_test_split(
-            x, y, test_size=0.3, random_state=101)
-        RAPID_info("TRAINED", x_train.shape[0])
-        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+            x, y_all, test_size=0.3, random_state=101)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.model = linear_model.Lasso(alpha=1, max_iter=1000000)
-        self.model.fit(x_train_poly, y_train)
+        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+        # train the model for each feature individually
+        for feature, values in y.items():
+            model = self.trainSingleFeature(x_train_poly, y_train, feature)
+            self.models[feature] = model
         self.TRAINED = True
 
     def validate(self):
-        y_pred = self.model.predict(self.x_test_poly)
+        debug_file = open('./mmodel_valid.csv', 'w')
+
+        # generate the y_pred for each feature
+        y_pred = {}
+        for feature, values in self.yDFs.items():
+            y_pred_feature = self.models[feature].predict(self.x_test_poly)
+            y_pred[feature] = y_pred_feature
+        y_pred = pd.DataFrame(data=y_pred)
+        #####
+        #debug_file.write(','.join(self.y_test.columns.values) + '\n')
+        #i = 0
+        #for index, row in self.y_test.iterrows():
+        #        debug_file.write(','.join(map(lambda x: str(x), row)) + '\n')
+        #        debug_file.write(','.join(map(lambda x: str(x), y_pred[i])) +
+        #                         '\n\n')
+        #        i += 1
+        #    debug_file.close()
+        #####
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)
@@ -54,7 +88,7 @@ class MModel:
         diffs = []
         feature_diffs = OrderedDict()
         for i in range(0, y_test.shape[0]):
-            yPred = y_pred[i]
+            yPred = y_pred.iloc[i].values
             yTest = y_test.iloc[i].values
             diff = [
                 abs((test - pred) / test) if test != 0 else 0
@@ -77,16 +111,21 @@ class MModel:
         pred_vec = self.model.predict(two_vecs)
         return pred_vec
 
-    def write_to_file(self, output):
+    def write_to_file(self, output_prefix):
         # save the model to disk
-        pickle.dump(self.model, open(output, 'wb'))
-        self.output_loc = output
+        self.outfile = OrderedDict()
+        for feature, model in self.models.items():
+            outfile = output_prefix + '_' + feature + '.pkl'
+            pickle.dump(model, open(outfile, 'wb'))
+            self.outfile[feature] = outfile
 
     def dump_into_machine(self, machine):
         machine.model_params['MModel'] = dict()
-        machine.model_params['MModel']["file"] = self.output_loc
         machine.model_params['MModel']["mse"] = self.mse
         machine.model_params['MModel']["mae"] = self.mae
         machine.model_params['MModel']["r2"] = self.r2
         machine.model_params['MModel']["avg_diff"] = self.avg_diff
         machine.model_params['MModel']["diff"] = self.diff
+        machine.model_params['MModelfile'] = dict()
+        for feature, outfile in self.outfile.items():
+            machine.model_params['MModelfile'][feature] = outfile

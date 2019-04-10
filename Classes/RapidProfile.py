@@ -28,7 +28,8 @@ class RapidProfile:
         'PhysIPC',
         'L2MISS',
         'L3MISS',
-        'INST'
+        'L3MPI',
+        'INSTnom%'  # this can be calculated by instnom /100 * 4
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -63,7 +64,7 @@ class RapidProfile:
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
-    def createScalar(self, writeout=False):
+    def createScalar(self, writeout):
         ''' create a persistent scaler for all data '''
         data = self.dataFrame[self.x]
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
@@ -71,29 +72,31 @@ class RapidProfile:
         if writeout:
             joblib.dump(self.scalar, 'RapidScalar.pkl')
 
-    def loadScalar(self, use_exist=False):
+    def loadScalar(self, writeout):
         ''' load an existing scalar '''
         if not Path(RapidProfile.SCALAR_PATH).is_file():
-            self.createScalar()
+            self.createScalar(writeout)
         self.scalar = joblib.load('RapidScalar.pkl')
 
-
-    def scale(self):
-        self.createScalar()
+    def scale(self, writeout=False):
+        self.loadScalar(writeout)
         self.dataFrame[self.x] = pd.DataFrame(
             self.scalar.transform(self.dataFrame[self.x]))
 
-    def cleanData(self):
+    def cleanData(self, postfix=''):
         ''' clean the PCM data to correct form '''
         # re-calculate the numerical value
         # 1) INST
         #TODO: WHY INST IS SO IMPORTANT
-        self.dataFrame['INST'] = self.dataFrame['ACYC'].div(
-            self.dataFrame['INST'])
+        self.dataFrame['INST' +
+                       postfix] = self.dataFrame['ACYC' + postfix].div(
+                           self.dataFrame['INST' + postfix])
         # 2) INSTnom%
-        self.dataFrame['INSTnom%'] = self.dataFrame['INSTnom%'].apply(lambda x: x/100.0)
+        self.dataFrame['INSTnom' + postfix] = self.dataFrame[
+            'INSTnom' + postfix].apply(lambda x: x / 100.0)
         # 3) PhysIPC%
-        self.dataFrame['PhysIPC%'] = self.dataFrame['PhysIPC%'].apply(lambda x: x/100.0)
+        self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[
+            'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
         # 2) READ / WRITE
         #self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
         #        self.dataFrame['TIME(ticks)'])
