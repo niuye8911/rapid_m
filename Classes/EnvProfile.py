@@ -47,22 +47,48 @@ class EnvProfile(RapidProfile):
         return self.combinedDF.x
 
     def getX(self):
-        forward_df = pd.concat([
+        first_df = pd.concat([
             self.sys1DF.dataFrame[self.sys1DF.x],
             self.sys2DF.dataFrame[self.sys2DF.x]
         ],
-                                axis=1)
-        reverse_df = pd.concat([
-            self.sys2DF.dataFrame[self.sys2DF.x],
-            self.sys1DF.dataFrame[self.sys1DF.x]
-        ],axis=1)
-        concated_df = forward_df.append(reverse_df, ignore_index=True, sort=False)
+                             axis=1)
+        concated_df = self.reformat_dfs(self.sys1DF.dataFrame[self.sys1DF.x],
+                          self.sys2DF.dataFrame[self.sys2DF.x])
+        #second_df = pd.concat([
+    #        self.sys2DF.dataFrame[self.sys2DF.x],
+    #        self.sys1DF.dataFrame[self.sys1DF.x]
+    #    ],
+                            #  axis=1)
+        #concated_df = first_df.append(second_df, ignore_index=True, sort=False)
         return concated_df
+
+    def reformat_dfs(self,df1, df2):
+        ''' reformat the dfs so that we get a symetric matrix where each pair
+        is represented by [smaller, sum] '''
+        # the first row
+        columns = df1.columns.values
+        columns = list(map(lambda x: x[:-2], columns))
+        #first_columns = list(map(lambda x: x+'-smaller', columns))
+        #second_columns = list(map(lambda x: x+'-sum', columns))
+        #columns = first_columns + second_columns
+        # reorder the data
+        combined_df = pd.concat([
+            df1,
+            df2
+        ],
+                             axis=1)
+        for index, row in combined_df.iterrows():
+            for feature in columns:
+                f1 = row[feature+'-1']
+                f2 = row[feature+'-2']
+                row[feature+'-1'] = min(f1,f2)
+                row[feature+'-2'] = max(f1,f2)
+        return combined_df
 
     def getY(self):
         forward_df = self.combinedDF.dataFrame[self.combinedDF.x]
         #print(result_df.shape)
         #return pd.concat([result_df,result_df],axis=0)
-        concated_df = forward_df.append(forward_df, ignore_index=True, sort=False)
-        print(concated_df.shape)
-        return concated_df
+        concated_df = forward_df.append(
+            forward_df, ignore_index=True, sort=False)
+        return forward_df

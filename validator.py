@@ -50,7 +50,7 @@ def genPred(observation, app_summary, appsys, m_model):
     dataFrame = observation.getSubdata()
     y_pred = []
     debug_file = open('./tmp.csv', 'w')
-    debug_file.write(','.join(observation.x))
+    debug_file.write(','.join(observation.x)+'\n')
     for index, row in dataFrame.iterrows():
         # take the config
         config = row['Configuration']
@@ -65,14 +65,14 @@ def genPred(observation, app_summary, appsys, m_model):
         env2 = app_env.values.tolist()
         env = env2[0] + env1
         env = np.reshape(env, (1, -1))
-        env_poly = PolynomialFeatures(degree=2).fit_transform(env)
+        env_poly = PolynomialFeatures(degree=3).fit_transform(env)
         debug_file.write(','.join(map(lambda x: str(x), env1)))
         debug_file.write('\n')
         debug_file.write(','.join(map(lambda x: str(x), env2[0])))
         debug_file.write('\n')
         pred_env = m_model.predict(env_poly)[0]
         debug_file.write(','.join(map(lambda x: str(x), pred_env)))
-        debug_file.write('\n\n')
+        debug_file.write('\n')
         # filter out the unwanted env
         # predict the slowdown
             # prepare data for the P model
@@ -85,6 +85,8 @@ def genPred(observation, app_summary, appsys, m_model):
         data_x = np.reshape(data_x, (1,-1))
         pred_slowdown = p_model.predict(data_x)
         y_pred.append(pred_slowdown[0])
+        debug_file.write(str(row['SLOWDOWN'])+',')
+        debug_file.write(str(pred_slowdown)+'\n\n')
     debug_file.close()
     return y_pred
 

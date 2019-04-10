@@ -24,6 +24,11 @@ class RapidProfile:
         'Configuration',
         'TIME(ticks)',
         'SLOWDOWN',
+        # some features that can be calculated by others
+        'PhysIPC',
+        'L2MISS',
+        'L3MISS',
+        'INST'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -85,6 +90,10 @@ class RapidProfile:
         #TODO: WHY INST IS SO IMPORTANT
         self.dataFrame['INST'] = self.dataFrame['ACYC'].div(
             self.dataFrame['INST'])
+        # 2) INSTnom%
+        self.dataFrame['INSTnom%'] = self.dataFrame['INSTnom%'].apply(lambda x: x/100.0)
+        # 3) PhysIPC%
+        self.dataFrame['PhysIPC%'] = self.dataFrame['PhysIPC%'].apply(lambda x: x/100.0)
         # 2) READ / WRITE
         #self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
         #        self.dataFrame['TIME(ticks)'])
