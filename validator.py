@@ -62,36 +62,26 @@ def genPred(observation, app_summary, appsys, m_models):
         app_env = appsys.getSysByConfig(config)
         # predict the combined env
         env1 = list(added_env)
-        env2 = app_env.values.tolist()
-        env = env2[0] + env1
-        # format the data
-        distance = int(len(env) / 2)
-        for i in range(0, distance):
-            f1 = env[i]
-            f2 = env[i + distance]
-            env[i] = min(f1, f2)
-            env[i + distance] = max(f1, f2)
-        env_poly = PolynomialFeatures(degree=2).fit_transform([env])
-        debug_file.write(','.join(map(lambda x: str(x), env1)))
-        debug_file.write('\n')
-        debug_file.write(','.join(map(lambda x: str(x), env2[0])))
-        debug_file.write('\n')
+        env2 = app_env.values.tolist()[0]
+        env = combineEnvs(env1, env2)
+
         # predic the values feature by feature
         pred_env = []
         for feature in observation.x:
+            if feature not in features:
+                # pass if the feature is not needed
+                pred_env.append('-')
+                continue
             model = m_models[feature]
-            value = model.predict(env_poly)[0]
+            value = model.predict(env)[0]
             pred_env.append(value)
-        debug_file.write(','.join(map(lambda x: str(x), pred_env)))
-        debug_file.write('\n')
+        writeEnvsToDebug(debug_file,env1,env2,pred_env)
+
         # filter out the unwanted env
         # predict the slowdown
         # prepare data for the P model
-        data_x = []
-        for i in range(0, len(observation.x)):
-            if observation.x[i] in features:
-                data_x.append(pred_env[i])
-        data_x = [data_x]
+        filtered_pred_env = list(filter(lambda x: x!='-', pred_env))
+        data_x = [filtered_pred_env]
         if isPoly:
             data_x = PolynomialFeatures(degree=2).fit_transform(data_x)
         pred_slowdown = p_model.predict(data_x)
@@ -101,6 +91,24 @@ def genPred(observation, app_summary, appsys, m_models):
     debug_file.close()
     return y_pred
 
+def combineEnvs(env1, env2):
+    env = env2 + env1
+    # format the data
+    distance = int(len(env) / 2)
+    for i in range(0, distance):
+        f1 = env[i]
+        f2 = env[i + distance]
+        env[i] = min(f1, f2)
+        env[i + distance] = max(f1, f2)
+    return PolynomialFeatures(degree=2).fit_transform([env])
+
+def writeEnvsToDebug(debug_file,env1,env2,env3):
+    debug_file.write(','.join(map(lambda x: str(x), env1)))
+    debug_file.write('\n')
+    debug_file.write(','.join(map(lambda x: str(x), env2)))
+    debug_file.write('\n')
+    debug_file.write(','.join(map(lambda x: str(x), env3)))
+    debug_file.write('\n')
 
 def getPModel(config, summary):
     '''fetch the P-model for a configuration'''

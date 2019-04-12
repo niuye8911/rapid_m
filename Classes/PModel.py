@@ -40,15 +40,13 @@ class PModel:
         x_train, self.x_test, y_train, self.y_test = train_test_split(
             x, y, test_size=0.3, random_state=101)
         RAPID_info("TRAINED", x_train.shape[0])
-        #self.model = LinearRegression()
-        #self.model = linear_model.Lasso(alpha=1, max_iter=100000)
-        #self.model = linear_model.BayesianRidge()
-        #self.model =ElasticNet(random_state=0,max_iter=1000000)
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
         # select the model and features
         self.selectModelAndFeature(x_train, y_train)
+        debug_file = pd.concat([x_train[self.features],y_train],axis=1)
+        debug_file.to_csv('./validate.csv')
         self.TRAINED = True
 
     def selectModelAndFeature(self, x_train, y_train):
