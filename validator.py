@@ -72,8 +72,13 @@ def genPred(observation, app_summary, appsys, m_models):
                 # pass if the feature is not needed
                 pred_env.append('-')
                 continue
-            model = m_models[feature]
-            value = model.predict(env)[0]
+            model = m_models[feature]['model']['model']
+            env_isPoly = m_models[feature]['poly']
+            if env_isPoly:
+                input_env = PolynomialFeatures(degree=2).fit_transform([env])
+            else:
+                input_env = [env]
+            value = model.predict(input_env)[0]
             pred_env.append(value)
         writeEnvsToDebug(debug_file,env1,env2,pred_env)
 
@@ -100,7 +105,7 @@ def combineEnvs(env1, env2):
         f2 = env[i + distance]
         env[i] = min(f1, f2)
         env[i + distance] = max(f1, f2)
-    return PolynomialFeatures(degree=2).fit_transform([env])
+    return env
 
 def writeEnvsToDebug(debug_file,env1,env2,env3):
     debug_file.write(','.join(map(lambda x: str(x), env1)))
@@ -132,9 +137,10 @@ def getPModel(config, summary):
 def getMModel(summary_file):
     machine = Machine(summary_file)
     mmodelfiles = machine.model_params['MModelfile']
+    mmodelpoly = machine.model_params['MModelPoly']
     mmodels = {}
     for feature, fileloc in mmodelfiles.items():
-        mmodels[feature] = pickle.load(open(fileloc, 'rb'))
+        mmodels[feature] = {'model':pickle.load(open(fileloc, 'rb')),'poly':mmodelpoly[feature]}
     return mmodels
 
 

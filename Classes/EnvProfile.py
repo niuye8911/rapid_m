@@ -10,9 +10,10 @@ class EnvProfile(RapidProfile):
     def __init__(self, df, host_name):
         RapidProfile.__init__(self, df)
         self.hostName = host_name
-        self.cleanData()
         self.partitionData()
+        self.cleanData()
         self.cleanFeatures()
+
 
     def partitionData(self):
         ind_len = int(len(self.x) / 3)
@@ -33,9 +34,9 @@ class EnvProfile(RapidProfile):
             list(map(lambda x: x + '-C', RapidProfile.EXCLUDED_FEATURES)))
 
     def cleanData(self):
-        super(EnvProfile, self).cleanData('-1')
-        super(EnvProfile, self).cleanData('-2')
-        super(EnvProfile, self).cleanData('-C')
+        self.sys1DF.cleanData('-1')
+        self.sys2DF.cleanData('-2')
+        self.combinedDF.cleanData('-C')
 
     def scaleAll(self):
         self.sys1DF.scale()
