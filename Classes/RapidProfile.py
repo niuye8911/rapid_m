@@ -29,7 +29,9 @@ class RapidProfile:
         'L2MISS',
         'L3MISS',
         'L3MPI',
-        'INSTnom%'  # this can be calculated by instnom /100 * 4
+        'INSTnom%',  # this can be calculated by instnom /100 * 4
+        'READ',
+        'WRITE',
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
@@ -87,7 +89,6 @@ class RapidProfile:
         ''' clean the PCM data to correct form '''
         # re-calculate the numerical value
         # 1) INST
-        #TODO: WHY INST IS SO IMPORTANT
         self.dataFrame['INST' +
                        postfix] = self.dataFrame['ACYC' + postfix].div(
                            self.dataFrame['INST' + postfix])
@@ -97,8 +98,6 @@ class RapidProfile:
         # 3) PhysIPC%
         self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[
             'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
-        # 2) READ / WRITE
-        #self.dataFrame['READ'] = self.dataFrame['READ'].mul(4200.) / (
-        #        self.dataFrame['TIME(ticks)'])
-        #        self.dataFrame['WRITE'] = self.dataFrame['WRITE'].mul(4200.) / (
-        #            self.dataFrame['TIME(ticks)'])
+        # 4) READ / WRITE, add MEM to the frame
+        self.dataFrame['MEM'+postfix] = self.dataFrame['READ'+postfix]+self.dataFrame['WRITE'+postfix]
+        self.x.append('MEM'+postfix)

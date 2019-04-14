@@ -10,10 +10,18 @@ from Utility import *
 from sklearn import linear_model
 from collections import OrderedDict
 from sklearn.linear_model import LassoCV
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNetCV
 import pandas as pd
 from Utility import *
+from sklearn.base import clone
 
+
+CANDIDATE_MODELS = {
+    'linear': LinearRegression(),
+    'EN': ElasticNetCV(cv=3, max_iter=1000000),
+    'lassoCV':LassoCV(cv=3, max_iter=1000000),
+    'Bayesian':linear_model.BayesianRidge()
+}
 
 class MModel:
     def __init__(self):
@@ -36,35 +44,65 @@ class MModel:
     def setYLabel(self, features):
         self.features = features
 
-    def trainSingleFeature(self, x, y, feature):
+    def chooseModelAndPoly(self,feature):
+        max_r2 = -99
+        selected_model = None
+        poly = False
+        name = ''
+        for model_name, model in CANDIDATE_MODELS.items():
+            tmp_linear_model = clone(model)
+            tmp_poly_model =clone(model)
+            tmp_linear_model.fit(self.x_train,self.y_train[feature+'-C'])
+            tmp_poly_model.fit(self.x_train_poly,self.y_train[feature+'-C'])
+
+            linear_pred = tmp_linear_model.predict(self.x_test)
+            poly_pred = tmp_poly_model.predict(self.x_test_poly)
+            r2_linear = r2_score(self.y_test[feature+'-C'],linear_pred)
+            r2_poly = r2_score(self.y_test[feature+'-C'],poly_pred)
+            print(feature, model_name, r2_linear,r2_poly)
+            if r2_linear > r2_poly and r2_linear > max_r2:
+                selected_model = tmp_linear_model
+                poly = False
+                max_r2 = r2_linear
+                name = model_name
+            elif r2_poly > r2_linear and r2_poly > max_r2:
+                selected_model = tmp_poly_model
+                poly = True
+                max_r2 = r2_poly
+                name = model_name
+        return selected_model, poly, name
+
+    def trainSingleFeature(self,feature):
         RAPID_info("TRAINING", feature)
-        y_feature = y[feature + '-C']
-        model = LassoCV(cv=3, max_iter=1000000).fit(x, y_feature)
-        return model
+        return self.chooseModelAndPoly(feature)
+
 
     def train(self):
         x = self.xDF
         y = self.yDFs
         y_all = self.yDF
         # first get the test data
-        x_train, self.x_test, y_train, self.y_test = train_test_split(
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y_all, test_size=0.3, random_state=101)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+        self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(self.x_train)
         # train the model for each feature individually
         for feature, values in y.items():
-            model = self.trainSingleFeature(x_train_poly, y_train, feature)
-            self.models[feature] = model
+            model,isPoly,model_name = self.trainSingleFeature(feature)
+            self.models[feature] = {'model':model,'isPoly':isPoly,'name':model_name}
         self.TRAINED = True
 
     def validate(self):
         debug_file = open('./mmodel_valid.csv', 'w')
-
         # generate the y_pred for each feature
         y_pred = {}
         for feature, values in self.yDFs.items():
-            y_pred_feature = self.models[feature].predict(self.x_test_poly)
+            print(feature)
+            # check if it's poly
+            isPoly = self.models[feature]['isPoly']
+            input_feature = self.x_test_poly if isPoly else self.x_test
+            y_pred_feature = self.models[feature]['model'].predict(input_feature)
             y_pred[feature] = y_pred_feature
         y_pred = pd.DataFrame(data=y_pred)
         #####
@@ -129,3 +167,6 @@ class MModel:
         machine.model_params['MModelfile'] = dict()
         for feature, outfile in self.outfile.items():
             machine.model_params['MModelfile'][feature] = outfile
+        machine.model_params['MModelPoly'] = dict()
+        for feature, outfile in self.outfile.items():
+            machine.model_params['MModelPoly'][feature] = self.models[feature]['isPoly']
