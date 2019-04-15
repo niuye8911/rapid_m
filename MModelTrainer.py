@@ -50,12 +50,17 @@ class MModelTrainer:
         mModel.validate()
         return mModel
 
+    def printCI(self, dir_name=''):
+        diff_list = pd.DataFrame(data=self.m_model.diffs)
+        diff_list.to_csv(dir_name + '/' + self.host_name + '_diff.csv')
+
     def write_to_file(self, dir_name=''):
         if dir_name != '' and not os.path.isdir(dir_name):
             # create the dir if not exist
             os.mkdir(dir_name)
 
         self.m_model.write_to_file(dir_name + "/" + self.host_name)
+        self.printCI(dir_name)
 
     def dump_into_machine(self, machine_file):
         self.m_model.dump_into_machine(machine_file)

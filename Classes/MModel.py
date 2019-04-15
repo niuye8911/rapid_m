@@ -15,13 +15,13 @@ import pandas as pd
 from Utility import *
 from sklearn.base import clone
 
-
 CANDIDATE_MODELS = {
     'linear': LinearRegression(),
     'EN': ElasticNetCV(cv=3, max_iter=1000000),
-    'lassoCV':LassoCV(cv=3, max_iter=1000000),
-    'Bayesian':linear_model.BayesianRidge()
+    'lassoCV': LassoCV(cv=3, max_iter=1000000),
+    'Bayesian': linear_model.BayesianRidge()
 }
+
 
 class MModel:
     def __init__(self):
@@ -44,22 +44,21 @@ class MModel:
     def setYLabel(self, features):
         self.features = features
 
-    def chooseModelAndPoly(self,feature):
+    def chooseModelAndPoly(self, feature):
         max_r2 = -99
         selected_model = None
         poly = False
         name = ''
         for model_name, model in CANDIDATE_MODELS.items():
             tmp_linear_model = clone(model)
-            tmp_poly_model =clone(model)
-            tmp_linear_model.fit(self.x_train,self.y_train[feature+'-C'])
-            tmp_poly_model.fit(self.x_train_poly,self.y_train[feature+'-C'])
+            tmp_poly_model = clone(model)
+            tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
+            tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
 
             linear_pred = tmp_linear_model.predict(self.x_test)
             poly_pred = tmp_poly_model.predict(self.x_test_poly)
-            r2_linear = r2_score(self.y_test[feature+'-C'],linear_pred)
-            r2_poly = r2_score(self.y_test[feature+'-C'],poly_pred)
-            print(feature, model_name, r2_linear,r2_poly)
+            r2_linear = r2_score(self.y_test[feature + '-C'], linear_pred)
+            r2_poly = r2_score(self.y_test[feature + '-C'], poly_pred)
             if r2_linear > r2_poly and r2_linear > max_r2:
                 selected_model = tmp_linear_model
                 poly = False
@@ -72,10 +71,9 @@ class MModel:
                 name = model_name
         return selected_model, poly, name
 
-    def trainSingleFeature(self,feature):
+    def trainSingleFeature(self, feature):
         RAPID_info("TRAINING", feature)
         return self.chooseModelAndPoly(feature)
-
 
     def train(self):
         x = self.xDF
@@ -86,11 +84,16 @@ class MModel:
             x, y_all, test_size=0.3, random_state=101)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
-        self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(self.x_train)
+        self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(
+            self.x_train)
         # train the model for each feature individually
         for feature, values in y.items():
-            model,isPoly,model_name = self.trainSingleFeature(feature)
-            self.models[feature] = {'model':model,'isPoly':isPoly,'name':model_name}
+            model, isPoly, model_name = self.trainSingleFeature(feature)
+            self.models[feature] = {
+                'model': model,
+                'isPoly': isPoly,
+                'name': model_name
+            }
         self.TRAINED = True
 
     def validate(self):
@@ -98,29 +101,29 @@ class MModel:
         # generate the y_pred for each feature
         y_pred = {}
         for feature, values in self.yDFs.items():
-            print(feature)
             # check if it's poly
             isPoly = self.models[feature]['isPoly']
             input_feature = self.x_test_poly if isPoly else self.x_test
-            y_pred_feature = self.models[feature]['model'].predict(input_feature)
+            y_pred_feature = self.models[feature]['model'].predict(
+                input_feature)
             y_pred[feature] = y_pred_feature
+        features = y_pred.keys()
         y_pred = pd.DataFrame(data=y_pred)
-        #####
-        #debug_file.write(','.join(self.y_test.columns.values) + '\n')
-        #i = 0
-        #for index, row in self.y_test.iterrows():
-        #        debug_file.write(','.join(map(lambda x: str(x), row)) + '\n')
-        #        debug_file.write(','.join(map(lambda x: str(x), y_pred[i])) +
-        #                         '\n\n')
-        #        i += 1
-        #    debug_file.close()
-        #####
+        # get the CI for feature
+        self.getDiffPerFeature(y_pred, self.y_test, features)
         self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
         self.r2 = r2_score(self.y_test, y_pred)
         diffs, avg_diff = self.diffOfTwoMatrix(y_pred, self.y_test)
         self.diff = diffs
         self.avg_diff = avg_diff
+
+    def getDiffPerFeature(self, y_pred, y_test, features):
+        diffs = {}
+        for feature in features:
+            diffs[feature] = (y_pred[feature] - y_test[feature + '-C']) / (
+                y_test[feature + '-C'])
+        self.diffs = diffs
 
     def diffOfTwoMatrix(self, y_pred, y_test):
         diffs = []
@@ -169,4 +172,5 @@ class MModel:
             machine.model_params['MModelfile'][feature] = outfile
         machine.model_params['MModelPoly'] = dict()
         for feature, outfile in self.outfile.items():
-            machine.model_params['MModelPoly'][feature] = self.models[feature]['isPoly']
+            machine.model_params['MModelPoly'][feature] = self.models[feature][
+                'isPoly']
