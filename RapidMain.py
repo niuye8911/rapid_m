@@ -52,9 +52,10 @@ def main(argv):
         # do something about the accuracy
 
     elif flow is Flow.INIT:
+        test = options.test
         # cluster the app profile and check accuracuy
         init(options.app_file, options.app_measurements, options.app_profiles,
-             options.dir)
+             options.dir, options.test)
 
 
 def checkParams(flow, options):
@@ -89,6 +90,9 @@ def genParser():
     parser.add_option('--flow', dest="flow")
     # for server maintainance
     parser.add_option('--dir', dest="dir")
+    parser.add_option(
+        '--test', dest="test", action="store_true",
+        default=False)  #if it's test, then won't modify the app file
     return parser
 
 

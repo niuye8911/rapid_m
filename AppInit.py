@@ -21,9 +21,14 @@ INCREMENTAL = "incremental"
 DIRECT_K = "direct_k"
 
 
-def init(app_file, performance_file, profile_file, directory, DRAW=True):
+def init(app_file,
+         performance_file,
+         profile_file,
+         directory,
+         test=True,
+         DRAW=True):
     # load in the file
-    app = App(app_file)
+    app = App(app_file, not test)
     # check if the app is clustered
     if not app.isClustered():
         RAPID_info("clustering for ", app.name)
