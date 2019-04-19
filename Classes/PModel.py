@@ -45,8 +45,6 @@ class PModel:
             self.x_test)
         # select the model and features
         self.selectModelAndFeature(x_train, y_train)
-        debug_file = pd.concat([x_train[self.features],y_train],axis=1)
-        debug_file.to_csv('./validate.csv')
         self.TRAINED = True
 
     def selectModelAndFeature(self, x_train, y_train):
@@ -147,15 +145,15 @@ class PModel:
             max(observations) - min(observations))
         normed_obs = (observations - min(observations)) / (
             max(observations) - min(observations))
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
-        plt.xlabel('SlowDown Observation')
-        plt.ylabel('Prediction')
         # plot the base line
         x = [0, 1]
         y = [0, 1]
         plt.plot(x, y, 'r-')
         plt.plot(normed_obs, normed_pred, 'x', color='black')
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.xlabel('SlowDown Observation')
+        plt.ylabel('Prediction')
         plt.savefig(output)
 
     def printPrediction(self, outfile):
