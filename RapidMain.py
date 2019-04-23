@@ -57,6 +57,10 @@ def main(argv):
         init(options.app_file, options.app_measurements, options.app_profiles,
              options.dir, options.test)
 
+    elif flow is Flow.GET_BUCKETS:
+        # find the optimal bucket selection for each active application
+        bucketSelect(options.active_apps)
+
 
 def checkParams(flow, options):
     if flow is Flow.TRAIN_SLOWDOWN:  # Rajanya's work starts here

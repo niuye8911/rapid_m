@@ -22,13 +22,24 @@ class PModel:
         'EN': ElasticNet(random_state=0, max_iter=100000)
     }
 
-    def __init__(self):
+    def __init__(self, p_info=''):
         self.model = None
         self.TRAINED = False
         self.mse = -1.
         self.mae = -1.
         self.r2 = -1.
         self.output_loc = ''
+        if p_info is not '':
+            # read from a file
+            self.fromInfo(p_info)
+
+    def fromInfo(self, info):
+        self.model = pickle.load(open(info['file'], 'rb'))
+        self.TRAINED=True
+        self.polyFeature = info['poly']
+        self.model_type = info['model_type']
+        self.feature = info['feature']
+
 
     def setDF(self, dataFrame, feature):
         self.df = dataFrame
