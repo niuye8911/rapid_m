@@ -22,8 +22,6 @@ def bucketSelect(active_apps_file, SELECTOR="P_M"):
 
 def pmSelect(active_apps):
     apps = getActiveApps(active_apps)
-    for app in apps:
-        print(app['app'].name)
 
 
 def getActiveApps(active_apps):
