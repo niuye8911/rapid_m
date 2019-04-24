@@ -35,11 +35,10 @@ class PModel:
 
     def fromInfo(self, info):
         self.model = pickle.load(open(info['file'], 'rb'))
-        self.TRAINED=True
+        self.TRAINED = True
         self.polyFeature = info['poly']
         self.model_type = info['model_type']
         self.feature = info['feature']
-
 
     def setDF(self, dataFrame, feature):
         self.df = dataFrame
@@ -129,8 +128,15 @@ class PModel:
         self.model = pickle.load(open(model_file, 'rb'))
         self.TRAINED = True
 
+    def formulate_env(self, env):
+        ''' given a df (env), filtered out the unwanted feature and get poly '''
+        input = env[self.feature]
+        if self.polyFeature:
+            input = PolynomialFeatures(degree=2).fit_transform([input])
+        return input
+
     def predict(self, system_profile):
-        pred_slowdown = self.model.predict(system_profile)[0]
+        pred_slowdown = self.model.predict(self.formulate_env(system_profile))
         return pred_slowdown
 
     def write_to_file(self, output):
