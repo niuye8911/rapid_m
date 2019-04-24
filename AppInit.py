@@ -40,8 +40,11 @@ def init(app_file,
         pModelTrainer, cluster_list, Z = determine_k_incremental(
             slowDownProfile, appSysProfile, directory, app.name)
 
+        # calculate the average envs
+        rep_env = gen_rep_env(profile_file, cluster_list)
+
         # write cluster info to app
-        write_cluster_info(app, cluster_list)
+        write_cluster_info(app, cluster_list, rep_env)
 
         # write pModels to file
         pModelTrainer.write_to_file(directory)
@@ -59,6 +62,16 @@ def init(app_file,
             draw(Z)
         # write the scaled perf-file to disk
         slowDownProfile.writeOut(app.name + "-perf_scaled.csv")
+
+
+def gen_rep_env(sys_file, cluster_list):
+    sys = pd.read_csv(sys_file)
+    avgs = []
+    for cluster in cluster_list:
+        rows = sys.loc[sys['Configuration'].isin(cluster)]
+        avg = rows.mean(axis=0)
+        avgs.append(avg)
+    return avgs
 
 
 def write_to_file(app_file, app):

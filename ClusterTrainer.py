@@ -70,12 +70,19 @@ def hCluster(data):
     return Z, c
 
 
-def write_cluster_info(app, cluster_info_list):
+def df_to_dict(rep_env):
+    dicts = rep_env.to_dict()
+    return dicts
+
+
+def write_cluster_info(app, cluster_info_list, rep_envs):
     k = len(cluster_info_list)
     cluster_info = OrderedDict()
     for i in range(1, k + 1):
-        cluster_info[get_cluster_name(app.name,
-                                      str(i))] = cluster_info_list[i - 1]
+        cluster_info[get_cluster_name(app.name, str(i))] = {
+            'cluster': cluster_info_list[i - 1],
+            'env': df_to_dict(rep_envs[i - 1])
+        }
     app.cluster_info = cluster_info
     app.num_of_cluster = k
     app.CLUSTERED = True
