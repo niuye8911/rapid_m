@@ -10,10 +10,13 @@ from Classes.PModel import *
 from Classes.SlowDownProfile import *
 from Classes.AppSysProfile import *
 from Classes.Bucket import *
+from Classes.MModel import *
 from Utility import *
 import pandas as pd
 import itertools
 import json
+
+MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 
 
 def bucketSelect(active_apps_file, SELECTOR="P_M"):
@@ -25,6 +28,9 @@ def bucketSelect(active_apps_file, SELECTOR="P_M"):
 
 
 def pmSelect(active_apps):
+    # get the M-Model
+    m_model = MModel(MACHINE_FILE)
+    RAPID_info('M-Model Loader: ', m_model.TRAINED)
     # get all the apps
     apps = getActiveApps(active_apps)
     # get all the P_models {app_name: {bucket_name: model }}
@@ -34,16 +40,41 @@ def pmSelect(active_apps):
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
-    
+    combined_envs = getEnvs(bucket_combs, m_model)
+
+
+def getEnvs(bucket_combs, mmodel):
+    ''' generate the combined env using M-Model '''
+    for comb in bucket_combs:
+        env_dicts = list(map(lambda x: formatEnv(x.rep_env, mmodel.features), comb))
+        print(env_dicts)
+
+
+def formatEnv(env, features):
+    result = []
+    features = list(map(lambda x: x[:-2], features)) # remove the '-C'
+    for feature in features:
+        if feature == 'MEM':
+            result.append(env['READ'] + env['WRITE'])
+        elif feature == 'INST':
+            result.append(env['ACYC'] / env['INST'])
+        elif feature == 'INSTnom' or feature == 'PhysIPC%':
+            result.append(env[feature] / 100.0)
+        else:
+            result.append(env[feature])
+    return list(map(lambda x: float(x),result))
 
 def getBucketCombs(buckets):
     bucket_lists = buckets.values()
     combs = list(itertools.product(*bucket_lists))
+    return combs
     #printBucketCombs(combs)
+
 
 def printBucketCombs(combs):
     names = list(map(lambda x: list(map(lambda y: y.b_name, x)), combs))
     print(names)
+
 
 def genBuckets(apps, models):
     buckets = {}
