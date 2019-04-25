@@ -121,15 +121,16 @@ def getPModel(config, summary):
     models = summary.model_params
     p_model_file = ''
     for name, configs in buckets.items():
-        if config in configs:
+        if config in configs['cluster']:
             # this is the correct bucket
             for target, params in models.items():
                 if target == name:
                     p_model_file = params['file']
                     features = params['feature']
                     poly = params['poly']
+                    break
     if p_model_file == '':
-        print("WARNING: no p model found")
+        print("WARNING: no p model found for config:"+config)
         exit(0)
     return pickle.load(open(p_model_file, 'rb')), features, poly
 
