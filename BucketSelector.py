@@ -12,6 +12,7 @@ from Classes.AppSysProfile import *
 from Classes.Bucket import *
 from Utility import *
 import pandas as pd
+import itertools
 import json
 
 
@@ -30,20 +31,33 @@ def pmSelect(active_apps):
     models = loadAppModels(apps)
     # convert apps to buckets
     buckets = genBuckets(apps, models)
+    # get all combinations of buckets
+    bucket_combs = getBucketCombs(buckets)
+    # predict the overall envs for each comb
 
+def getBucketCombs(buckets):
+    bucket_lists = buckets.values()
+    combs = list(itertools.product(*bucket_lists))
+    #printBucketCombs(combs)
+
+def printBucketCombs(combs):
+    names = list(map(lambda x: list(map(lambda y: y.b_name, x)), combs))
+    print(names)
 
 def genBuckets(apps, models):
     buckets = {}
     for app in apps:
         dir = app['dir']
         app = app['app']
-        buckets[app.name]={}
+        buckets[app.name] = []
         for bucket_name, info in app.cluster_info.items():
-            bucket = Bucket(info['cluster'], models[app.name][bucket_name],
-                            dir + '/cost.csv', dir + '/mv.csv', info['env'])
-            buckets[app.name][bucket_name] = bucket
+            bucket = Bucket(app.name, bucket_name, info['cluster'],
+                            models[app.name][bucket_name], dir + '/cost.csv',
+                            dir + '/mv.csv', info['env'])
+            buckets[app.name].append(bucket)
         RAPID_info("Bucket Loader", "loaded Buckets for " + app.name)
     return buckets
+
 
 def getActiveApps(active_apps):
     '''return a list of App instances from the profile'''
