@@ -6,7 +6,10 @@ import pandas as pd
 
 
 class Bucket:
-    def __init__(self, configurations, p_model, cost_fact, mv_fact, rep_env):
+    def __init__(self, app_name, b_name, configurations, p_model, cost_fact,
+                 mv_fact, rep_env):
+        self.app_name = app_name
+        self.b_name = b_name
         self.configurations = configurations
         self.p_model = p_model
         self.profile = {}
