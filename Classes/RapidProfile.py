@@ -62,7 +62,8 @@ class RapidProfile:
         @param excludes: a vector containing all unwanted feature string
         note that the 'x' has already been cleaned up by cleanData()
         '''
-        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x), excludes, False)
+        match_func = lambda feature: reduce((lambda x, y: (y == feature) or x),
+                                            excludes, False)
         self.x = list(filter(lambda feature: not match_func(feature), self.x))
         return
 
@@ -86,6 +87,7 @@ class RapidProfile:
             self.scalar.transform(self.dataFrame[self.x]))
 
     def cleanData(self, postfix=''):
+        # !!!! REMEMBER TO UPDATE foramtEnv() in BucketSelector
         ''' clean the PCM data to correct form '''
         # re-calculate the numerical value
         # 1) INST
@@ -99,5 +101,6 @@ class RapidProfile:
         self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[
             'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
         # 4) READ / WRITE, add MEM to the frame
-        self.dataFrame['MEM'+postfix] = self.dataFrame['READ'+postfix]+self.dataFrame['WRITE'+postfix]
-        self.x.append('MEM'+postfix)
+        self.dataFrame['MEM' + postfix] = self.dataFrame[
+            'READ' + postfix] + self.dataFrame['WRITE' + postfix]
+        self.x.append('MEM' + postfix)

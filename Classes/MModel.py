@@ -12,6 +12,7 @@ from collections import OrderedDict
 from sklearn.linear_model import LassoCV
 from sklearn.linear_model import ElasticNetCV
 import pandas as pd
+import json
 from Utility import *
 from sklearn.base import clone
 
@@ -24,13 +25,35 @@ CANDIDATE_MODELS = {
 
 
 class MModel:
-    def __init__(self):
+    def __init__(self, file_loc=""):
         self.models = OrderedDict()
         self.TRAINED = False
         self.mse = -1.
         self.mae = -1.
         self.r2 = -1.
         self.output_loc = ''
+        self.features = []
+        if file_loc != "":
+            self.loadFromFile(file_loc)
+
+    def loadFromFile(self, model_file):
+        with open(model_file, 'r') as file:
+            mmodel = json.load(file)
+            # host name
+            self.host_name = mmodel['host_name']
+            if not mmodel['TRAINED']:
+                return
+            model_params = mmodel['model_params']
+            # features
+            self.features = model_params['MModel']['diff'].keys()
+            for feature, file_loc in model_params['MModelfile'].items():
+                self.models[feature] = {
+                    'model': pickle.load(open(file_loc, 'rb')),
+                    'isPoly': model_params['MModelPoly'][feature],
+                    'name': ''
+                }
+            self.TRAINED = True
+        return
 
     def setX(self, X):
         self.xDF = X
@@ -99,7 +122,7 @@ class MModel:
     def validate(self):
         debug_file = open('./mmodel_valid.csv', 'w')
         # generate the y_pred for each feature
-        y_pred = {}
+        y_pred = OrderedDict()
         for feature, values in self.yDFs.items():
             # check if it's poly
             isPoly = self.models[feature]['isPoly']
@@ -144,13 +167,28 @@ class MModel:
             feature_diffs[self.features[i]] = feature_diff[i]
         return feature_diffs, average_diff
 
-    def loadFromFile(self, model_file):
-        self.model = pickle.load(open(model_file, 'rb'))
-        self.TRAINED = True
-
-    def predict(self, two_vecs):
-        pred_vec = self.model.predict(two_vecs)
-        return pred_vec
+    def predict(self, vec1, vec2):
+        if len(vec1) != len(vec2):
+            RAPID_warn('M-Model', "two vecs with different lengths")
+        # assemble the two vecs into a single vec
+        vec = vec1 + vec2
+        # format the vec
+        for i in range(0, len(vec1)):
+            smaller = min(vec1[i], vec2[i])
+            bigger = max(vec1[i], vec2[i])
+            vec[i] = smaller
+            vec[i + len(vec1)] = bigger
+        # predict per-feature
+        vec = [vec]
+        pred = OrderedDict()
+        for feature in self.features:
+            model = self.models[feature]['model']
+            if self.models[feature]['isPoly']:
+                vec = PolynomialFeatures(degree=2).fit_transform(
+                    vec)
+            combined_feature = model.predict(vec)
+            pred[feature] = combined_feature
+        return pd.DataFrame(data=pred)
 
     def write_to_file(self, output_prefix):
         # save the model to disk
