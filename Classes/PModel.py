@@ -136,6 +136,7 @@ class PModel:
         return input
 
     def predict(self, system_profile):
+        ''' the input is a df with all features '''
         pred_slowdown = self.model.predict(self.formulate_env(system_profile))
         return pred_slowdown
 
