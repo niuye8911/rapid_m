@@ -15,8 +15,11 @@ from Utility import *
 import pandas as pd
 import itertools
 import json
+import functools
 
-MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
+#MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
+MACHINE_FILE = '/home/liuliu/Research/rapidBackend/rapid_m_backend_server/examples/example_machine_empty.json'
+DELIMITER = ","  # bucket comb delimiter
 
 
 def bucketSelect(active_apps_file, SELECTOR="P_M"):
@@ -30,29 +33,70 @@ def bucketSelect(active_apps_file, SELECTOR="P_M"):
 def pmSelect(active_apps):
     # get the M-Model
     m_model = MModel(MACHINE_FILE)
+    features = list(map(lambda x: x[:-2], m_model.features))
     RAPID_info('M-Model Loader: ', m_model.TRAINED)
     # get all the apps
     apps = getActiveApps(active_apps)
     # get all the P_models {app_name: {bucket_name: model }}
-    models = loadAppModels(apps)
+    p_models = loadAppModels(apps)
     # convert apps to buckets
-    buckets = genBuckets(apps, models)
+    buckets = genBuckets(apps, p_models)
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
     combined_envs = getEnvs(bucket_combs, m_model)
+    # predict the per-app slow-down
+    slowdowns = getSlowdowns(combined_envs, p_models, features)
+    # get the bucket selection based on slow-down
+
+
+def getSlowdowns(combined_envs, p_models, features):
+    ''' return the slow-down for each app with slow-down '''
+    slowDownTable = {}
+    for comb_name, env in combined_envs.items():
+        buckets = comb_name.split(DELIMITER)
+        comb_slowdown = {}
+        for bucket in buckets:
+            app_name = bucket[:-1]
+            p_model = p_models[app_name][bucket]
+            # tranform the vector to dataframe
+            slowdown = p_model.predict(env_to_frame(env, features))
+            comb_slowdown[app_name] = slowdown[0]
+        slowDownTable[comb_name] = comb_slowdown
+    return slowDownTable
+
+
+def env_to_frame(env, features):
+    result = OrderedDict()
+    i = 0
+    for feature in features:
+        result[feature] = [env[i]]
+        i += 1
+    return pd.DataFrame(data=result)
 
 
 def getEnvs(bucket_combs, mmodel):
     ''' generate the combined env using M-Model '''
+    result = {}
     for comb in bucket_combs:
-        env_dicts = list(map(lambda x: formatEnv(x.rep_env, mmodel.features), comb))
-        print(env_dicts)
+        comb_name = DELIMITER.join((list(map(lambda x: x.b_name, comb))))
+        env_dicts = list(
+            map(lambda x: formatEnv(x.rep_env, mmodel.features), comb))
+        # cumulatively apply M-Model
+        final_env = functools.reduce(lambda x, y: mReducer(x, y, mmodel),
+                                     env_dicts)
+        #print(final_env)
+        result[comb_name] = final_env
+    return result
+
+
+def mReducer(env1, env2, mmodel):
+    return mmodel.predict(env1, env2).values[0]
 
 
 def formatEnv(env, features):
     result = []
-    features = list(map(lambda x: x[:-2], features)) # remove the '-C'
+    features = list(map(lambda x: x[:-2], features))  # remove the '-C'
     for feature in features:
         if feature == 'MEM':
             result.append(env['READ'] + env['WRITE'])
@@ -62,7 +106,8 @@ def formatEnv(env, features):
             result.append(env[feature] / 100.0)
         else:
             result.append(env[feature])
-    return list(map(lambda x: float(x),result))
+    return list(map(lambda x: float(x), result))
+
 
 def getBucketCombs(buckets):
     bucket_lists = buckets.values()
