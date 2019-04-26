@@ -180,13 +180,15 @@ class MModel:
             vec[i + len(vec1)] = bigger
         # predict per-feature
         vec = [vec]
+        vec_poly = PolynomialFeatures(degree=2).fit_transform(vec)
         pred = OrderedDict()
-        for feature in self.features:
-            model = self.models[feature]['model']
+        features = list(map(lambda x: x[:-2], self.features))
+        for feature in features:
+            model = self.models[feature]['model']['model']
+            input = vec
             if self.models[feature]['isPoly']:
-                vec = PolynomialFeatures(degree=2).fit_transform(
-                    vec)
-            combined_feature = model.predict(vec)
+                input = vec_poly
+            combined_feature = model.predict(input)
             pred[feature] = combined_feature
         return pd.DataFrame(data=pred)
 
