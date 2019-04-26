@@ -132,7 +132,7 @@ class PModel:
         ''' given a df (env), filtered out the unwanted feature and get poly '''
         input = env[self.feature]
         if self.polyFeature:
-            input = PolynomialFeatures(degree=2).fit_transform([input])
+            input = PolynomialFeatures(degree=2).fit_transform(input)
         return input
 
     def predict(self, system_profile):
