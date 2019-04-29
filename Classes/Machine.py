@@ -17,6 +17,7 @@ class Machine:
         self.host_name = -1
         self.TRAINED = False
         self.model_params = OrderedDict()
+        self.features = []
         if filePath:
             self.fromFile(filePath)
 

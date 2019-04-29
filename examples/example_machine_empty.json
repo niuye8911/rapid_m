@@ -1,51 +1,135 @@
 {
-  "host_name": "example_machine",
   "TRAINED": true,
+  "features": [
+    "AFREQ",
+    "EXEC",
+    "FREQ",
+    "INST",
+    "INSTnom",
+    "IPC",
+    "L2HIT",
+    "L2MPI",
+    "L3HIT",
+    "PhysIPC%",
+    "MEM"
+  ],
+  "host_name": "example_machine",
   "model_params": {
-    "MModelfile": {
-      "AFREQ": "output/machine/example_machine_AFREQ.pkl",
-      "EXEC": "output/machine/example_machine_EXEC.pkl",
-      "INSTnom": "output/machine/example_machine_INSTnom.pkl",
-      "PhysIPC%": "output/machine/example_machine_PhysIPC%.pkl",
-      "INST": "output/machine/example_machine_INST.pkl",
-      "L3HIT": "output/machine/example_machine_L3HIT.pkl",
-      "MEM": "output/machine/example_machine_MEM.pkl",
-      "FREQ": "output/machine/example_machine_FREQ.pkl",
-      "IPC": "output/machine/example_machine_IPC.pkl",
-      "L2MPI": "output/machine/example_machine_L2MPI.pkl",
-      "L2HIT": "output/machine/example_machine_L2HIT.pkl"
-    },
-    "MModelPoly": {
-      "AFREQ": true,
-      "EXEC": true,
-      "INSTnom": true,
-      "PhysIPC%": true,
-      "INST": true,
-      "L3HIT": true,
-      "MEM": true,
-      "FREQ": true,
-      "IPC": true,
-      "L2MPI": true,
-      "L2HIT": true
-    },
     "MModel": {
-      "mse": 0.056295734555887995,
       "mae": 0.027998124498819478,
       "r2": 0.9388091692698232,
+      "avg_diff": 0.07023694513039697,
+      "mse": 0.056295734555887995,
       "diff": {
-        "AFREQ-C": 0.016149025057301925,
-        "EXEC-C": 0.03164840944070562,
-        "FREQ-C": 0.02253715944719803,
-        "INST-C": 0.025598552423156753,
-        "INSTnom-C": 0.03165159125452178,
         "IPC-C": 0.02579656488133034,
-        "L2HIT-C": 0.09269045190162883,
+        "MEM-C": 0.06139291237177465,
+        "AFREQ-C": 0.016149025057301925,
         "L2MPI-C": 0.3808943590555981,
+        "EXEC-C": 0.03164840944070562,
         "L3HIT-C": 0.05844090360206433,
+        "INSTnom-C": 0.03165159125452178,
+        "L2HIT-C": 0.09269045190162883,
+        "FREQ-C": 0.02253715944719803,
         "PhysIPC%-C": 0.025806466999086213,
-        "MEM-C": 0.06139291237177465
+        "INST-C": 0.025598552423156753
+      }
+    },
+    "Meta": {
+      "AFREQ": {
+        "isPoly": true,
+        "name": "Bayesian",
+        "filepath": "output/machine/example_machine_AFREQ.pkl"
       },
-      "avg_diff": 0.07023694513039697
+      "EXEC": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_EXEC.pkl"
+      },
+      "FREQ": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_FREQ.pkl"
+      },
+      "INST": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_INST.pkl"
+      },
+      "INSTnom": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_INSTnom.pkl"
+      },
+      "IPC": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_IPC.pkl"
+      },
+      "L2HIT": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_L2HIT.pkl"
+      },
+      "L2MPI": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_L2MPI.pkl"
+      },
+      "L3HIT": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_L3HIT.pkl"
+      },
+      "PhysIPC%": {
+        "isPoly": true,
+        "name": "linear",
+        "filepath": "output/machine/example_machine_PhysIPC%.pkl"
+      },
+      "MEM": {
+        "isPoly": true,
+        "name": "Bayesian",
+        "filepath": "output/machine/example_machine_MEM.pkl"
+      }
+    },
+    "MModelfile": {
+      "IPC": "output/machine/example_machine_IPC.pkl",
+      "L2MPI": "output/machine/example_machine_L2MPI.pkl",
+      "MEM": "output/machine/example_machine_MEM.pkl",
+      "FREQ": "output/machine/example_machine_FREQ.pkl",
+      "L3HIT": "output/machine/example_machine_L3HIT.pkl",
+      "L2HIT": "output/machine/example_machine_L2HIT.pkl",
+      "INSTnom": "output/machine/example_machine_INSTnom.pkl",
+      "AFREQ": "output/machine/example_machine_AFREQ.pkl",
+      "PhysIPC%": "output/machine/example_machine_PhysIPC%.pkl",
+      "EXEC": "output/machine/example_machine_EXEC.pkl",
+      "INST": "output/machine/example_machine_INST.pkl"
+    },
+    "Metric": {
+      "avg_diff": 0.07023694513039697,
+      "AFREQ": 0.016149025057301925,
+      "EXEC": 0.03164840944070562,
+      "FREQ": 0.02253715944719803,
+      "INST": 0.025598552423156753,
+      "INSTnom": 0.03165159125452178,
+      "IPC": 0.02579656488133034,
+      "L2HIT": 0.09269045190162883,
+      "L2MPI": 0.3808943590555981,
+      "L3HIT": 0.05844090360206433,
+      "PhysIPC%": 0.025806466999086213,
+      "MEM": 0.06139291237177465
+    },
+    "MModelPoly": {
+      "IPC": true,
+      "L2MPI": true,
+      "MEM": true,
+      "FREQ": true,
+      "L3HIT": true,
+      "L2HIT": true,
+      "INSTnom": true,
+      "AFREQ": true,
+      "PhysIPC%": true,
+      "EXEC": true,
+      "INST": true
     }
   }
 }

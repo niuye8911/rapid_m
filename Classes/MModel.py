@@ -23,6 +23,11 @@ CANDIDATE_MODELS = {
     'Bayesian': linear_model.BayesianRidge()
 }
 
+FEATURES = [
+    'AFREQ', 'EXEC', 'FREQ', 'INST', 'INSTnom', 'IPC', 'L2HIT', 'L2MPI',
+    'L3HIT', 'PhysIPC%', 'MEM'
+]
+
 
 class MModel:
     def __init__(self, file_loc=""):
@@ -45,15 +50,38 @@ class MModel:
                 return
             model_params = mmodel['model_params']
             # features
-            self.features = model_params['MModel']['diff'].keys()
-            for feature, file_loc in model_params['MModelfile'].items():
+            self.features = model_params['features']
+            for feature in self.features:
+                file_loc = model_params['Meta'][feature]['filepath']
                 self.models[feature] = {
                     'model': pickle.load(open(file_loc, 'rb')),
-                    'isPoly': model_params['MModelPoly'][feature],
-                    'name': ''
+                    'isPoly': model_params['Meta'][feature]['isPoly'],
+                    'name': model_params['Meta'][feature]['name']
                 }
             self.TRAINED = True
         return
+
+    def dump_into_machine(self, machine):
+        # write the features
+        machine.features = self.features
+        machine.model_params['Metric'] = OrderedDict()
+        machine.model_params['Meta'] = OrderedDict()
+        #machine.model_params['MModel']["mse"] = self.mse
+        #machine.model_params['MModel']["mae"] = self.mae
+        #machine.model_params['MModel']["r2"] = self.r2
+        machine.model_params['Metric']["avg_diff"] = self.avg_diff
+        for feature in self.features:
+            # write the metric
+            machine.model_params['Metric'][feature] = self.diff[feature]
+            # write the metadata
+            machine.model_params['Meta'][feature] = OrderedDict({
+                'name':
+                self.models[feature]['name'],
+                'isPoly':
+                self.models[feature]['isPoly'],
+                'filepath':
+                self.outfile[feature]
+            })
 
     def setX(self, X):
         self.xDF = X
@@ -65,7 +93,7 @@ class MModel:
         self.yDF = Y
 
     def setYLabel(self, features):
-        self.features = features
+        self.features = list(map(lambda x: x[:-2], features))
 
     def chooseModelAndPoly(self, feature):
         max_r2 = -99
@@ -182,7 +210,7 @@ class MModel:
         vec = [vec]
         vec_poly = PolynomialFeatures(degree=2).fit_transform(vec)
         pred = OrderedDict()
-        features = list(map(lambda x: x[:-2], self.features))
+        features = self.features
         for feature in features:
             model = self.models[feature]['model']['model']
             input = vec
@@ -195,22 +223,8 @@ class MModel:
     def write_to_file(self, output_prefix):
         # save the model to disk
         self.outfile = OrderedDict()
-        for feature, model in self.models.items():
+        for feature in self.features:
+            model = self.models[feature]
             outfile = output_prefix + '_' + feature + '.pkl'
             pickle.dump(model, open(outfile, 'wb'))
             self.outfile[feature] = outfile
-
-    def dump_into_machine(self, machine):
-        machine.model_params['MModel'] = dict()
-        machine.model_params['MModel']["mse"] = self.mse
-        machine.model_params['MModel']["mae"] = self.mae
-        machine.model_params['MModel']["r2"] = self.r2
-        machine.model_params['MModel']["avg_diff"] = self.avg_diff
-        machine.model_params['MModel']["diff"] = self.diff
-        machine.model_params['MModelfile'] = dict()
-        for feature, outfile in self.outfile.items():
-            machine.model_params['MModelfile'][feature] = outfile
-        machine.model_params['MModelPoly'] = dict()
-        for feature, outfile in self.outfile.items():
-            machine.model_params['MModelPoly'][feature] = self.models[feature][
-                'isPoly']
