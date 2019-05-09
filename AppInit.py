@@ -15,7 +15,7 @@ from Utility import *
 import pandas as pd
 
 MAX_ITERATION = 5
-SLOWDOWN_THRESHOLD = .06
+SLOWDOWN_THRESHOLD = .07
 
 INCREMENTAL = "incremental"
 DIRECT_K = "direct_k"

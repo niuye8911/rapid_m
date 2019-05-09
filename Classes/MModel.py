@@ -50,7 +50,7 @@ class MModel:
                 return
             model_params = mmodel['model_params']
             # features
-            self.features = model_params['features']
+            self.features = mmodel['features']
             for feature in self.features:
                 file_loc = model_params['Meta'][feature]['filepath']
                 self.models[feature] = {

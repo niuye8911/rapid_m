@@ -29,7 +29,7 @@ class RapidProfile:
         'L2MISS',
         'L3MISS',
         'L3MPI',
-        'INSTnom%',  # this can be calculated by instnom /100 * 4
+        'INSTnom',  # this can be calculated by instnom /100 * 4
         'READ',
         'WRITE',
     }
@@ -95,7 +95,7 @@ class RapidProfile:
                        postfix] = self.dataFrame['ACYC' + postfix].div(
                            self.dataFrame['INST' + postfix])
         # 2) INSTnom%
-        self.dataFrame['INSTnom' + postfix] = self.dataFrame[
+        self.dataFrame['INSTnom%' + postfix] = self.dataFrame[
             'INSTnom' + postfix].apply(lambda x: x / 100.0)
         # 3) PhysIPC%
         self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[

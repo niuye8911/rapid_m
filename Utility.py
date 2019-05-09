@@ -1,7 +1,11 @@
 from functools import reduce
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
+import pprint
 
+def PPRINT(stuff):
+    pp = pprint.PrettyPrinter(indent=2)
+    pp.pprint(stuff)
 
 def RAPID_warn(prefix, message):
     print("RAPID_LEARNER WARNING: " + str(prefix) + ":" + str(message))

@@ -6,7 +6,8 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 import pandas as pd
-
+from sklearn.linear_model import LassoCV
+from sklearn.linear_model import ElasticNetCV
 from Utility import *
 from sklearn import linear_model
 from sklearn.linear_model import ElasticNet
@@ -18,8 +19,9 @@ from sklearn.base import clone
 class PModel:
     CANDIDATE_MODELS = {
         'linear': LinearRegression(),
-        'lasso': linear_model.Lasso(alpha=1, max_iter=100000),
-        'EN': ElasticNet(random_state=0, max_iter=100000)
+        'EN': ElasticNetCV(cv=3, max_iter=1000000),
+        'lassoCV': LassoCV(cv=3, max_iter=1000000),
+        'Bayesian': linear_model.BayesianRidge()
     }
 
     def __init__(self, p_info=''):
@@ -115,8 +117,8 @@ class PModel:
         if model is None:
             model = self.model
         self.y_pred = model.predict(x)
-        self.mse = np.sqrt(
-            metrics.mean_squared_error(self.y_test, self.y_pred))
+        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test,
+                                                      self.y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
         self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
@@ -159,10 +161,10 @@ class PModel:
     def drawPrediction(self, output):
         predictions = self.y_pred
         observations = self.y_test
-        normed_pred = (predictions - min(observations)) / (
-            max(observations) - min(observations))
-        normed_obs = (observations - min(observations)) / (
-            max(observations) - min(observations))
+        normed_pred = (predictions - min(observations)) / (max(observations) -
+                                                           min(observations))
+        normed_obs = (observations - min(observations)) / (max(observations) -
+                                                           min(observations))
         # plot the base line
         x = [0, 1]
         y = [0, 1]

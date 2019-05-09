@@ -17,8 +17,7 @@ import itertools
 import json
 import functools
 
-#MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
-MACHINE_FILE = '/home/liuliu/Research/rapidBackend/rapid_m_backend_server/examples/example_machine_empty.json'
+MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 DELIMITER = ","  # bucket comb delimiter
 
 
@@ -33,7 +32,7 @@ def bucketSelect(active_apps_file, SELECTOR="P_M"):
 def pmSelect(active_apps):
     # get the M-Model
     m_model = MModel(MACHINE_FILE)
-    features = list(map(lambda x: x[:-2], m_model.features))
+    features = m_model.features
     RAPID_info('M-Model Loader: ', m_model.TRAINED)
     # get all the apps
     apps = getActiveApps(active_apps)
@@ -48,6 +47,7 @@ def pmSelect(active_apps):
     # predict the per-app slow-down
     slowdowns = getSlowdowns(combined_envs, p_models, features)
     # get the bucket selection based on slow-down
+    PPRINT(slowdowns)
 
 
 def getSlowdowns(combined_envs, p_models, features):
@@ -91,18 +91,19 @@ def getEnvs(bucket_combs, mmodel):
 
 
 def mReducer(env1, env2, mmodel):
-    return list(mmodel.predict(env1, env2).values[0])
+    result = mmodel.predict(env1, env2)
+    print(result)
+    return list(result.values[0])
 
 
 def formatEnv(env, features):
     result = []
-    features = list(map(lambda x: x[:-2], features))  # remove the '-C'
     for feature in features:
         if feature == 'MEM':
             result.append(env['READ'] + env['WRITE'])
         elif feature == 'INST':
             result.append(env['ACYC'] / env['INST'])
-        elif feature == 'INSTnom' or feature == 'PhysIPC%':
+        elif feature == 'INSTnom%' or feature == 'PhysIPC%':
             result.append(env[feature] / 100.0)
         else:
             result.append(env[feature])
