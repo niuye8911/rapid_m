@@ -6,8 +6,12 @@
 
 import pandas as pd
 
+BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/appself/'
+APPS = ['ferret','swaptions','bodytrack','facedetect']
+RESULT = './mmodelfile.csv'
 
-def getMModelFile(sysFile, mperfFile, perfFile):
+
+def getMModelFile(sysFile, mperfFile, perfFile, result):
     # get the column names
     columns = pd.read_csv(sysFile).columns.values.tolist()[1:]
     # get all the configs
@@ -19,11 +23,10 @@ def getMModelFile(sysFile, mperfFile, perfFile):
     # get all the overall environment according to the slowdown
     overall_env = getOverallEnv(perfFile, columns)
     # assemble everything into a dataFrame
-    assembleAlltoFile(columns, config_footprint, added_env, overall_env)
+    assembleAlltoFile(columns, config_footprint, added_env, overall_env, result)
 
 
-def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs):
-    result = open('./mmodelfile.csv', 'w')
+def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs, result):
     #write the header
     result.write(','.join(map(lambda x: x + '-1', columns)))
     result.write(',')
@@ -39,7 +42,6 @@ def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs):
                               overall_envs))
         for line in lines:
             result.write(line)
-    result.close()
 
 
 def assemblePerConfig(config, config_footprint, added_envs, overall_envs):
@@ -77,7 +79,10 @@ def getAddedEnv(mperfFile, columns):
         added_envs[config][slowDown] = added_env
     return added_envs
 
-
-getMModelFile('./testData/lighter/ferret-sys.csv',
-              './testData/lighter/ferret-mperf.csv',
-              './testData/lighter/ferret-perf.csv')
+for app in APPS:
+    result = open(RESULT,'w')
+    sys_file = BASE_DIR+app+"-sys.csv"
+    mperf_file = BASE_DIR+app+"-mperf.csv"
+    perf_file = BASE_DIR+app+"-perf.csv"
+    getMModelFile(sys_file, mperf_file,perf_file,result)
+    result.close()
