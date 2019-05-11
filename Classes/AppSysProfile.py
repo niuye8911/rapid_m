@@ -13,7 +13,7 @@ class AppSysProfile(RapidProfile):
 
     def getSysByConfig(self, config):
         return self.dataFrame.loc[self.dataFrame['Configuration'].
-                                  apply(lambda x: x == config), self.x]
+                                  apply(lambda x: x == config)]
 
     def getSubFrameByConfigs(self, configs):
         return self.dataFrame.loc[self.dataFrame['Configuration'].apply(
