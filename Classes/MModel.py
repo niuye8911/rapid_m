@@ -199,7 +199,13 @@ class MModel:
         if len(vec1) != len(vec2):
             RAPID_warn('M-Model', "two vecs with different lengths")
         # assemble the two vecs into a single vec
-        vec = vec1 + vec2
+        try:
+            vec = list(vec1) + list(vec2)
+        except:
+            RAPID_warn('M-Model',"Caught Unexpected Exception, vec1 and vec2 cannot be combined")
+            print('vec1',vec1)
+            print('vec2',vec2)
+            exit(1)
         # format the vec
         for i in range(0, len(vec1)):
             smaller = min(vec1[i], vec2[i])
