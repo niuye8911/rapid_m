@@ -1,0 +1,18 @@
+{
+    "applications": [
+        {
+            "id": "bodytrack",
+            "budget": 0,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-bodytrack",
+            "status": 1
+        },
+        {
+            "id": "swaptions",
+            "budget": 0,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-swaptions",
+            "status": 1
+        }
+    ],
+    "lastload": 1557431305,
+    "compute": null
+}
