@@ -1,29 +1,33 @@
 {
-  "model_type": "LINEAR",
-  "num_of_cluster": 1,
+  "machine_id": 0,
+  "overwrite": false,
   "model_params": {
     "bodytrack1": {
-      "model_type": "Bayesian",
-      "diff": 0.05936183237848009,
-      "mae": 0.085324474820134,
-      "file": "outputs/bodytrack/bodytrack1.pkl",
-      "mse": 0.11499964231759241,
-      "r2": 0.8422107657291895,
+      "poly": true,
+      "model_type": "lassoCV",
+      "diff": 0.02337872337296479,
       "feature": [
         "AFREQ",
         "EXEC",
         "FREQ",
         "INST",
         "INSTnom%",
-        "IPC",
+        "L2HIT",
         "L2MPI",
         "L3HIT",
         "PhysIPC%",
         "MEM"
       ],
-      "poly": true
+      "file": "outputs/bodytrack/bodytrack1.pkl",
+      "mae": 0.031204721873530017,
+      "mse": 0.05780731801044676,
+      "r2": 0.9521320034583094
     }
   },
+  "model_type": "LINEAR",
+  "TRAINED": true,
+  "name": "bodytrack",
+  "num_of_cluster": 1,
   "cluster_info": {
     "bodytrack1": {
       "cluster": [
@@ -74,31 +78,27 @@
         "layer-4-particle-1399"
       ],
       "env": {
-        "INSTnom": 0.6798535497835554,
-        "WRITE": 0.1299732720859778,
-        "L2HIT": 0.7212127040244223,
-        "L3MPI": 3.067799663299333e-05,
-        "READ": 0.44024470819304445,
-        "IPC": 2.327838087221111,
-        "L3MISS": 0.1819316281065,
         "PhysIPC": 4.655420755170667,
+        "READ": 0.44024470819304445,
+        "WRITE": 0.1299732720859778,
+        "INSTnom%": 16.99914163860667,
+        "PhysIPC%": 116.35616289882222,
+        "TIME(ticks)": 2117.406541606889,
         "L2MPI": 0.001536589698573111,
         "EXEC": 0.33992106862273325,
+        "L2HIT": 0.7212127040244223,
+        "FREQ": 0.1462513298060444,
+        "L3HIT": 0.9702470715087552,
+        "INSTnom": 0.6798535497835554,
         "AFREQ": 1.020683751002244,
-        "PhysIPC%": 116.35616289882222,
-        "INSTnom%": 16.99914163860667,
-        "ACYC": 2478.6561087062228,
-        "TIME(ticks)": 2117.406541606889,
         "INST": 5760.111343594666,
         "L2MISS": 8.620719215972889,
-        "L3HIT": 0.9702470715087552,
-        "FREQ": 0.1462513298060444
+        "IPC": 2.327838087221111,
+        "L3MPI": 3.067799663299333e-05,
+        "ACYC": 2478.6561087062228,
+        "L3MISS": 0.1819316281065
       }
     }
   },
-  "TRAINED": true,
-  "overwrite": true,
-  "name": "bodytrack",
-  "machine_id": 0,
   "CLUSTERED": true
 }

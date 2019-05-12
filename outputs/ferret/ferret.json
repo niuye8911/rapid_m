@@ -1,57 +1,9 @@
 {
-  "name": "ferret",
-  "TRAINED": true,
-  "num_of_cluster": 1,
-  "machine_id": 0,
-  "overwrite": true,
-  "model_type": "LINEAR",
-  "model_params": {
-    "ferret1": {
-      "mse": 0.05808415914681486,
-      "file": "outputs/ferret/ferret1.pkl",
-      "poly": true,
-      "mae": 0.044288513310491454,
-      "diff": 0.037242347887972795,
-      "model_type": "linear",
-      "r2": 0.8124052107249943,
-      "feature": [
-        "AFREQ",
-        "EXEC",
-        "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2MPI",
-        "L3HIT",
-        "PhysIPC%",
-        "MEM"
-      ]
-    }
-  },
   "CLUSTERED": true,
+  "machine_id": 0,
+  "model_type": "LINEAR",
   "cluster_info": {
     "ferret1": {
-      "env": {
-        "INSTnom%": 11.345379658383374,
-        "INSTnom": 0.4538255693581629,
-        "WRITE": 0.04584479899930909,
-        "L2MPI": 0.000685456521739131,
-        "READ": 0.8359988354037542,
-        "ACYC": 2292.6931504485506,
-        "FREQ": 0.13506812456866668,
-        "L3MPI": 0.0004282480590062064,
-        "TIME(ticks)": 2120.9751552793114,
-        "INST": 3850.816166321558,
-        "L2HIT": 0.5434908040027501,
-        "L3HIT": 0.38075859213251123,
-        "PhysIPC": 3.3620990338164134,
-        "L3MISS": 1.5922868184955277,
-        "IPC": 1.6810738440302537,
-        "L2MISS": 2.5601046411316304,
-        "AFREQ": 1.0133812974464607,
-        "PhysIPC%": 84.05306504485654,
-        "EXEC": 0.22692864906833327
-      },
       "cluster": [
         "hash-8-itr-7-probe-8",
         "hash-6-itr-25-probe-20",
@@ -329,7 +281,55 @@
         "hash-5-itr-25-probe-12",
         "hash-8-itr-12-probe-4",
         "hash-7-itr-25-probe-2"
-      ]
+      ],
+      "env": {
+        "L3MISS": 1.5922868184955277,
+        "READ": 0.8359988354037542,
+        "L3MPI": 0.0004282480590062064,
+        "INSTnom": 0.4538255693581629,
+        "WRITE": 0.04584479899930909,
+        "INST": 3850.816166321558,
+        "EXEC": 0.22692864906833327,
+        "PhysIPC%": 84.05306504485654,
+        "ACYC": 2292.6931504485506,
+        "PhysIPC": 3.3620990338164134,
+        "L2MISS": 2.5601046411316304,
+        "INSTnom%": 11.345379658383374,
+        "TIME(ticks)": 2120.9751552793114,
+        "L2HIT": 0.5434908040027501,
+        "L3HIT": 0.38075859213251123,
+        "IPC": 1.6810738440302537,
+        "L2MPI": 0.000685456521739131,
+        "FREQ": 0.13506812456866668,
+        "AFREQ": 1.0133812974464607
+      }
     }
-  }
+  },
+  "TRAINED": true,
+  "num_of_cluster": 1,
+  "model_params": {
+    "ferret1": {
+      "poly": true,
+      "mae": 0.02033498406999415,
+      "mse": 0.034421055823026014,
+      "feature": [
+        "AFREQ",
+        "EXEC",
+        "FREQ",
+        "INST",
+        "INSTnom%",
+        "IPC",
+        "L2HIT",
+        "L2MPI",
+        "L3HIT",
+        "MEM"
+      ],
+      "diff": 0.017786943539597064,
+      "model_type": "EN",
+      "r2": 0.9085369610930729,
+      "file": "outputs/ferret/ferret1.pkl"
+    }
+  },
+  "name": "ferret",
+  "overwrite": false
 }
