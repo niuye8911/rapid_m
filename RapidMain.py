@@ -56,7 +56,7 @@ def main(argv):
         test = options.test
         # cluster the app profile and check accuracuy
         init(options.app_file, options.app_measurements, options.app_profiles,
-             options.dir, options.test)
+             options.dir, options.test,options.appname)
 
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
@@ -98,6 +98,7 @@ def genParser():
     parser.add_option(
         '--test', dest="test", action="store_true",
         default=False)  #if it's test, then won't modify the app file
+    parser.add_option('--app', dest="appname",default='')
     return parser
 
 
