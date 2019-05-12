@@ -50,7 +50,7 @@ class PModel:
         x = self.df[self.features]
         y = self.df['SLOWDOWN']
         x_train, self.x_test, y_train, self.y_test = train_test_split(
-            x, y, test_size=0.3, random_state=101)
+            x, y, test_size=0.2, random_state=0)
         RAPID_info("TRAINED", x_train.shape[0])
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
