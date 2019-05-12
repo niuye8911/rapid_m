@@ -96,7 +96,7 @@ class RapidProfile:
                            self.dataFrame['INST' + postfix])
         # 2) INSTnom%
         self.dataFrame['INSTnom%' + postfix] = self.dataFrame[
-            'INSTnom' + postfix].apply(lambda x: x / 100.0)
+            'INSTnom%' + postfix].apply(lambda x: x / 100.0)
         # 3) PhysIPC%
         self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[
             'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
