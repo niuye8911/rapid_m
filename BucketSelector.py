@@ -92,7 +92,6 @@ def getEnvs(bucket_combs, mmodel):
 
 def mReducer(env1, env2, mmodel):
     result = mmodel.predict(env1, env2)
-    print(result)
     return list(result.values[0])
 
 

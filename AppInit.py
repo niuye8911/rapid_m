@@ -26,9 +26,12 @@ def init(app_file,
          profile_file,
          directory,
          test=True,
+         app_name = '',
          DRAW=True):
     # load in the file
     app = App(app_file, not test)
+    if not app_name == '':
+        app.name = app_name
     # check if the app is clustered
     if not app.isClustered():
         RAPID_info("clustering for ", app.name)
