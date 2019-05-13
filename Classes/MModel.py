@@ -217,13 +217,17 @@ class MModel:
         vec_poly = PolynomialFeatures(degree=2).fit_transform(vec)
         pred = OrderedDict()
         features = self.features
+        id = 0
         for feature in features:
             model = self.models[feature]['model']['model']
             input = vec
             if self.models[feature]['isPoly']:
                 input = vec_poly
             combined_feature = model.predict(input)
+            if combined_feature < 0:
+                combined_feature = (vec1[id]+vec2[id])/2.0
             pred[feature] = combined_feature
+            id+=1
         return pd.DataFrame(data=pred)
 
     def write_to_file(self, output_prefix):

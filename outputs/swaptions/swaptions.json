@@ -1,7 +1,34 @@
 {
   "model_type": "LINEAR",
-  "num_of_cluster": 1,
   "name": "swaptions",
+  "TRAINED": true,
+  "overwrite": false,
+  "num_of_cluster": 1,
+  "machine_id": 0,
+  "CLUSTERED": true,
+  "model_params": {
+    "swaptions1": {
+      "model_type": "EN",
+      "file": "outputs/swaptions/swaptions1.pkl",
+      "diff": 0.01593571531825607,
+      "poly": true,
+      "feature": [
+        "AFREQ",
+        "EXEC",
+        "FREQ",
+        "INSTnom%",
+        "IPC",
+        "L2HIT",
+        "L2MPI",
+        "L3HIT",
+        "PhysIPC%",
+        "MEM"
+      ],
+      "mse": 0.032613952094117174,
+      "r2": 0.9693499030675288,
+      "mae": 0.019436381557377355
+    }
+  },
   "cluster_info": {
     "swaptions1": {
       "cluster": [
@@ -18,52 +45,25 @@
       ],
       "env": {
         "EXEC": 0.3402286785427,
-        "L2HIT": 0.94454479598,
-        "ACYC": 2326.47635582,
-        "L3MISS": 0.042605944839849995,
-        "L3MPI": 7.295220164767e-06,
-        "TIME(ticks)": 2120.3426501040003,
-        "IPC": 2.4865938362659996,
-        "INST": 5772.73307741,
-        "PhysIPC": 4.973476772776,
         "PhysIPC%": 124.34439771670002,
         "INSTnom%": 17.01349874914,
-        "FREQ": 0.1370745327237,
         "INSTnom": 0.6803422892226,
-        "READ": 0.3026168205084,
-        "AFREQ": 1.0318829278816999,
+        "INST": 5772.73307741,
+        "L3MISS": 0.042605944839849995,
         "WRITE": 0.022688404574289996,
-        "L2MPI": 5.471341869394001e-05,
+        "AFREQ": 1.0318829278816999,
         "L2MISS": 0.3239215220986,
+        "TIME(ticks)": 2120.3426501040003,
+        "L3MPI": 7.295220164767e-06,
+        "L2HIT": 0.94454479598,
+        "ACYC": 2326.47635582,
+        "READ": 0.3026168205084,
+        "L2MPI": 5.471341869394001e-05,
+        "IPC": 2.4865938362659996,
+        "PhysIPC": 4.973476772776,
+        "FREQ": 0.1370745327237,
         "L3HIT": 0.8075183826489999
       }
     }
-  },
-  "model_params": {
-    "swaptions1": {
-      "model_type": "EN",
-      "r2": 0.9770421151720259,
-      "feature": [
-        "AFREQ",
-        "EXEC",
-        "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2HIT",
-        "L2MPI",
-        "L3HIT",
-        "PhysIPC%"
-      ],
-      "mse": 0.026237169772391513,
-      "diff": 0.012847979847246203,
-      "mae": 0.015496464008493948,
-      "poly": true,
-      "file": "outputs/swaptions/swaptions1.pkl"
-    }
-  },
-  "TRAINED": true,
-  "overwrite": false,
-  "machine_id": 0,
-  "CLUSTERED": true
+  }
 }

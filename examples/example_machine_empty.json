@@ -1,4 +1,90 @@
 {
+  "features": [
+    "AFREQ",
+    "EXEC",
+    "FREQ",
+    "INST",
+    "INSTnom%",
+    "IPC",
+    "L2HIT",
+    "L2MPI",
+    "L3HIT",
+    "PhysIPC%",
+    "MEM"
+  ],
   "host_name": "example_machine",
-  "TRAINED": false 
+  "TRAINED": true,
+  "model_params": {
+    "Metric": {
+      "avg_diff": 0.05278358296135926,
+      "AFREQ": 0.006259298969463168,
+      "EXEC": 0.030429776767858286,
+      "FREQ": 0.022355698283149046,
+      "INST": 0.015092106258778056,
+      "INSTnom%": 0.030456123546400607,
+      "IPC": 0.01748086556249234,
+      "L2HIT": 0.04228222185190849,
+      "L2MPI": 0.2605274743209138,
+      "L3HIT": 0.03906265276362057,
+      "PhysIPC%": 0.017456116207492264,
+      "MEM": 0.09921707804287525
+    },
+    "Meta": {
+      "AFREQ": {
+        "filepath": "outputs/machine/example_machine_AFREQ.pkl",
+        "isPoly": true,
+        "name": "Bayesian"
+      },
+      "EXEC": {
+        "filepath": "outputs/machine/example_machine_EXEC.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "FREQ": {
+        "filepath": "outputs/machine/example_machine_FREQ.pkl",
+        "isPoly": true,
+        "name": "Bayesian"
+      },
+      "INST": {
+        "filepath": "outputs/machine/example_machine_INST.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "INSTnom%": {
+        "filepath": "outputs/machine/example_machine_INSTnom%.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "IPC": {
+        "filepath": "outputs/machine/example_machine_IPC.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "L2HIT": {
+        "filepath": "outputs/machine/example_machine_L2HIT.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "L2MPI": {
+        "filepath": "outputs/machine/example_machine_L2MPI.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "L3HIT": {
+        "filepath": "outputs/machine/example_machine_L3HIT.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "PhysIPC%": {
+        "filepath": "outputs/machine/example_machine_PhysIPC%.pkl",
+        "isPoly": true,
+        "name": "linear"
+      },
+      "MEM": {
+        "filepath": "outputs/machine/example_machine_MEM.pkl",
+        "isPoly": true,
+        "name": "Bayesian"
+      }
+    }
+  }
 }
