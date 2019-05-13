@@ -1,7 +1,6 @@
 **/*.pyc
 *.pkl
 LICENSE
-**/*.csv
 output/*
 .idea/*
 .DS_Store
