@@ -6,6 +6,7 @@
 """
 
 import os
+import scipy.stats
 
 from Classes.MModel import *
 from Classes.Machine import *
@@ -51,8 +52,23 @@ class MModelTrainer:
         return mModel
 
     def printCI(self, dir_name=''):
+        # write diffs raw data to a csv
         diff_list = pd.DataFrame(data=self.m_model.diffs)
-        diff_list.to_csv(dir_name + '/' + self.host_name + '_diff.csv')
+        diff_list.dropna(thresh=1)
+        diff_list.to_csv(dir_name + '/' + self.host_name + '_diff.csv',
+                         index=False)
+        # calculate the CI
+        output = open(dir_name + "/" + self.host_name + "_ci.csv", 'w')
+        for feature in self.m_model.diffs.keys():
+            diff = diff_list[feature].values.tolist()
+            m, ci_upp, ci_low = cal_ci(diff)
+            line = [feature, str(m), str(ci_low), str(ci_upp)]
+            output.write(','.join(line))
+            output.write('\n')
+        output.close()
+        # draw the ci
+        draw_ci(dir_name + "/" + self.host_name + "_ci.csv",
+                dir_name + '/' + self.host_name + "_mmodel")
 
     def write_to_file(self, dir_name=''):
         if dir_name != '' and not os.path.isdir(dir_name):

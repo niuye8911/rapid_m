@@ -133,6 +133,7 @@ class MModel:
         # first get the test data
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y_all, test_size=0.3, random_state=101)
+        print(self.y_test.shape)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
         self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(
@@ -172,8 +173,9 @@ class MModel:
     def getDiffPerFeature(self, y_pred, y_test, features):
         diffs = {}
         for feature in features:
-            diffs[feature] = (y_pred[feature] - y_test[feature + '-C']) / (
-                y_test[feature + '-C'])
+            pred = y_pred[feature].values.tolist()
+            test = y_test[feature + '-C'].values.tolist()
+            diffs[feature] = [(p - t) / t for p, t in zip(pred, test)]
         self.diffs = diffs
 
     def diffOfTwoMatrix(self, y_pred, y_test):
@@ -202,9 +204,12 @@ class MModel:
         try:
             vec = list(vec1) + list(vec2)
         except:
-            RAPID_warn('M-Model',"Caught Unexpected Exception, vec1 and vec2 cannot be combined")
-            print('vec1',vec1)
-            print('vec2',vec2)
+            RAPID_warn(
+                'M-Model',
+                "Caught Unexpected Exception, vec1 and vec2 cannot be combined"
+            )
+            print('vec1', vec1)
+            print('vec2', vec2)
             exit(1)
         # format the vec
         for i in range(0, len(vec1)):
@@ -225,9 +230,9 @@ class MModel:
                 input = vec_poly
             combined_feature = model.predict(input)
             if combined_feature < 0:
-                combined_feature = (vec1[id]+vec2[id])/2.0
+                combined_feature = (vec1[id] + vec2[id]) / 2.0
             pred[feature] = combined_feature
-            id+=1
+            id += 1
         return pd.DataFrame(data=pred)
 
     def write_to_file(self, output_prefix):
