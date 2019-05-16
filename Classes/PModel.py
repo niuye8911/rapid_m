@@ -50,7 +50,7 @@ class PModel:
         x = self.df[self.features]
         y = self.df['SLOWDOWN']
         x_train, self.x_test, y_train, self.y_test = train_test_split(
-            x, y, test_size=0.3, random_state=0)
+            x, y, test_size=0.2, random_state=0)
         RAPID_info("TRAINED", x_train.shape[0])
         x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
@@ -71,7 +71,7 @@ class PModel:
         min_mse = 99999
         selected_model_name = ''
         for model_name, model in PModel.CANDIDATE_MODELS.items():
-            rfe = RFE(model, 10)
+            rfe = RFE(model, 11)
             fit = rfe.fit(x_train_scaled, y_train)
             # get the feature names:
             feature_names = list(

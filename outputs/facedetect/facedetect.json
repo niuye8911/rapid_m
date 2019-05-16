@@ -1,27 +1,55 @@
 {
-  "num_of_cluster": 1,
+  "model_params": {
+    "facedetect1": {
+      "file": "outputs/facedetect/facedetect1.pkl",
+      "diff": 0.016712398453895456,
+      "model_type": "linear",
+      "poly": true,
+      "r2": 0.9883159310942798,
+      "mae": 0.027615815572635413,
+      "mse": 0.052958765560548286,
+      "feature": [
+        "AFREQ",
+        "EXEC",
+        "FREQ",
+        "INST",
+        "INSTnom%",
+        "IPC",
+        "L2HIT",
+        "L2MPI",
+        "L3HIT",
+        "PhysIPC%",
+        "MEM"
+      ]
+    }
+  },
+  "name": "facedetect",
+  "machine_id": 0,
+  "overwrite": false,
+  "CLUSTERED": true,
+  "model_type": "LINEAR",
   "cluster_info": {
     "facedetect1": {
       "env": {
+        "INST": 7050.6751183471115,
         "INSTnom": 0.8377880339509219,
         "READ": 0.6278267197924555,
-        "IPC": 0.8804880256731447,
-        "TIME(ticks)": 2102.986413089334,
-        "FREQ": 0.47620183330627774,
-        "L3HIT": 0.9265937518050333,
         "L3MPI": 4.859776068728998e-05,
-        "WRITE": 0.2156269420246333,
-        "ACYC": 8015.681354646001,
-        "L2MISS": 5.423638735945666,
-        "AFREQ": 0.7576276699087998,
-        "L3MISS": 0.29455386099824443,
-        "INSTnom%": 20.945678854917773,
-        "INST": 7050.6751183471115,
-        "L2HIT": 0.9694860626986443,
-        "PhysIPC": 1.761090994577556,
+        "PhysIPC%": 44.02418323343999,
         "L2MPI": 0.0007758300923842889,
+        "INSTnom%": 20.945678854917773,
+        "L2HIT": 0.9694860626986443,
+        "L3HIT": 0.9265937518050333,
+        "AFREQ": 0.7576276699087998,
+        "L2MISS": 5.423638735945666,
+        "WRITE": 0.2156269420246333,
+        "FREQ": 0.47620183330627774,
+        "ACYC": 8015.681354646001,
+        "PhysIPC": 1.761090994577556,
         "EXEC": 0.41891267956387784,
-        "PhysIPC%": 44.02418323343999
+        "TIME(ticks)": 2102.986413089334,
+        "IPC": 0.8804880256731447,
+        "L3MISS": 0.29455386099824443
       },
       "cluster": [
         "eyes-2-pyramid-9-selectivity-2",
@@ -118,32 +146,5 @@
     }
   },
   "TRAINED": true,
-  "overwrite": false,
-  "name": "facedetect",
-  "CLUSTERED": true,
-  "machine_id": 0,
-  "model_type": "LINEAR",
-  "model_params": {
-    "facedetect1": {
-      "mae": 0.030554508964352498,
-      "mse": 0.05891075760117372,
-      "diff": 0.01880249797448605,
-      "poly": true,
-      "file": "outputs/facedetect/facedetect1.pkl",
-      "feature": [
-        "AFREQ",
-        "EXEC",
-        "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2HIT",
-        "L2MPI",
-        "PhysIPC%",
-        "MEM"
-      ],
-      "model_type": "Bayesian",
-      "r2": 0.9853371166961594
-    }
-  }
+  "num_of_cluster": 1
 }

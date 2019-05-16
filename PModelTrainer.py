@@ -100,7 +100,7 @@ class PModelTrainer:
             model.drawPrediction(dir_name + "/" + self.app_name + str(id) +
                                  ".png")
             model.printPrediction(dir_name + "/" + self.app_name + str(id) +
-                                 ".csv")
+                                  ".csv")
             id += 1
         self.printCI(dir_name)
 
@@ -109,12 +109,11 @@ class PModelTrainer:
         diff_list = list(map(lambda x: x.diffs, self.p_models))
         for i in diff_list:
             diffs = diffs + i
-        n = len(diffs)
-        m, se = np.mean(diffs), scipy.stats.sem(diffs)
-        h = se * scipy.stats.t.ppf((1 + 0.95) / 2., n-1)
-        ci_upp = m+h
-        ci_low = m-h
-        print(m,ci_low,ci_upp)
+        m, ci_upp, ci_low = cal_ci(diffs)
+        output = open(dir_name + "/" + self.app_name + "_ci.csv",'w')
+        line = [self.app_name, str(m), str(ci_low), str(ci_upp)]
+        output.write(",".join(line))
+        output.close()
 
     def dump_into_app(self, app):
         id = 1

@@ -37,6 +37,6 @@ def trainEnv(machine_file, machine_measurements, directory, DRAW=True):
         write_to_file(machine_file, machine)
 
 
-def write_to_file(app_file, app):
-    with open(app_file, 'w') as output:
-        json.dump(app.__dict__, output, indent=2)
+def write_to_file(machine_file, machine):
+    with open(machine_file, 'w') as output:
+        json.dump(machine.__dict__, output, indent=2)

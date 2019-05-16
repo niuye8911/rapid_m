@@ -1,4 +1,5 @@
 from functools import reduce
+import numpy as np
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pprint
