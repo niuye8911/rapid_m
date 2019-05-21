@@ -14,6 +14,13 @@ from sklearn.linear_model import ElasticNet
 from sklearn import preprocessing
 from sklearn.feature_selection import RFE
 from sklearn.base import clone
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 
 
 class PModel:
@@ -56,8 +63,36 @@ class PModel:
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
         # select the model and features
-        self.selectModelAndFeature(x_train, y_train)
+        #self.selectModelAndFeature(x_train, y_train)
+        self.nnTrain(x,y)
         self.TRAINED = True
+
+    def nnTrain(self, X, Y):
+        # use neural net for training
+        seed = 7
+        np.random.seed(seed)
+        estimators = []
+        estimators.append(('standardize', StandardScaler()))
+        estimators.append(('mlp', KerasRegressor(build_fn=self.initNNModel, epochs=100, batch_size=5, verbose=0)))
+        pipeline = Pipeline(estimators)
+        kfold = KFold(n_splits=10, random_state=seed)
+        pipeline.fit(X,Y)
+        scores = pipeline.evaluate(X,Y)
+        print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+        #results = cross_val_score(pipeline, X,Y,cv=kfold)
+        #print(results)
+        #print("Results: %.2f (%.2f) MSE" % (results.mean(), results.std()))
+
+    def initNNModel(self):
+        model = Sequential()
+        model.add(
+            Dense(12,
+                  input_dim=11,
+                  kernel_initializer='normal',
+                  activation='relu'))
+        model.add(Dense(1,kernel_initializer='normal'))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        return model
 
     def selectModelAndFeature(self, x_train, y_train):
         # use the validate process to pick the most important 10 linear features
