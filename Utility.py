@@ -1,11 +1,15 @@
 from functools import reduce
+import numpy as np
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pprint
+import scipy.stats
+
 
 def PPRINT(stuff):
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(stuff)
+
 
 def RAPID_warn(prefix, message):
     print("RAPID_LEARNER WARNING: " + str(prefix) + ":" + str(message))
@@ -17,6 +21,41 @@ def RAPID_info(prefix, message):
 
 def not_none(values):
     return reduce(lambda x, y: x and y, values, True)
+
+
+def cal_ci(values):
+    n = len(values)
+    m, se = np.mean(values), scipy.stats.sem(values)
+    h = se * scipy.stats.t.ppf((1 + 0.95) / 2., n - 1)
+    ci_upp = m + h
+    ci_low = m - h
+    return m, ci_upp, ci_low
+
+
+def draw_ci(ci_file, output):
+    names = []
+    ci_lows = []
+    ci_upps = []
+    means = []
+    with open(ci_file) as f:
+        for line in f:
+            items = line.split(',')
+            names.append(items[0])
+            means.append(float(items[1]))
+            ci_lows.append(float(items[1]) - float(items[2]))
+            ci_upps.append(float(items[3]) - float(items[1]))
+    (_, caps, _) = plt.errorbar(range(len(names)),
+                                means,
+                                yerr=[ci_lows, ci_upps],
+                                fmt='o',
+                                ecolor='g',
+                                capsize=10)
+    for cap in caps:
+        cap.set_markeredgewidth(1)
+    plt.xticks(range(len(names)), names, fontsize='15', rotation=30)
+    plt.ylabel('Prediction MRE', fontsize='15')
+    plt.ylim(0.0, 0.15)
+    plt.savefig(output + '.png')
 
 
 # view of Dendrogram with only the last 30 clusters and distances marked
@@ -38,12 +77,11 @@ def simplified_dendrogram(*args, **kwargs):
             y = d[1]
             if y > annotate_above:
                 plt.plot(x, y, 'o', c=c)
-                plt.annotate(
-                    "%.3f" % y, (x, y),
-                    xytext=(0, -5),
-                    textcoords='offset points',
-                    va='top',
-                    ha='center')
+                plt.annotate("%.3f" % y, (x, y),
+                             xytext=(0, -5),
+                             textcoords='offset points',
+                             va='top',
+                             ha='center')
         if max_d:
             plt.axhline(y=max_d, c='k')
     return ddata

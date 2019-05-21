@@ -1,7 +1,7 @@
 import pandas as pd
 
 BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/appself/'
-APPS = ['ferret','swaptions','bodytrack','facedetect']
+APPS = ['ferret','swaptions','bodytrack','facedetect','nn']
 
 HEADER_DONE = False
 

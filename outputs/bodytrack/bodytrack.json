@@ -1,10 +1,55 @@
 {
-  "machine_id": 0,
-  "model_type": "LINEAR",
   "num_of_cluster": 1,
   "name": "bodytrack",
+  "overwrite": false,
+  "machine_id": 0,
+  "model_params": {
+    "bodytrack1": {
+      "file": "outputs/bodytrack/bodytrack1.pkl",
+      "r2": 0.9296647954681123,
+      "feature": [
+        "AFREQ",
+        "EXEC",
+        "FREQ",
+        "INST",
+        "INSTnom%",
+        "IPC",
+        "L2HIT",
+        "L2MPI",
+        "L3HIT",
+        "PhysIPC%",
+        "MEM"
+      ],
+      "mse": 0.07451845612356042,
+      "mae": 0.03879349802544086,
+      "model_type": "linear",
+      "diff": 0.027610254810225193,
+      "poly": true
+    }
+  },
   "cluster_info": {
     "bodytrack1": {
+      "env": {
+        "PhysIPC%": 116.35616289882222,
+        "INSTnom%": 16.99914163860667,
+        "READ": 0.44024470819304445,
+        "L2MISS": 8.620719215972889,
+        "IPC": 2.327838087221111,
+        "TIME(ticks)": 2117.406541606889,
+        "L3MPI": 3.067799663299333e-05,
+        "FREQ": 0.1462513298060444,
+        "INST": 5760.111343594666,
+        "L2HIT": 0.7212127040244223,
+        "L3HIT": 0.9702470715087552,
+        "EXEC": 0.33992106862273325,
+        "L2MPI": 0.001536589698573111,
+        "INSTnom": 0.6798535497835554,
+        "ACYC": 2478.6561087062228,
+        "WRITE": 0.1299732720859778,
+        "L3MISS": 0.1819316281065,
+        "AFREQ": 1.020683751002244,
+        "PhysIPC": 4.655420755170667
+      },
       "cluster": [
         "layer-5-particle-100",
         "layer-2-particle-2266",
@@ -51,54 +96,10 @@
         "layer-3-particle-533",
         "layer-1-particle-1399",
         "layer-4-particle-1399"
-      ],
-      "env": {
-        "WRITE": 0.1299732720859778,
-        "L3MPI": 3.067799663299333e-05,
-        "INST": 5760.111343594666,
-        "READ": 0.44024470819304445,
-        "L2MISS": 8.620719215972889,
-        "FREQ": 0.1462513298060444,
-        "EXEC": 0.33992106862273325,
-        "IPC": 2.327838087221111,
-        "INSTnom%": 16.99914163860667,
-        "TIME(ticks)": 2117.406541606889,
-        "ACYC": 2478.6561087062228,
-        "AFREQ": 1.020683751002244,
-        "L3MISS": 0.1819316281065,
-        "L3HIT": 0.9702470715087552,
-        "L2HIT": 0.7212127040244223,
-        "L2MPI": 0.001536589698573111,
-        "PhysIPC%": 116.35616289882222,
-        "INSTnom": 0.6798535497835554,
-        "PhysIPC": 4.655420755170667
-      }
+      ]
     }
   },
-  "model_params": {
-    "bodytrack1": {
-      "mae": 0.03879349802544089,
-      "model_type": "Bayesian",
-      "r2": 0.9296647954681123,
-      "mse": 0.07451845612356045,
-      "file": "outputs/bodytrack/bodytrack1.pkl",
-      "poly": true,
-      "feature": [
-        "AFREQ",
-        "EXEC",
-        "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2HIT",
-        "L2MPI",
-        "L3HIT",
-        "MEM"
-      ],
-      "diff": 0.027610254810225218
-    }
-  },
-  "overwrite": false,
-  "CLUSTERED": true,
-  "TRAINED": true
+  "model_type": "LINEAR",
+  "TRAINED": true,
+  "CLUSTERED": true
 }
