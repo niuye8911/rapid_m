@@ -6,11 +6,12 @@
 
 import pandas as pd
 
-BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/appself/'
-APPS = ['ferret','swaptions','bodytrack','facedetect']
+BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/halfandhalf/'
+APPS = ['ferret', 'swaptions', 'bodytrack', 'svm', 'nn']
 RESULT = './mmodelfile.csv'
 
 HEADER_DONE = False
+
 
 def getMModelFile(sysFile, mperfFile, perfFile, result):
     # get the column names
@@ -24,10 +25,12 @@ def getMModelFile(sysFile, mperfFile, perfFile, result):
     # get all the overall environment according to the slowdown
     overall_env = getOverallEnv(perfFile, columns)
     # assemble everything into a dataFrame
-    assembleAlltoFile(columns, config_footprint, added_env, overall_env, result)
+    assembleAlltoFile(columns, config_footprint, added_env, overall_env,
+                      result)
 
 
-def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs, result):
+def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs,
+                      result):
     global HEADER_DONE
     #write the header
     if not HEADER_DONE:
@@ -53,6 +56,9 @@ def assemblePerConfig(config, config_footprint, added_envs, overall_envs):
     lines = []
     for slowdown, added_env in added_envs[config].items():
         sys2 = added_env
+        if slowdown not in overall_envs[config]:
+            # broken in perf
+            continue
         sysC = overall_envs[config][slowdown]
         line = sys1 + sys2 + sysC
         line = list(map(lambda x: str(x), line))
@@ -78,16 +84,24 @@ def getAddedEnv(mperfFile, columns):
         config = row['Configuration']
         slowDown = float(row['SLOWDOWN'])
         added_env = row[columns].values.tolist()
+        if -1 in added_env or len(added_env)!=len(columns):
+            # broken line
+            continue
         if config not in added_envs:
             added_envs[config] = {}
         added_envs[config][slowDown] = added_env
     return added_envs
 
-result = open(RESULT,'w')
+
+result = open(RESULT, 'w')
 for app in APPS:
-    for type in ['small','big']:
-        sys_file = BASE_DIR+app+"-sys-"+type+".csv"
-        mperf_file = BASE_DIR+app+"-mperf-"+type+".csv"
-        perf_file = BASE_DIR+app+"-perf-"+type+".csv"
-        getMModelFile(sys_file, mperf_file,perf_file,result)
+    #for type in ['small','big']:
+    #    sys_file = BASE_DIR+app+"-sys-"+type+".csv"
+    #    mperf_file = BASE_DIR+app+"-mperf-"+type+".csv"
+    #    perf_file = BASE_DIR+app+"-perf-"+type+".csv"
+    #    getMModelFile(sys_file, mperf_file,perf_file,result)
+    sys_file = BASE_DIR + app + "-sys.csv"
+    mperf_file = BASE_DIR + app + "-mperf.csv"
+    perf_file = BASE_DIR + app + "-perf.csv"
+    getMModelFile(sys_file, mperf_file, perf_file, result)
 result.close()

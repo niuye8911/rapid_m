@@ -15,13 +15,14 @@ import pandas as pd
 import json
 from Utility import *
 from sklearn.base import clone
-
-CANDIDATE_MODELS = {
-    'linear': LinearRegression(),
-    'EN': ElasticNetCV(cv=3, max_iter=1000000),
-    'lassoCV': LassoCV(cv=3, max_iter=1000000),
-    'Bayesian': linear_model.BayesianRidge()
-}
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from models.ModelPool import *
 
 FEATURES = [
     'AFREQ', 'EXEC', 'FREQ', 'INST', 'INSTnom', 'IPC', 'L2HIT', 'L2MPI',
@@ -38,10 +39,12 @@ class MModel:
         self.r2 = -1.
         self.output_loc = ''
         self.features = []
+        self.modelPool = ModelPool()
         if file_loc != "":
             self.loadFromFile(file_loc)
 
     def loadFromFile(self, model_file):
+        # TODO, load model
         with open(model_file, 'r') as file:
             mmodel = json.load(file)
             # host name
@@ -99,28 +102,61 @@ class MModel:
         max_r2 = -99
         selected_model = None
         poly = False
-        name = ''
-        for model_name, model in CANDIDATE_MODELS.items():
-            tmp_linear_model = clone(model)
-            tmp_poly_model = clone(model)
+        for model_name in self.modelPool.CANDIDATE_MODELS:
+            tmp_linear_model = self.modelPool.get(model_name)
+            tmp_poly_model = self.modelPool.get(model_name)
             tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
             tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
 
-            linear_pred = tmp_linear_model.predict(self.x_test)
-            poly_pred = tmp_poly_model.predict(self.x_test_poly)
-            r2_linear = r2_score(self.y_test[feature + '-C'], linear_pred)
-            r2_poly = r2_score(self.y_test[feature + '-C'], poly_pred)
+            r2_linear = tmp_linear_model.validate(self.x_test,
+                                                  self.y_test[feature + '-C'])
+            r2_poly = tmp_poly_model.validate(self.x_test_poly,
+                                              self.y_test[feature + '-C'])
             if r2_linear > r2_poly and r2_linear > max_r2:
                 selected_model = tmp_linear_model
                 poly = False
                 max_r2 = r2_linear
-                name = model_name
             elif r2_poly > r2_linear and r2_poly > max_r2:
                 selected_model = tmp_poly_model
                 poly = True
                 max_r2 = r2_poly
-                name = model_name
-        return selected_model, poly, name
+        # if accuracy is still not good, try NN
+        #if max_r2 < 0.8:
+        #    print('use NN to boost accuracy')
+        #    scores = self.nnTrain(self.x_train, self.y_train[feature + '-C'])
+        #    poly = True
+        #    name = 'NN'
+        #    model = None
+        return selected_model, poly
+
+    def nnTrain(self, X, Y):
+        # use neural net for training
+        seed = 7
+        np.random.seed(seed)
+        estimators = []
+        estimators.append(('standardize', StandardScaler()))
+        estimators.append(('mlp',
+                           KerasRegressor(build_fn=self.initNNModel,
+                                          epochs=100,
+                                          batch_size=5,
+                                          verbose=0)))
+        pipeline = Pipeline(estimators)
+        kfold = KFold(n_splits=10, random_state=seed)
+        pipeline.fit(X, Y)
+        scores = pipeline.evaluate(X, Y)
+        return scores
+        print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+
+    def initNNModel(self):
+        model = Sequential()
+        model.add(
+            Dense(40,
+                  input_dim=20,
+                  kernel_initializer='normal',
+                  activation='relu'))
+        model.add(Dense(1, kernel_initializer='normal'))
+        model.compile(loss='mean_squared_error', optimizer='adam')
+        return model
 
     def trainSingleFeature(self, feature):
         RAPID_info("TRAINING", feature)
@@ -140,7 +176,7 @@ class MModel:
             self.x_train)
         # train the model for each feature individually
         for feature, values in y.items():
-            model, isPoly, model_name = self.trainSingleFeature(feature)
+            model, isPoly = self.trainSingleFeature(feature)
             self.models[feature] = {
                 'model': model,
                 'isPoly': isPoly,
@@ -224,7 +260,7 @@ class MModel:
         features = self.features
         id = 0
         for feature in features:
-            model = self.models[feature]['model']['model']
+            model = self.models[feature]['model']
             input = vec
             if self.models[feature]['isPoly']:
                 input = vec_poly
@@ -239,7 +275,7 @@ class MModel:
         # save the model to disk
         self.outfile = OrderedDict()
         for feature in self.features:
-            model = self.models[feature]
+            model = self.models[feature]['model']
             outfile = output_prefix + '_' + feature + '.pkl'
-            pickle.dump(model, open(outfile, 'wb'))
+            model.save(outfile)
             self.outfile[feature] = outfile
