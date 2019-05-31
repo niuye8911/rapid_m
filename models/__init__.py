@@ -1,3 +1,4 @@
 __all__ = [
-    "ModelPool","RapidModel", "RapidBayesian", "RapidEN", "RapidLasso", "RapidLinear"
+    "ModelPool", "RapidModel", "RapidNN", "RapidBayesian", "RapidEN",
+    "RapidLasso", "RapidLinear"
 ]

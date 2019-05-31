@@ -52,9 +52,9 @@ def draw_ci(ci_file, output):
                                 capsize=10)
     for cap in caps:
         cap.set_markeredgewidth(1)
-    plt.xticks(range(len(names)), names, fontsize='15', rotation=30)
+    plt.xticks(range(len(names)), names, fontsize='10', rotation=30)
     plt.ylabel('Prediction MRE', fontsize='15')
-    plt.ylim(0.0, 0.15)
+    plt.ylim(0.0, 0.35)
     plt.savefig(output + '.png')
 
 

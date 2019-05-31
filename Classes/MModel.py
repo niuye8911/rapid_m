@@ -104,31 +104,34 @@ class MModel:
         poly = False
         for model_name in self.modelPool.CANDIDATE_MODELS:
             if model_name is not 'NN':
-                continue
-            tmp_linear_model = self.modelPool.getModel(model_name)
-            tmp_poly_model = self.modelPool.getModel(model_name)
-            tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
-            tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
+                tmp_linear_model = self.modelPool.getModel(model_name)
+                tmp_poly_model = self.modelPool.getModel(model_name)
+                tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
+                tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
 
-            r2_linear = tmp_linear_model.validate(self.x_test,
+                r2_linear = tmp_linear_model.validate(self.x_test,
+                                                      self.y_test[feature + '-C'])
+                r2_poly = tmp_poly_model.validate(self.x_test_poly,
                                                   self.y_test[feature + '-C'])
-            r2_poly = tmp_poly_model.validate(self.x_test_poly,
-                                              self.y_test[feature + '-C'])
-            if r2_linear > r2_poly and r2_linear > max_r2:
-                selected_model = tmp_linear_model
+                if r2_linear > r2_poly and r2_linear > max_r2:
+                    selected_model = tmp_linear_model
+                    poly = False
+                    max_r2 = r2_linear
+                elif r2_poly > r2_linear and r2_poly > max_r2:
+                    selected_model = tmp_poly_model
+                    poly = True
+                    max_r2 = r2_poly
+            else:
+                # if accuracy is enough, skip NN
+                if max_r2 > 0.8:
+                    continue
+                # NN does not need to check high order
+                nn_model = self.modelPool.getModel('NN')
+                nn_model.fit(self.x_train, self.y_train[feature+'-C'])
+                r2 = nn_model.validate(self.x_test, self.y_test[feature+'-C'])
+                selected_model = nn_model
                 poly = False
-                max_r2 = r2_linear
-            elif r2_poly > r2_linear and r2_poly > max_r2:
-                selected_model = tmp_poly_model
-                poly = True
-                max_r2 = r2_poly
-        # if accuracy is still not good, try NN
-        #if max_r2 < 0.8:
-        #    print('use NN to boost accuracy')
-        #    scores = self.nnTrain(self.x_train, self.y_train[feature + '-C'])
-        #    poly = True
-        #    name = 'NN'
-        #    model = None
+                max_r2 = r2
         return selected_model, poly
 
     def nnTrain(self, X, Y):
@@ -139,7 +142,7 @@ class MModel:
         estimators.append(('standardize', StandardScaler()))
         estimators.append(('mlp',
                            KerasRegressor(build_fn=self.initNNModel,
-                                          epochs=100,
+                                          epochs=30,
                                           batch_size=5,
                                           verbose=0)))
         pipeline = Pipeline(estimators)

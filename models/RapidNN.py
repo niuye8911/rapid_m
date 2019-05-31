@@ -77,9 +77,9 @@ class RapidNN(RapidModel):
         estimators.append((RapidNN.SCALER, StandardScaler()))
         estimators.append((RapidNN.REGRESSER,
                            KerasRegressor(build_fn=self.initNNModel,
-                                          epochs=100,
-                                          batch_size=5,
-                                          verbose=0)))
+                                          epochs=30,
+                                          batch_size=10,
+                                          verbose=2)))
         pipeline = Pipeline(estimators)
         kfold = KFold(n_splits=10, random_state=seed)
         pipeline.fit(X, Y)

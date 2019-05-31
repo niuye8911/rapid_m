@@ -6,7 +6,6 @@ from models.RapidNN import *
 
 
 class ModelPool:
-    #CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian','NN']
     CANDIDATE_MODELS = ['linear', 'EN', 'lassoCV', 'Bayesian', 'NN']
 
     def getModel(self, name):
@@ -22,4 +21,4 @@ class ModelPool:
         elif name == 'Bayesian':
             return RapidBayesian()
         elif name == 'NN':
-            return RapidNN()  # todo
+            return RapidNN()
