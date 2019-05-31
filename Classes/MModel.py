@@ -103,6 +103,8 @@ class MModel:
         selected_model = None
         poly = False
         for model_name in self.modelPool.CANDIDATE_MODELS:
+            if model_name is not 'NN':
+                continue
             tmp_linear_model = self.modelPool.getModel(model_name)
             tmp_poly_model = self.modelPool.getModel(model_name)
             tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
@@ -169,7 +171,6 @@ class MModel:
         # first get the test data
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y_all, test_size=0.3, random_state=101)
-        print(self.y_test.shape)
         self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_test)
         self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(
@@ -276,6 +277,6 @@ class MModel:
         self.outfile = OrderedDict()
         for feature in self.features:
             model = self.models[feature]['model']
-            outfile = output_prefix + '_' + feature + '.pkl'
+            outfile = output_prefix + '_' + feature
             model.save(outfile)
             self.outfile[feature] = outfile

@@ -2,13 +2,16 @@ from models.RapidBayesian import *
 from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
+from models.RapidNN import *
+
 
 class ModelPool:
     #CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian','NN']
-    CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian']
+    CANDIDATE_MODELS = ['linear', 'EN', 'lassoCV', 'Bayesian', 'NN']
+
     def getModel(self, name):
         if name not in self.CANDIDATE_MODELS:
-            print('not supported model:'+name)
+            print('not supported model:' + name)
             return None
         if name == 'linear':
             return RapidLinear()
@@ -19,4 +22,4 @@ class ModelPool:
         elif name == 'Bayesian':
             return RapidBayesian()
         elif name == 'NN':
-            return None # todo
+            return RapidNN()  # todo

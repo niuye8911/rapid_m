@@ -5,6 +5,7 @@ from sklearn.metrics import r2_score
 from models.RapidModel import *
 import pickle
 
+
 class RapidLinear(RapidModel):
     def __init__(self, name='LinearRegression', file_path=''):
         RapidModel.__init__(self, name, file_path)
@@ -33,5 +34,5 @@ class RapidLinear(RapidModel):
         r2 = r2_score(Y, pred)
         return r2
 
-    def save(self,file_path):
-        pickle.dump(self.model, open(file_path, 'wb'))
+    def save(self, file_path_prefix):
+        pickle.dump(self.model, open(file_path_prefix + '.pkl', 'wb'))

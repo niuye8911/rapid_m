@@ -9,7 +9,7 @@ from functools import reduce
 
 class RapidModel:
     def __init__(self, name='', file_path=''):
-        self.name = ''
+        self.name = name
         self.train_x = None
         self.train_y = None
         self.model = None
