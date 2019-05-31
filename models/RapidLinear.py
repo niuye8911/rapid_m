@@ -30,8 +30,8 @@ class RapidLinear(RapidModel):
         if self.model is None:
             return -1
         pred = self.model.predict(X)
-        r2_score = r2_score(Y, pred)
-        return r2_score
+        r2 = r2_score(Y, pred)
+        return r2
 
     def save(self,file_path):
         pickle.dump(self.model, open(file_path, 'wb'))

@@ -103,8 +103,8 @@ class MModel:
         selected_model = None
         poly = False
         for model_name in self.modelPool.CANDIDATE_MODELS:
-            tmp_linear_model = self.modelPool.get(model_name)
-            tmp_poly_model = self.modelPool.get(model_name)
+            tmp_linear_model = self.modelPool.getModel(model_name)
+            tmp_poly_model = self.modelPool.getModel(model_name)
             tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
             tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
 
@@ -180,7 +180,7 @@ class MModel:
             self.models[feature] = {
                 'model': model,
                 'isPoly': isPoly,
-                'name': model_name
+                'name': model.name
             }
         self.TRAINED = True
 

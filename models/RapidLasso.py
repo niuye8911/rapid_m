@@ -2,13 +2,13 @@
 
 from sklearn import linear_model
 from sklearn.linear_model import LassoCV
-from models.Linear import *
+from models.RapidLinear import *
 
 
-class RapidLasso(Linear):
+class RapidLasso(RapidLinear):
 
     def __init__(self, file_path=''):
-        Linear.__init__(self,"LassoCV",file_path)
+        RapidLinear.__init__(self,"LassoCV",file_path)
 
     def fit(self, X, Y):
         ''' train the model '''

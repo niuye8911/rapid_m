@@ -4,7 +4,8 @@ from models.RapidLasso import *
 from models.RapidLinear import *
 
 class ModelPool:
-    CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian','NN']
+    #CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian','NN']
+    CANDIDATE_MODELS = ['linear','EN','lassoCV','Bayesian']
     def getModel(self, name):
         if name not in self.CANDIDATE_MODELS:
             print('not supported model:'+name)
