@@ -17,6 +17,7 @@ from MachineInit import trainEnv
 from BucketSelector import bucketSelect
 from Utility import not_none
 
+DEBUG = False
 
 # flows supported by this learner
 class Flow(Enum):
@@ -28,8 +29,10 @@ class Flow(Enum):
 
 
 def main(argv):
+    global DEBUG
     parser = genParser()
     options, args = parser.parse_args()
+    DEBUG = options.debug
     # determine modes and pass params to different routine
     flow = next(filter(lambda x: x.value == options.flow, Flow))
 
@@ -49,7 +52,7 @@ def main(argv):
     elif flow is Flow.TRAIN_ENV:
         # train the environment predictor by calling Liu's work
         trainEnv(options.machine_file, options.machine_measurements,
-                 options.dir)
+                 options.dir, TEST=DEBUG)
         # do something about the accuracy
 
     elif flow is Flow.INIT:
@@ -99,6 +102,9 @@ def genParser():
         '--test', dest="test", action="store_true",
         default=False)  #if it's test, then won't modify the app file
     parser.add_option('--app', dest="appname",default='')
+    parser.add_option(
+        '-d', dest="debug", action="store_true",
+        default=False)  #if it's test, then won't modify the app file
     return parser
 
 

@@ -98,21 +98,33 @@ class MModel:
     def setYLabel(self, features):
         self.features = list(map(lambda x: x[:-2], features))
 
-    def chooseModelAndPoly(self, feature):
+    def chooseModelAndPoly(self, feature, TEST=False):
+        ''' if TEST is set to True, then use all models '''
         max_r2 = -99
         selected_model = None
         poly = False
+        training_time = OrderedDict()
         for model_name in self.modelPool.CANDIDATE_MODELS:
             if model_name is not 'NN':
                 tmp_linear_model = self.modelPool.getModel(model_name)
                 tmp_poly_model = self.modelPool.getModel(model_name)
-                tmp_linear_model.fit(self.x_train, self.y_train[feature + '-C'])
-                tmp_poly_model.fit(self.x_train_poly, self.y_train[feature + '-C'])
 
-                r2_linear = tmp_linear_model.validate(self.x_test,
-                                                      self.y_test[feature + '-C'])
+                time_linear = tmp_linear_model.fit(
+                    self.x_train, self.y_train[feature + '-C'])
+                time_high = tmp_poly_model.fit(self.x_train_poly,
+                                               self.y_train[feature + '-C'])
+                r2_linear = tmp_linear_model.validate(
+                    self.x_test, self.y_test[feature + '-C'])
                 r2_poly = tmp_poly_model.validate(self.x_test_poly,
                                                   self.y_test[feature + '-C'])
+                training_time[model_name+'-1'] = {
+                    'time': time_linear,
+                    'r2': r2_linear
+                }
+                training_time[model_name+'-2'] = {
+                    'time': time_high,
+                    'r2': r2_poly
+                }
                 if r2_linear > r2_poly and r2_linear > max_r2:
                     selected_model = tmp_linear_model
                     poly = False
@@ -123,16 +135,20 @@ class MModel:
                     max_r2 = r2_poly
             else:
                 # if accuracy is enough, skip NN
-                if max_r2 > 0.8:
+                if max_r2 > 0.8 and TEST is False:
                     continue
                 # NN does not need to check high order
                 nn_model = self.modelPool.getModel('NN')
-                nn_model.fit(self.x_train, self.y_train[feature+'-C'])
-                r2 = nn_model.validate(self.x_test, self.y_test[feature+'-C'])
+                time_nn = nn_model.fit(self.x_train,
+                                       self.y_train[feature + '-C'])
+                r2 = nn_model.validate(self.x_test,
+                                       self.y_test[feature + '-C'])
+                training_time['nn'] = {'time': time_nn, 'r2': r2}
                 selected_model = nn_model
                 poly = False
                 max_r2 = r2
-        return selected_model, poly
+        # print the training time into the debug file
+        return selected_model, poly, training_time
 
     def nnTrain(self, X, Y):
         # use neural net for training
@@ -163,11 +179,11 @@ class MModel:
         model.compile(loss='mean_squared_error', optimizer='adam')
         return model
 
-    def trainSingleFeature(self, feature):
+    def trainSingleFeature(self, feature, TEST=False):
         RAPID_info("TRAINING", feature)
-        return self.chooseModelAndPoly(feature)
+        return self.chooseModelAndPoly(feature, TEST)
 
-    def train(self):
+    def train(self, TEST=False):
         x = self.xDF
         y = self.yDFs
         y_all = self.yDF
@@ -179,13 +195,17 @@ class MModel:
         self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(
             self.x_train)
         # train the model for each feature individually
+        debug_info = OrderedDict()
         for feature, values in y.items():
-            model, isPoly = self.trainSingleFeature(feature)
+            model, isPoly, training_time = self.trainSingleFeature(
+                feature, TEST)
             self.models[feature] = {
                 'model': model,
                 'isPoly': isPoly,
                 'name': model.name
             }
+            debug_info[feature] = training_time
+        printTrainingInfo(debug_info)
         self.TRAINED = True
 
     def validate(self):

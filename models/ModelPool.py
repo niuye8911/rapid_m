@@ -6,7 +6,7 @@ from models.RapidNN import *
 
 
 class ModelPool:
-    CANDIDATE_MODELS = ['linear', 'EN', 'lassoCV', 'Bayesian', 'NN']
+    CANDIDATE_MODELS = ['linear', 'lassoCV', 'EN','Bayesian', 'NN']
 
     def getModel(self, name):
         if name not in self.CANDIDATE_MODELS:

@@ -4,7 +4,37 @@ from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pprint
 import scipy.stats
+import json
 
+def printTrainingInfo(d):
+    time_output = open('./training_time.csv','w')
+    acc_output = open('./training_acc.csv','w')
+    # get all features
+    features = list(d.keys())
+    # get all the models
+    tmp = features[0]
+    print(d,features,tmp)
+    models = list(d[tmp].keys())
+    # write the header
+    time_output.write('feature,'+','.join(models)+'\n')
+    acc_output.write('feature,'+','.join(models)+'\n')
+    for feature in features:
+        time_line = []
+        time_line.append(feature)
+        acc_line = []
+        acc_line.append(feature)
+        for model in models:
+            time_line.append(str(d[feature][model]['time']))
+            acc_line.append(str(d[feature][model]['r2']))
+        time_output.write(feature+','+','.join(time_line)+'\n')
+        acc_output.write(feature+','+','.join(acc_line)+'\n')
+    time_output.close()
+    acc_output.close()
+
+
+def printDicToFile(d, f):
+    output = open(f,'w')
+    json.dump(d,output,indent=2)
 
 def PPRINT(stuff):
     pp = pprint.PrettyPrinter(indent=2)

@@ -11,6 +11,7 @@ from sklearn.metrics import r2_score
 from models.RapidModel import *
 import pickle
 import numpy as np
+import time
 
 
 class RapidNN(RapidModel):
@@ -31,7 +32,11 @@ class RapidNN(RapidModel):
         ''' train the model '''
         if self.model is None:
             self.input_dim = X.shape[1]
+            time1 = time.time()
             self.model = self.nnTrain(X, Y)
+            time2 = time.time()
+            return time2 - time1
+        return -1
         # note: self.model is now a pipe line
 
     def predict(self, x):

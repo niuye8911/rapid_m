@@ -3,6 +3,7 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from models.RapidModel import *
+import time
 import pickle
 
 
@@ -19,7 +20,11 @@ class RapidLinear(RapidModel):
         ''' train the model '''
         if self.model is None:
             self.model = LinearRegression()
+            time1 = time.time()
             self.model.fit(X, Y)
+            time2 = time.time()
+            return time2 - time1
+        return -1
 
     def predict(self, x):
         ''' predict the result '''

@@ -14,7 +14,7 @@ import pandas as pd
 import json
 
 
-def trainEnv(machine_file, machine_measurements, directory, DRAW=True):
+def trainEnv(machine_file, machine_measurements, directory, DRAW=True, TEST=False):
     # load in the file
     machine = Machine(machine_file)
     # check if the machine is trained
@@ -23,7 +23,7 @@ def trainEnv(machine_file, machine_measurements, directory, DRAW=True):
         # read in the machine measurement file
         envProfile = EnvProfile(
             pd.read_csv(machine_measurements), machine.host_name)
-        mModelTrainer = MModelTrainer(machine.host_name, envProfile)
+        mModelTrainer = MModelTrainer(machine.host_name, envProfile, TEST)
         mModelTrainer.train()
 
         # write mModel to file

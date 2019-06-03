@@ -14,7 +14,7 @@ from Utility import *
 
 
 class MModelTrainer:
-    def __init__(self, host_name, machineProfile):
+    def __init__(self, host_name, machineProfile, TEST=False):
         '''
         :param host_name: the name of the machine
         :param machineProfile: formatted data of environment
@@ -22,6 +22,7 @@ class MModelTrainer:
         self.host_name = host_name
         self.machineProfile = machineProfile
         self.m_model = None
+        self.TEST = TEST
 
     def train(self):
         '''
@@ -47,7 +48,7 @@ class MModelTrainer:
         mModel.setYDict(Y_dict)
         mModel.setYAll(Y_all)
         mModel.setYLabel(self.machineProfile.getYLabel())
-        mModel.train()
+        mModel.train(self.TEST)
         mModel.validate()
         return mModel
 
