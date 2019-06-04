@@ -29,7 +29,7 @@ class RapidNN(RapidModel):
     def fromFile(self, file_path):
         full_path_scaler = file_path + '_scaler.pkl'
         full_path_regressor = file_path + '_regresser.h5'
-        estimators = joblib.load(full_path_scaler)
+        estimator = joblib.load(full_path_scaler)
         estimator.named_steps[RapidNN.REGRESSER].model = load_model(
             full_path_regressor)
         self.model = estimator
@@ -38,6 +38,7 @@ class RapidNN(RapidModel):
         ''' train the model '''
         if self.model is None:
             self.input_dim = X.shape[1]
+            print(self.input_dim)
             time1 = time.time()
             self.model = self.nnTrain(X, Y)
             time2 = time.time()

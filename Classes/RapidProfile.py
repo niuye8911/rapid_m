@@ -32,6 +32,8 @@ class RapidProfile:
         'INSTnom',  # this can be calculated by instnom /100 * 4
         'READ',
         'WRITE',
+        'stresser',
+        'L2MPI'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'

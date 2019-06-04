@@ -13,7 +13,7 @@ class RapidLinear(RapidModel):
             self.model = None
 
     def fromFile(self, file_path):
-        self.model = pickle.load(open(file_path, 'rb'))
+        self.model = pickle.load(open(file_path+'.pkl', 'rb'))
 
     def fit(self, X, Y):
         ''' train the model '''

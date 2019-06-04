@@ -1,12 +1,14 @@
 {
-  "num_of_cluster": 1,
   "name": "bodytrack",
-  "overwrite": false,
   "machine_id": 0,
+  "model_type": "LINEAR",
   "model_params": {
     "bodytrack1": {
       "file": "outputs/bodytrack/bodytrack1.pkl",
-      "r2": 0.9296647954681123,
+      "mse": 0.04481593119230665,
+      "mae": 0.02684695153046094,
+      "diff": 0.02456146119775548,
+      "r2": 0.5860511409983211,
       "feature": [
         "AFREQ",
         "EXEC",
@@ -14,42 +16,20 @@
         "INST",
         "INSTnom%",
         "IPC",
-        "L2HIT",
         "L2MPI",
         "L3HIT",
         "PhysIPC%",
         "MEM"
       ],
-      "mse": 0.07451845612356042,
-      "mae": 0.03879349802544086,
-      "model_type": "linear",
-      "diff": 0.027610254810225193,
-      "poly": true
+      "poly": true,
+      "model_type": "EN"
     }
   },
+  "TRAINED": true,
+  "CLUSTERED": true,
+  "num_of_cluster": 1,
   "cluster_info": {
     "bodytrack1": {
-      "env": {
-        "PhysIPC%": 116.35616289882222,
-        "INSTnom%": 16.99914163860667,
-        "READ": 0.44024470819304445,
-        "L2MISS": 8.620719215972889,
-        "IPC": 2.327838087221111,
-        "TIME(ticks)": 2117.406541606889,
-        "L3MPI": 3.067799663299333e-05,
-        "FREQ": 0.1462513298060444,
-        "INST": 5760.111343594666,
-        "L2HIT": 0.7212127040244223,
-        "L3HIT": 0.9702470715087552,
-        "EXEC": 0.33992106862273325,
-        "L2MPI": 0.001536589698573111,
-        "INSTnom": 0.6798535497835554,
-        "ACYC": 2478.6561087062228,
-        "WRITE": 0.1299732720859778,
-        "L3MISS": 0.1819316281065,
-        "AFREQ": 1.020683751002244,
-        "PhysIPC": 4.655420755170667
-      },
       "cluster": [
         "layer-5-particle-100",
         "layer-2-particle-2266",
@@ -84,8 +64,8 @@
         "layer-1-particle-1833",
         "layer-3-particle-4000",
         "layer-1-particle-533",
-        "layer-1-particle-100",
         "layer-1-particle-3133",
+        "layer-1-particle-100",
         "layer-2-particle-4000",
         "layer-4-particle-533",
         "layer-1-particle-2266",
@@ -96,10 +76,28 @@
         "layer-3-particle-533",
         "layer-1-particle-1399",
         "layer-4-particle-1399"
-      ]
+      ],
+      "env": {
+        "ACYC": 2326.000165956,
+        "AFREQ": 1.0500336638746666,
+        "EXEC": 0.32571277738597776,
+        "FREQ": 0.13750866069659995,
+        "INST": 5510.488064549555,
+        "INSTnom": 0.6514452572119332,
+        "INSTnom%": 16.282153983637777,
+        "IPC": 2.3728729328406666,
+        "L2MISS": 6.6045792357248905,
+        "L2MPI": 0.0012265244607248891,
+        "L3HIT": 0.9863890809952888,
+        "L3MISS": 0.06423588201704444,
+        "L3MPI": 1.124885870357089e-05,
+        "PhysIPC": 4.745909200893332,
+        "PhysIPC%": 118.66170686608224,
+        "READ": 0.09471520893703557,
+        "TIME(ticks)": 2114.540684152667,
+        "WRITE": 0.03527647195723332
+      }
     }
   },
-  "model_type": "LINEAR",
-  "TRAINED": true,
-  "CLUSTERED": true
+  "overwrite": false
 }

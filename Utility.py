@@ -40,6 +40,7 @@ def printTrainingInfo(d):
     output.write('\nmse\n')
     output.write('\n'.join(mse))
     output.write('\ndiff\n')
+    output.write('\n'.join(diff))
     output.close()
 
 

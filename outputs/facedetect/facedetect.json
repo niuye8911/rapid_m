@@ -1,13 +1,14 @@
 {
+  "name": "facedetect",
+  "machine_id": 0,
+  "model_type": "LINEAR",
   "model_params": {
     "facedetect1": {
       "file": "outputs/facedetect/facedetect1.pkl",
-      "diff": 0.016712398453895456,
-      "model_type": "linear",
-      "poly": true,
-      "r2": 0.9883159310942798,
-      "mae": 0.027615815572635413,
-      "mse": 0.052958765560548286,
+      "mse": 0.017914153361728358,
+      "mae": 0.010821669307097971,
+      "diff": 0.009878540404692914,
+      "r2": 0.9133551406095292,
       "feature": [
         "AFREQ",
         "EXEC",
@@ -15,42 +16,20 @@
         "INST",
         "INSTnom%",
         "IPC",
-        "L2HIT",
         "L2MPI",
         "L3HIT",
         "PhysIPC%",
         "MEM"
-      ]
+      ],
+      "poly": true,
+      "model_type": "linear"
     }
   },
-  "name": "facedetect",
-  "machine_id": 0,
-  "overwrite": false,
+  "TRAINED": true,
   "CLUSTERED": true,
-  "model_type": "LINEAR",
+  "num_of_cluster": 1,
   "cluster_info": {
     "facedetect1": {
-      "env": {
-        "INST": 7050.6751183471115,
-        "INSTnom": 0.8377880339509219,
-        "READ": 0.6278267197924555,
-        "L3MPI": 4.859776068728998e-05,
-        "PhysIPC%": 44.02418323343999,
-        "L2MPI": 0.0007758300923842889,
-        "INSTnom%": 20.945678854917773,
-        "L2HIT": 0.9694860626986443,
-        "L3HIT": 0.9265937518050333,
-        "AFREQ": 0.7576276699087998,
-        "L2MISS": 5.423638735945666,
-        "WRITE": 0.2156269420246333,
-        "FREQ": 0.47620183330627774,
-        "ACYC": 8015.681354646001,
-        "PhysIPC": 1.761090994577556,
-        "EXEC": 0.41891267956387784,
-        "TIME(ticks)": 2102.986413089334,
-        "IPC": 0.8804880256731447,
-        "L3MISS": 0.29455386099824443
-      },
       "cluster": [
         "eyes-2-pyramid-9-selectivity-2",
         "eyes-2-pyramid-9-selectivity-1",
@@ -142,9 +121,28 @@
         "eyes-2-pyramid-25-selectivity-2",
         "eyes-2-pyramid-25-selectivity-0",
         "eyes-2-pyramid-25-selectivity-1"
-      ]
+      ],
+      "env": {
+        "ACYC": 2283.2812583570003,
+        "AFREQ": 1.0678857775331103,
+        "EXEC": 0.18194887384492223,
+        "FREQ": 0.13483826732517773,
+        "INST": 3081.3513262838887,
+        "INSTnom": 0.36390434586276654,
+        "INSTnom%": 9.097474639327999,
+        "IPC": 1.3498742174435558,
+        "L2MISS": 0.5057680705209557,
+        "L2MPI": 0.00016299616910810005,
+        "L3HIT": 0.9695115430417448,
+        "L3MISS": 0.02051855421449866,
+        "L3MPI": 6.414507569381111e-06,
+        "PhysIPC": 2.6998432241189994,
+        "PhysIPC%": 67.49578800449886,
+        "READ": 0.020970330491273004,
+        "TIME(ticks)": 2116.318476199556,
+        "WRITE": 0.01000315079563533
+      }
     }
   },
-  "TRAINED": true,
-  "num_of_cluster": 1
+  "overwrite": false
 }
