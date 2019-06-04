@@ -1,10 +1,8 @@
 # The base class for Models used in Rapid-M
 
-import pandas as pd
-from sklearn import preprocessing
-from sklearn.externals import joblib
-from pathlib import Path
-from functools import reduce
+from sklearn.metrics import r2_score
+from sklearn import metrics
+import numpy as np
 
 
 class RapidModel:
@@ -27,9 +25,16 @@ class RapidModel:
         ''' predict the result '''
         pass
 
+
     def validate(self, X, Y):
         ''' validate the trained model '''
-        pass
+        if self.model is None:
+            return -1
+        pred = self.model.predict(X)
+        r2 = r2_score(Y, pred)
+        mse = metrics.mean_squared_error(Y, pred)
+        diff = np.mean(np.abs((Y - pred) / Y)) * 100
+        return r2,mse,diff
 
     def save(self, file_path):
         pass

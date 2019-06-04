@@ -7,8 +7,9 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import r2_score
 from models.RapidModel import *
+from keras.models import load_model
+from sklearn.externals import joblib
 import pickle
 import numpy as np
 import time
@@ -19,14 +20,19 @@ class RapidNN(RapidModel):
     REGRESSER = 'regressor'
     SCALER = 'scaler'
 
-    def __init__(self, name='NN', file_path=''):
+    def __init__(self, file_path=''):
         self.input_dim = -1
-        RapidModel.__init__(self, name, file_path)
+        RapidModel.__init__(self, 'NN', file_path)
         if file_path == '':
             self.model = None
 
     def fromFile(self, file_path):
-        pass
+        full_path_scaler = file_path + '_scaler.pkl'
+        full_path_regressor = file_path + '_regresser.h5'
+        estimators = joblib.load(full_path_scaler)
+        estimator.named_steps[RapidNN.REGRESSER].model = load_model(
+            full_path_regressor)
+        self.model = estimator
 
     def fit(self, X, Y):
         ''' train the model '''
@@ -44,13 +50,6 @@ class RapidNN(RapidModel):
         if self.model is not None:
             return self.model.predict(x)
 
-    def validate(self, X, Y):
-        ''' validate the trained model '''
-        if self.model is None:
-            return -1
-        pred = self.model.predict(X)
-        r2 = r2_score(Y, pred)
-        return r2
 
     def save(self, file_path):
         # save the model
@@ -58,8 +57,8 @@ class RapidNN(RapidModel):
         regresser.model.save(file_path + '_regresser.h5')
         # save the scaler
         # remove the regresser
-        self.model.named_steps[RapidNN.REGRESSER] = None
-        pickle.dump(self.model, open(file_path + '_scaler.pkl', 'wb'))
+        self.model.named_steps[RapidNN.REGRESSER].model = None
+        joblib.dump(self.model, file_path + '_scaler.pkl')
 
     def initNNModel(self):
         model = Sequential()

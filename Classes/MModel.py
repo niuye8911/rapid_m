@@ -57,9 +57,13 @@ class MModel:
             for feature in self.features:
                 file_loc = model_params['Meta'][feature]['filepath']
                 self.models[feature] = {
-                    'model': pickle.load(open(file_loc, 'rb')),
-                    'isPoly': model_params['Meta'][feature]['isPoly'],
-                    'name': model_params['Meta'][feature]['name']
+                    'model':
+                    self.modelPool.getModel(
+                        model_params['Meta'][feature]['name'], file_loc),
+                    'isPoly':
+                    model_params['Meta'][feature]['isPoly'],
+                    'name':
+                    model_params['Meta'][feature]['name']
                 }
             self.TRAINED = True
         return
@@ -100,7 +104,7 @@ class MModel:
 
     def chooseModelAndPoly(self, feature, TEST=False):
         ''' if TEST is set to True, then use all models '''
-        max_r2 = -99
+        min_diff = 99
         selected_model = None
         poly = False
         training_time = OrderedDict()
@@ -113,40 +117,51 @@ class MModel:
                     self.x_train, self.y_train[feature + '-C'])
                 time_high = tmp_poly_model.fit(self.x_train_poly,
                                                self.y_train[feature + '-C'])
-                r2_linear = tmp_linear_model.validate(
+                r2_linear, mse_linear, diff_linear = tmp_linear_model.validate(
                     self.x_test, self.y_test[feature + '-C'])
-                r2_poly = tmp_poly_model.validate(self.x_test_poly,
-                                                  self.y_test[feature + '-C'])
-                training_time[model_name+'-1'] = {
+                r2_poly, mse_poly, diff_poly = tmp_poly_model.validate(
+                    self.x_test_poly, self.y_test[feature + '-C'])
+                training_time[model_name + '-1'] = {
                     'time': time_linear,
-                    'r2': r2_linear
+                    'r2': r2_linear,
+                    'mse': mse_linear,
+                    'diff': diff_linear
                 }
-                training_time[model_name+'-2'] = {
+                training_time[model_name + '-2'] = {
                     'time': time_high,
-                    'r2': r2_poly
+                    'r2': r2_poly,
+                    'mse': mse_poly,
+                    'diff': diff_poly
                 }
-                if r2_linear > r2_poly and r2_linear > max_r2:
+                if diff_linear < diff_poly and diff_linear < min_diff:
                     selected_model = tmp_linear_model
                     poly = False
-                    max_r2 = r2_linear
-                elif r2_poly > r2_linear and r2_poly > max_r2:
+                    min_diff = diff_linear
+                elif diff_poly > diff_linear and diff_poly > min_diff:
                     selected_model = tmp_poly_model
                     poly = True
-                    max_r2 = r2_poly
+                    min_diff = diff_poly
             else:
                 # if accuracy is enough, skip NN
-                if max_r2 > 0.8 and TEST is False:
+                if min_diff < 10 and not TEST:
+                    RAPID_info('M-Model', "Accuracy Reached, no need for NN")
                     continue
                 # NN does not need to check high order
                 nn_model = self.modelPool.getModel('NN')
                 time_nn = nn_model.fit(self.x_train,
                                        self.y_train[feature + '-C'])
-                r2 = nn_model.validate(self.x_test,
-                                       self.y_test[feature + '-C'])
-                training_time['nn'] = {'time': time_nn, 'r2': r2}
-                selected_model = nn_model
-                poly = False
-                max_r2 = r2
+                r2, mse, diff = nn_model.validate(self.x_test,
+                                                  self.y_test[feature + '-C'])
+                training_time['nn'] = {
+                    'time': time_nn,
+                    'r2': r2,
+                    'mse': mse,
+                    'diff': diff
+                }
+                if min_diff >= 10:
+                    selected_model = nn_model
+                    poly = False
+                    min_diff = diff
         # print the training time into the debug file
         return selected_model, poly, training_time
 

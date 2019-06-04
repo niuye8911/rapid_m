@@ -7,7 +7,7 @@ import time
 
 class RapidBayesian(RapidLinear):
     def __init__(self, file_path=''):
-        RapidLinear.__init__(self, "BayesianRidge", file_path)
+        RapidLinear.__init__(self, "BR", file_path)
 
     def fit(self, X, Y):
         ''' train the model '''

@@ -6,35 +6,47 @@ import pprint
 import scipy.stats
 import json
 
+
 def printTrainingInfo(d):
-    time_output = open('./training_time.csv','w')
-    acc_output = open('./training_acc.csv','w')
+    output = open('./training_info.csv', 'w')
     # get all features
     features = list(d.keys())
     # get all the models
     tmp = features[0]
-    print(d,features,tmp)
     models = list(d[tmp].keys())
     # write the header
-    time_output.write('feature,'+','.join(models)+'\n')
-    acc_output.write('feature,'+','.join(models)+'\n')
+    output.write('feature,' + ','.join(models) + '\n')
+    time = []
+    r2 = []
+    mse = []
+    diff = []
     for feature in features:
         time_line = []
-        time_line.append(feature)
-        acc_line = []
-        acc_line.append(feature)
+        r2_line = []
+        mse_line = []
+        diff_line = []
         for model in models:
             time_line.append(str(d[feature][model]['time']))
-            acc_line.append(str(d[feature][model]['r2']))
-        time_output.write(feature+','+','.join(time_line)+'\n')
-        acc_output.write(feature+','+','.join(acc_line)+'\n')
-    time_output.close()
-    acc_output.close()
+            r2_line.append(str(d[feature][model]['r2']))
+            mse_line.append(str(d[feature][model]['mse']))
+            diff_line.append(str(d[feature][model]['diff']))
+        time.append(feature + ',' + ','.join(time_line))
+        r2.append(feature + ',' + ','.join(r2_line))
+        mse.append(feature + ',' + ','.join(mse_line))
+        diff.append(feature + ',' + ','.join(diff_line))
+    output.write('\n'.join(time))
+    output.write('\nr2\n')
+    output.write('\n'.join(r2))
+    output.write('\nmse\n')
+    output.write('\n'.join(mse))
+    output.write('\ndiff\n')
+    output.close()
 
 
 def printDicToFile(d, f):
-    output = open(f,'w')
-    json.dump(d,output,indent=2)
+    output = open(f, 'w')
+    json.dump(d, output, indent=2)
+
 
 def PPRINT(stuff):
     pp = pprint.PrettyPrinter(indent=2)

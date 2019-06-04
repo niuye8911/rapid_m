@@ -7,7 +7,7 @@ import time
 
 class RapidLasso(RapidLinear):
     def __init__(self, file_path=''):
-        RapidLinear.__init__(self, "LassoCV", file_path)
+        RapidLinear.__init__(self, "LS", file_path)
 
     def fit(self, X, Y):
         ''' train the model '''

@@ -6,19 +6,19 @@ from models.RapidNN import *
 
 
 class ModelPool:
-    CANDIDATE_MODELS = ['linear', 'lassoCV', 'EN','Bayesian', 'NN']
+    CANDIDATE_MODELS = ['LR', 'LS', 'EN','BR', 'NN']
 
-    def getModel(self, name):
+    def getModel(self, name, path=''):
         if name not in self.CANDIDATE_MODELS:
             print('not supported model:' + name)
             return None
-        if name == 'linear':
-            return RapidLinear()
+        if name == 'LR':
+            return RapidLinear(file_path=path)
         elif name == 'EN':
-            return RapidEN()
-        elif name == 'lassoCV':
-            return RapidLasso()
-        elif name == 'Bayesian':
-            return RapidBayesian()
+            return RapidEN(file_path=path)
+        elif name == 'LS':
+            return RapidLasso(file_path=path)
+        elif name == 'BR':
+            return RapidBayesian(file_path=path)
         elif name == 'NN':
-            return RapidNN()
+            return RapidNN(file_path=path)
