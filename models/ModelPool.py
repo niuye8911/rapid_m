@@ -1,14 +1,17 @@
+from collections import OrderedDict
+
+from sklearn.preprocessing import PolynomialFeatures
+
 from models.RapidBayesian import *
 from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
 from models.RapidNN import *
-from sklearn.preprocessing import PolynomialFeatures
-from collections import OrderedDict
+from Utility import *
 
 
 class ModelPool:
-    CANDIDATE_MODELS = ['LR', 'LS', 'EN','BR', 'NN']
+    CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN']
 
     def getModel(self, name, path=''):
         if name not in self.CANDIDATE_MODELS:
@@ -27,7 +30,6 @@ class ModelPool:
 
     def selectFeature(self, x, y):
         pass
-
 
     def selectModel(self, x_train, y_train, x_test, y_test, TEST=False):
         ''' choose a proper model with the lowest mre,
@@ -78,8 +80,8 @@ class ModelPool:
                     continue
                 # NN does not need to check high order
                 nn_model = self.getModel('NN')
-                time_nn = nn_model.fit(x_train,y_train)
-                r2, mse, diff = nn_model.validate(x_test,y_test)
+                time_nn = nn_model.fit(x_train, y_train)
+                r2, mse, diff = nn_model.validate(x_test, y_test)
                 training_time['nn'] = {
                     'time': time_nn,
                     'r2': r2,

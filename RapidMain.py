@@ -10,14 +10,14 @@ import sys
 from enum import Enum
 
 import ClusterTrainer
-import MModelTrainer
 import PModelTrainer
 from AppInit import init
-from MachineInit import trainEnv
 from BucketSelector import bucketSelect
+from MachineInit import trainEnv
 from Utility import not_none
 
 DEBUG = False
+
 
 # flows supported by this learner
 class Flow(Enum):
@@ -59,7 +59,7 @@ def main(argv):
         test = options.test
         # cluster the app profile and check accuracuy
         init(options.app_file, options.app_measurements, options.app_profiles,
-             options.dir, options.test,options.appname)
+             options.dir, options.test, options.appname)
 
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
@@ -100,11 +100,11 @@ def genParser():
     parser.add_option('--dir', dest="dir")
     parser.add_option(
         '--test', dest="test", action="store_true",
-        default=False)  #if it's test, then won't modify the app file
-    parser.add_option('--app', dest="appname",default='')
+        default=False)  # if it's test, then won't modify the app file
+    parser.add_option('--app', dest="appname", default='')
     parser.add_option(
         '-d', dest="debug", action="store_true",
-        default=False)  #if it's test, then won't modify the app file
+        default=False)  # if it's test, then won't modify the app file
     return parser
 
 

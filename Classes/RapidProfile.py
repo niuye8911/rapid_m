@@ -1,10 +1,11 @@
 # The base class for profiling data in RAPID_M
 
+from functools import reduce
+from pathlib import Path
+
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.externals import joblib
-from pathlib import Path
-from functools import reduce
 
 
 class RapidProfile:
@@ -95,7 +96,7 @@ class RapidProfile:
         # 1) INST
         self.dataFrame['INST' +
                        postfix] = self.dataFrame['ACYC' + postfix].div(
-                           self.dataFrame['INST' + postfix])
+            self.dataFrame['INST' + postfix])
         # 2) INSTnom%
         self.dataFrame['INSTnom%' + postfix] = self.dataFrame[
             'INSTnom%' + postfix].apply(lambda x: x / 100.0)
@@ -104,5 +105,6 @@ class RapidProfile:
             'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
         # 4) READ / WRITE, add MEM to the frame
         self.dataFrame['MEM' + postfix] = self.dataFrame[
-            'READ' + postfix] + self.dataFrame['WRITE' + postfix]
+                                              'READ' + postfix] + \
+                                          self.dataFrame['WRITE' + postfix]
         self.x.append('MEM' + postfix)

@@ -5,17 +5,17 @@
     04/2019
 """
 
-from Classes.App import *
-from Classes.PModel import *
-from Classes.SlowDownProfile import *
-from Classes.AppSysProfile import *
-from Classes.Bucket import *
-from Classes.MModel import *
-from Utility import *
-import pandas as pd
+import functools
 import itertools
 import json
-import functools
+
+import pandas as pd
+
+from Classes.App import *
+from Classes.Bucket import *
+from Classes.MModel import *
+from Classes.PModel import *
+from Utility import *
 
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 DELIMITER = ","  # bucket comb delimiter
@@ -85,7 +85,7 @@ def getEnvs(bucket_combs, mmodel):
         # cumulatively apply M-Model
         final_env = functools.reduce(lambda x, y: mReducer(x, y, mmodel),
                                      env_dicts)
-        #print(final_env)
+        # print(final_env)
         result[comb_name] = final_env
     return result
 
@@ -113,7 +113,7 @@ def getBucketCombs(buckets):
     bucket_lists = buckets.values()
     combs = list(itertools.product(*bucket_lists))
     return combs
-    #printBucketCombs(combs)
+    # printBucketCombs(combs)
 
 
 def printBucketCombs(combs):

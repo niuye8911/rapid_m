@@ -2,8 +2,6 @@
 # a bucket contains a P-model instance and a list of configurations along with
 # their cost / quality
 
-import pandas as pd
-
 
 class Bucket:
     def __init__(self, app_name, b_name, configurations, p_model, cost_fact,

@@ -5,16 +5,18 @@
     03/2019
 """
 
-from Classes.EnvProfile import *
-from Classes.MModel import *
-from Classes.Machine import *
-from MModelTrainer import *
-from Utility import *
-import pandas as pd
 import json
 
+import pandas as pd
 
-def trainEnv(machine_file, machine_measurements, directory, DRAW=True, TEST=False):
+from Classes.EnvProfile import EnvProfile
+from Classes.Machine import Machine
+from MModelTrainer import *
+from Utility import *
+
+
+def trainEnv(machine_file, machine_measurements, directory, DRAW=True,
+             TEST=False):
     # load in the file
     machine = Machine(machine_file)
     # check if the machine is trained

@@ -6,10 +6,8 @@
 """
 
 import os
-import scipy.stats
-from Classes.App import *
+
 from Classes.PModel import *
-from Classes.SlowDownProfile import *
 from Utility import *
 
 
@@ -41,7 +39,7 @@ class PModelTrainer:
                 self.cluster_list))
 
         features = self.slowDownProfile.getFeatures()
-        if clusterDFs is None:  #no cluster provided
+        if clusterDFs is None:  # no cluster provided
             clusterDFs = slowDownProfile.getSubdata([])
 
         # train all clustered data frame
@@ -110,7 +108,7 @@ class PModelTrainer:
         for i in diff_list:
             diffs = diffs + i
         m, ci_upp, ci_low = cal_ci(diffs)
-        output = open(dir_name + "/" + self.app_name + "_ci.csv",'w')
+        output = open(dir_name + "/" + self.app_name + "_ci.csv", 'w')
         line = [self.app_name, str(m), str(ci_low), str(ci_upp)]
         output.write(",".join(line))
         output.close()
@@ -119,5 +117,5 @@ class PModelTrainer:
         id = 1
         for model in self.p_models:
             model.dump_into_app(app, app.name + str(id))
-            #print(model.model.coef_)
+            # print(model.model.coef_)
             id += 1

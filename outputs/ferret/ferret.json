@@ -1,14 +1,16 @@
 {
-  "name": "ferret",
-  "machine_id": 0,
-  "model_type": "LINEAR",
+  "TRAINED": true,
+  "overwrite": false,
   "model_params": {
     "ferret1": {
+<<<<<<< HEAD
       "file": "outputs/ferret/ferret1.pkl",
       "mse": 0.0317280204378278,
       "mae": 0.023363795948692697,
       "diff": 0.021669496813448683,
       "r2": 0.9418754107766555,
+=======
+>>>>>>> 67e804042aa355484e7d986b6547c3c7eeeb83f9
       "feature": [
         "AFREQ",
         "EXEC",
@@ -20,12 +22,18 @@
         "PhysIPC%",
         "MEM"
       ],
+      "model_type": "linear",
+      "mse": 0.029850038695252566,
+      "r2": 0.9796388460766061,
+      "mae": 0.019860815156359412,
       "poly": true,
-      "model_type": "linear"
+      "file": "outputs/ferret/ferret1.pkl",
+      "diff": 0.017062974253998615
     }
   },
-  "TRAINED": true,
   "CLUSTERED": true,
+  "name": "ferret",
+  "model_type": "LINEAR",
   "num_of_cluster": 1,
   "cluster_info": {
     "ferret1": {
@@ -308,6 +316,7 @@
         "hash-7-itr-25-probe-2"
       ],
       "env": {
+<<<<<<< HEAD
         "ACYC": 2339.809782608877,
         "AFREQ": 1.0351908212556151,
         "EXEC": 0.18459903381640225,
@@ -326,8 +335,28 @@
         "READ": 1.030189311594181,
         "TIME(ticks)": 2120.640096618696,
         "WRITE": 0.05043236111111158
+=======
+        "PhysIPC%": 69.41361714975797,
+        "L2MISS": 4.310736714975795,
+        "EXEC": 0.18669987922705064,
+        "INSTnom": 0.37339824879229694,
+        "L3HIT": 0.31495621980675004,
+        "INST": 3161.609299516848,
+        "IPC": 1.3882065217390593,
+        "PhysIPC": 2.7764009661835147,
+        "READ": 1.0144513888890467,
+        "L3MISS": 2.96141183574895,
+        "FREQ": 0.13442240338163783,
+        "ACYC": 2277.4214975845653,
+        "TIME(ticks)": 2119.0519323675726,
+        "AFREQ": 1.0605935990343105,
+        "L2MPI": 0.0013874486714979082,
+        "WRITE": 0.04908706219806743,
+        "INSTnom%": 9.334118357487757,
+        "L3MPI": 0.0009529163647342644
+>>>>>>> 67e804042aa355484e7d986b6547c3c7eeeb83f9
       }
     }
   },
-  "overwrite": false
+  "machine_id": 0
 }

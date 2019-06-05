@@ -1,6 +1,3 @@
-import pandas as pd
-import sys
-import os
 from Classes.MModel import *
 
 DATA = '/home/liuliu/Research/rapid_m_backend_server/testData/assemble/assemble.csv'
@@ -13,11 +10,12 @@ df = pd.read_csv(DATA)
 columns = list(df.columns.values)
 length = len(columns)
 
-column1 = columns[0:int(length/3)]
-column2 = columns[int(length/3):int(length*2/3)]
-column3 = columns[int(length*2/3):]
+column1 = columns[0:int(length / 3)]
+column2 = columns[int(length / 3):int(length * 2 / 3)]
+column3 = columns[int(length * 2 / 3):]
 
-#test the first 5 rows
+
+# test the first 5 rows
 
 
 def formatEnv(env, features, postfix):
@@ -33,6 +31,7 @@ def formatEnv(env, features, postfix):
             result.append(env[feature + postfix])
     return list(map(lambda x: float(x), result))
 
+
 i = 0
 for index, row in df.iterrows():
     input1 = row[column1]
@@ -44,7 +43,7 @@ for index, row in df.iterrows():
     print('predict:')
     print(predict)
     print('real:')
-    print( output)
+    print(output)
     i += 1
     if i == 1:
         break
