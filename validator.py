@@ -6,6 +6,7 @@ from Classes.App import *
 from Classes.AppSysProfile import *
 from Classes.MModel import *
 
+#TODO: use average sys in bucket
 
 def main(argv):
     parser = genParser()

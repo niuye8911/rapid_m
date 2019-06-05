@@ -7,6 +7,7 @@ from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
 from models.RapidNN import *
+from Utility import *
 
 
 class ModelPool:

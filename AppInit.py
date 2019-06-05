@@ -5,12 +5,14 @@
     11/2018
 """
 
-import pandas as pd
 
-from Classes.AppSysProfile import *
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
+from Classes.App import App
+from Classes.SlowDownProfile import SlowDownProfile
+from Classes.AppSysProfile import AppSysProfile
+
 
 MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .07

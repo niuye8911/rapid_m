@@ -9,7 +9,8 @@ import json
 
 import pandas as pd
 
-from Classes.EnvProfile import *
+from Classes.EnvProfile import EnvProfile
+from Classes.Machine import Machine
 from MModelTrainer import *
 from Utility import *
 
