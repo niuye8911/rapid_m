@@ -32,7 +32,7 @@ def getMModelFile(sysFile, mperfFile, perfFile, result):
 def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs,
                       result):
     global HEADER_DONE
-    #write the header
+    # write the header
     if not HEADER_DONE:
         result.write(','.join(map(lambda x: x + '-1', columns)))
         result.write(',')
@@ -84,7 +84,7 @@ def getAddedEnv(mperfFile, columns):
         config = row['Configuration']
         slowDown = float(row['SLOWDOWN'])
         added_env = row[columns].values.tolist()
-        if -1 in added_env or len(added_env)!=len(columns):
+        if -1 in added_env or len(added_env) != len(columns):
             # broken line
             continue
         if config not in added_envs:
@@ -95,7 +95,7 @@ def getAddedEnv(mperfFile, columns):
 
 result = open(RESULT, 'w')
 for app in APPS:
-    #for type in ['small','big']:
+    # for type in ['small','big']:
     #    sys_file = BASE_DIR+app+"-sys-"+type+".csv"
     #    mperf_file = BASE_DIR+app+"-mperf-"+type+".csv"
     #    perf_file = BASE_DIR+app+"-perf-"+type+".csv"

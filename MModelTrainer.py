@@ -6,10 +6,8 @@
 """
 
 import os
-import scipy.stats
 
 from Classes.MModel import *
-from Classes.Machine import *
 from Utility import *
 
 

@@ -6,10 +6,8 @@
     3) model_params<attribute, value>
 '''
 
-import hashlib
 import json
 from collections import OrderedDict
-from enum import Enum
 
 
 class Machine:

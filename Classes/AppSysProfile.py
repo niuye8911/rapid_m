@@ -1,5 +1,4 @@
 from Classes.RapidProfile import RapidProfile
-import pandas as pd
 
 
 class AppSysProfile(RapidProfile):
@@ -9,11 +8,11 @@ class AppSysProfile(RapidProfile):
         self.setXLabel(self.x[1:])
         self.cleanLabelByExactName(RapidProfile.EXCLUDED_FEATURES)
         self.cleanData()
-        #self.scale()
+        # self.scale()
 
     def getSysByConfig(self, config):
         return self.dataFrame.loc[self.dataFrame['Configuration'].
-                                  apply(lambda x: x == config)]
+            apply(lambda x: x == config)]
 
     def getSubFrameByConfigs(self, configs):
         return self.dataFrame.loc[self.dataFrame['Configuration'].apply(

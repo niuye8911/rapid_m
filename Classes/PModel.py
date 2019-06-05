@@ -1,27 +1,12 @@
-import numpy as np
-import pickle
-from sklearn import metrics
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import PolynomialFeatures
 import pandas as pd
-from sklearn.linear_model import LassoCV
-from sklearn.linear_model import ElasticNetCV
-from Utility import *
-from sklearn import linear_model
-from sklearn.linear_model import ElasticNet
 from sklearn import preprocessing
-from sklearn.feature_selection import RFE
 from sklearn.base import clone
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import RFE
+from sklearn.model_selection import train_test_split
+
+from Utility import *
 from models.ModelPool import *
+
 
 class PModel:
     CANDIDATE_MODELS = {
@@ -67,7 +52,6 @@ class PModel:
         self.selectModelAndFeature(x_train, y_train)
         self.TRAINED = True
 
-
     def selectModelAndFeature(self, x_train, y_train):
         # use the validate process to pick the most important 10 linear features
         # scale the data
@@ -110,8 +94,7 @@ class PModel:
                 min_mse = mse
                 self.model = high_model
 
-
-# set all members
+        # set all members
         self.polyFeature = selected_poly
         self.features = selected_features
         self.modelType = selected_model_name

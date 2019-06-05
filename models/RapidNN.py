@@ -1,22 +1,21 @@
 # FC 2Layer Neural Network
 
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from models.RapidModel import *
-from keras.models import load_model
-from sklearn.externals import joblib
-import pickle
-import numpy as np
 import time
+
+import numpy as np
+from keras.layers import Dense
+from keras.models import Sequential
+from keras.models import load_model
+from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn.externals import joblib
+from sklearn.model_selection import KFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+from models.RapidModel import *
 
 
 class RapidNN(RapidModel):
-
     REGRESSER = 'regressor'
     SCALER = 'scaler'
 
@@ -50,7 +49,6 @@ class RapidNN(RapidModel):
         ''' predict the result '''
         if self.model is not None:
             return self.model.predict(x)
-
 
     def save(self, file_path):
         # save the model
@@ -88,6 +86,6 @@ class RapidNN(RapidModel):
         pipeline = Pipeline(estimators)
         kfold = KFold(n_splits=10, random_state=seed)
         pipeline.fit(X, Y)
-        #scores = pipeline.evaluate(X, Y)
-        #print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
+        # scores = pipeline.evaluate(X, Y)
+        # print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
         return pipeline

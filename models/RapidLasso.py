@@ -1,9 +1,11 @@
 # Simple Linear Regression Model
 
-from sklearn import linear_model
-from sklearn.linear_model import LassoCV
-from models.RapidLinear import *
 import time
+
+from sklearn.linear_model import LassoCV
+
+from models.RapidLinear import *
+
 
 class RapidLasso(RapidLinear):
     def __init__(self, file_path=''):

@@ -5,14 +5,12 @@
     11/2018
 """
 
-from Classes.App import *
-from Classes.PModel import *
-from Classes.SlowDownProfile import *
+import pandas as pd
+
 from Classes.AppSysProfile import *
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
-import pandas as pd
 
 MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .07
@@ -26,7 +24,7 @@ def init(app_file,
          profile_file,
          directory,
          test=True,
-         app_name = '',
+         app_name='',
          DRAW=True):
     # load in the file
     app = App(app_file, not test)

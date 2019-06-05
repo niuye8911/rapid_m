@@ -1,15 +1,8 @@
 # validate the accuracy of applying M+P models
 import optparse
 import sys
-import pickle
-import numpy as np
-import pandas as pd
-from sklearn.preprocessing import PolynomialFeatures
+
 from Classes.App import *
-from sklearn.metrics import r2_score
-from sklearn import metrics
-from Classes.Machine import *
-from Classes.SlowDownProfile import *
 from Classes.AppSysProfile import *
 from Classes.MModel import *
 
@@ -65,7 +58,7 @@ def genPred(observation, app_summary, appsys, m_model):
         # predict the combined env
         env1 = formatEnv(added_env, features)
         env2 = app_env[features].values[0]
-        #print(len(env1),env1,len(env2),env2)
+        # print(len(env1),env1,len(env2),env2)
         pred_env = m_model.predict(env1, env2)
         writeEnvsToDebug(debug_file, env1, env2, pred_env.values[0])
 

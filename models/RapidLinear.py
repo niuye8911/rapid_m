@@ -1,9 +1,11 @@
 # Simple Linear Regression Model
 
-from sklearn.linear_model import LinearRegression
-from models.RapidModel import *
-import time
 import pickle
+import time
+
+from sklearn.linear_model import LinearRegression
+
+from models.RapidModel import *
 
 
 class RapidLinear(RapidModel):
@@ -13,7 +15,7 @@ class RapidLinear(RapidModel):
             self.model = None
 
     def fromFile(self, file_path):
-        self.model = pickle.load(open(file_path+'.pkl', 'rb'))
+        self.model = pickle.load(open(file_path + '.pkl', 'rb'))
 
     def fit(self, X, Y):
         ''' train the model '''

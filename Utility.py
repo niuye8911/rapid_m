@@ -1,10 +1,11 @@
-from functools import reduce
-import numpy as np
-from matplotlib import pyplot as plt
-from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
-import pprint
-import scipy.stats
 import json
+import pprint
+from functools import reduce
+
+import numpy as np
+import scipy.stats
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram
 
 
 def printTrainingInfo(d):

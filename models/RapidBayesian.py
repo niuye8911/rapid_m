@@ -1,8 +1,10 @@
 # ElasticNet Regression Model
 
-from sklearn import linear_model
-from models.RapidLinear import *
 import time
+
+from sklearn import linear_model
+
+from models.RapidLinear import *
 
 
 class RapidBayesian(RapidLinear):

@@ -1,27 +1,10 @@
-import numpy as np
-import pickle
-from sklearn import metrics
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-from sklearn.model_selection import train_test_split
-from collections import OrderedDict
-from sklearn.preprocessing import PolynomialFeatures
-from Utility import *
-from sklearn import linear_model
-from collections import OrderedDict
-from sklearn.linear_model import LassoCV
-from sklearn.linear_model import ElasticNetCV
 import pandas as pd
-import json
-from Utility import *
-from sklearn.base import clone
-from keras.models import Sequential
 from keras.layers import Dense
+from keras.models import Sequential
 from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+
+from Utility import *
 from models.ModelPool import *
 
 FEATURES = [
@@ -58,12 +41,12 @@ class MModel:
                 file_loc = model_params['Meta'][feature]['filepath']
                 self.models[feature] = {
                     'model':
-                    self.modelPool.getModel(
-                        model_params['Meta'][feature]['name'], file_loc),
+                        self.modelPool.getModel(
+                            model_params['Meta'][feature]['name'], file_loc),
                     'isPoly':
-                    model_params['Meta'][feature]['isPoly'],
+                        model_params['Meta'][feature]['isPoly'],
                     'name':
-                    model_params['Meta'][feature]['name']
+                        model_params['Meta'][feature]['name']
                 }
             self.TRAINED = True
         return
@@ -80,11 +63,11 @@ class MModel:
             # write the metadata
             machine.model_params['Meta'][feature] = OrderedDict({
                 'name':
-                self.models[feature]['name'],
+                    self.models[feature]['name'],
                 'isPoly':
-                self.models[feature]['isPoly'],
+                    self.models[feature]['isPoly'],
                 'filepath':
-                self.outfile[feature]
+                    self.outfile[feature]
             })
 
     def setX(self, X):
@@ -99,8 +82,11 @@ class MModel:
     def setYLabel(self, features):
         self.features = list(map(lambda x: x[:-2], features))
 
-    def getModel(self,feature, TEST=False):
-        return self.modelPool.selectModel(self.x_train, self.y_train[feature+'-C'], self.x_test, self.y_test[feature+'-C'], TEST)
+    def getModel(self, feature, TEST=False):
+        return self.modelPool.selectModel(self.x_train,
+                                          self.y_train[feature + '-C'],
+                                          self.x_test,
+                                          self.y_test[feature + '-C'], TEST)
 
     def chooseModelAndPoly(self, feature, TEST=False):
         ''' if TEST is set to True, then use all models '''

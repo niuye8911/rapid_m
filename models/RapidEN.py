@@ -1,9 +1,10 @@
 # ElasticNet Regression Model
 
-from sklearn import linear_model
-from sklearn.linear_model import ElasticNetCV
-from models.RapidLinear import *
 import time
+
+from sklearn.linear_model import ElasticNetCV
+
+from models.RapidLinear import *
 
 
 class RapidEN(RapidLinear):
