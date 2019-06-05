@@ -73,9 +73,6 @@ class MModel:
         machine.features = self.features
         machine.model_params['Metric'] = OrderedDict()
         machine.model_params['Meta'] = OrderedDict()
-        #machine.model_params['MModel']["mse"] = self.mse
-        #machine.model_params['MModel']["mae"] = self.mae
-        #machine.model_params['MModel']["r2"] = self.r2
         machine.model_params['Metric']["avg_diff"] = self.avg_diff
         for feature in self.features:
             # write the metric
@@ -101,6 +98,9 @@ class MModel:
 
     def setYLabel(self, features):
         self.features = list(map(lambda x: x[:-2], features))
+
+    def getModel(self,feature, TEST=False):
+        return self.modelPool.selectModel(self.x_train, self.y_train[feature+'-C'], self.x_test, self.y_test[feature+'-C'], TEST)
 
     def chooseModelAndPoly(self, feature, TEST=False):
         ''' if TEST is set to True, then use all models '''
@@ -196,7 +196,7 @@ class MModel:
 
     def trainSingleFeature(self, feature, TEST=False):
         RAPID_info("TRAINING", feature)
-        return self.chooseModelAndPoly(feature, TEST)
+        return self.getModel(feature, TEST)
 
     def train(self, TEST=False):
         x = self.xDF

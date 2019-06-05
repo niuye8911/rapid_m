@@ -3,6 +3,8 @@ from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
 from models.RapidNN import *
+from sklearn.preprocessing import PolynomialFeatures
+from collections import OrderedDict
 
 
 class ModelPool:
@@ -22,3 +24,71 @@ class ModelPool:
             return RapidBayesian(file_path=path)
         elif name == 'NN':
             return RapidNN(file_path=path)
+
+    def selectFeature(self, x, y):
+        pass
+
+
+    def selectModel(self, x_train, y_train, x_test, y_test, TEST=False):
+        ''' choose a proper model with the lowest mre,
+        if TEST is set to True, then use all models '''
+        min_diff = 99
+        selected_model = None
+        poly = False
+        training_time = OrderedDict()
+        x_train_poly = PolynomialFeatures(degree=2).fit_transform(
+            x_train)
+        x_test_poly = PolynomialFeatures(degree=2).fit_transform(
+            x_test)
+        for model_name in ModelPool.CANDIDATE_MODELS:
+            if model_name is not 'NN':
+                tmp_linear_model = self.getModel(model_name)
+                tmp_poly_model = self.getModel(model_name)
+
+                time_linear = tmp_linear_model.fit(x_train, y_train)
+                time_high = tmp_poly_model.fit(x_train_poly, y_train)
+                r2_linear, mse_linear, diff_linear = tmp_linear_model.validate(
+                    x_test, y_test)
+                r2_poly, mse_poly, diff_poly = tmp_poly_model.validate(
+                    x_test_poly, y_test)
+                training_time[model_name + '-1'] = {
+                    'time': time_linear,
+                    'r2': r2_linear,
+                    'mse': mse_linear,
+                    'diff': diff_linear
+                }
+                training_time[model_name + '-2'] = {
+                    'time': time_high,
+                    'r2': r2_poly,
+                    'mse': mse_poly,
+                    'diff': diff_poly
+                }
+                if diff_linear < diff_poly and diff_linear < min_diff:
+                    selected_model = tmp_linear_model
+                    poly = False
+                    min_diff = diff_linear
+                elif diff_poly > diff_linear and diff_poly > min_diff:
+                    selected_model = tmp_poly_model
+                    poly = True
+                    min_diff = diff_poly
+            else:
+                # if accuracy is enough, skip NN
+                if min_diff < 10 and not TEST:
+                    RAPID_info('ModelPool', "Accuracy Reached, no need for NN")
+                    continue
+                # NN does not need to check high order
+                nn_model = self.getModel('NN')
+                time_nn = nn_model.fit(x_train,y_train)
+                r2, mse, diff = nn_model.validate(x_test,y_test)
+                training_time['nn'] = {
+                    'time': time_nn,
+                    'r2': r2,
+                    'mse': mse,
+                    'diff': diff
+                }
+                if min_diff >= 10:
+                    selected_model = nn_model
+                    poly = False
+                    min_diff = diff
+        # print the training time into the debug file
+        return selected_model, poly, training_time
