@@ -1,0 +1,49 @@
+Stressers:
+ - app: real apps, e.g., swaptions, bodytrack...
+ - tool: Stress Tool's instance
+
+Layout:
+appself - app runs with app ONLY
+heavy / light / lighter / lightest - app runs with tool ONLY
+*halfandhalf - app runs with BOTH app and tool
+
+File Explanation:
+
+1) <*/*-perf.csv>
+format: [Configuration, Feature-1, Feature-2...., SLOWDOWN]
+ - Configuration: the configuration of the measurement
+ - Feature-1,...n: the measured overall environment footprint
+ - SLOWDOWN: the performance degradation under the environment
+use: for P-Model Construction
+
+2) <*/*-sys.csv>
+format: [Configuration, Feature-1, Feature-2..., Feature-n]
+ - Configuration: the configuration of the measurement
+ - Feature-1,...n: the measured footprint when running the app with this configuration
+use: for Bucketization
+
+3) <*/*-mperf.csv>
+format: [Configuration, stresser, Feature-1, Feature-2..., Feature-n, SLOWDOWN]
+ - Configuration: ...
+ - stresser: the stresser to be runned with the application
+ - Feature-1,...n: the measured footprint of the stresser alone
+ - SLOWDOWN: the observed performance degradation of the app when running with the stresser
+use: for M-Model Construction
+
+***Note***
+Each line in -mperf has a corresponding line in -perf. The difference between the two lines
+is the Feature-1,..n represents the overall env footprint in -perf while represents the stresser 
+alone in -mperf.
+
+4) ./mmodelfile.csv
+format: [Feature-1-1 ... Feature-1-n, Feature-2-1 ... Feature-2-n, Feture-3-1 ... Feature-3-n]
+ - Feature-1-*: The footprint of an application
+ - Feature-2-*: The footprint of the stresser
+ - Feature-3-*: The footprint of the app + stresser
+
+***Note***
+The mmodelfile.csv is generated automatically by combining:
+ -sys (Feature-1-*), 
+ -mperf (Feature-2-*), and 
+ -perf (Feature-3-*). 
+It's just another format of the same piece of data but makes it easier to construct the M-Model.
