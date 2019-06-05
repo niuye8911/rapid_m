@@ -1,14 +1,16 @@
 {
+  "overwrite": false,
   "name": "facedetect",
-  "machine_id": 0,
-  "model_type": "LINEAR",
+  "num_of_cluster": 1,
+  "TRAINED": true,
   "model_params": {
     "facedetect1": {
+      "poly": true,
       "file": "outputs/facedetect/facedetect1.pkl",
-      "mse": 0.017914153361728358,
-      "mae": 0.010821669307097971,
-      "diff": 0.009878540404692914,
-      "r2": 0.9133551406095292,
+      "mae": 0.011391363420554058,
+      "model_type": "EN",
+      "diff": 0.010433987225711941,
+      "r2": 0.9097758149454127,
       "feature": [
         "AFREQ",
         "EXEC",
@@ -16,18 +18,16 @@
         "INST",
         "INSTnom%",
         "IPC",
-        "L2MPI",
         "L3HIT",
         "PhysIPC%",
         "MEM"
       ],
-      "poly": true,
-      "model_type": "linear"
+      "mse": 0.018280428486670348
     }
   },
-  "TRAINED": true,
+  "model_type": "LINEAR",
   "CLUSTERED": true,
-  "num_of_cluster": 1,
+  "machine_id": 0,
   "cluster_info": {
     "facedetect1": {
       "cluster": [
@@ -123,26 +123,25 @@
         "eyes-2-pyramid-25-selectivity-1"
       ],
       "env": {
+        "INSTnom": 0.36390434586276654,
+        "L3HIT": 0.9695115430417448,
+        "L2MPI": 0.00016299616910810005,
+        "IPC": 1.3498742174435558,
+        "TIME(ticks)": 2116.318476199556,
         "ACYC": 2283.2812583570003,
-        "AFREQ": 1.0678857775331103,
+        "L3MPI": 6.414507569381111e-06,
+        "READ": 0.020970330491273004,
         "EXEC": 0.18194887384492223,
         "FREQ": 0.13483826732517773,
-        "INST": 3081.3513262838887,
-        "INSTnom": 0.36390434586276654,
-        "INSTnom%": 9.097474639327999,
-        "IPC": 1.3498742174435558,
+        "WRITE": 0.01000315079563533,
         "L2MISS": 0.5057680705209557,
-        "L2MPI": 0.00016299616910810005,
-        "L3HIT": 0.9695115430417448,
-        "L3MISS": 0.02051855421449866,
-        "L3MPI": 6.414507569381111e-06,
         "PhysIPC": 2.6998432241189994,
+        "INSTnom%": 9.097474639327999,
+        "AFREQ": 1.0678857775331103,
         "PhysIPC%": 67.49578800449886,
-        "READ": 0.020970330491273004,
-        "TIME(ticks)": 2116.318476199556,
-        "WRITE": 0.01000315079563533
+        "INST": 3081.3513262838887,
+        "L3MISS": 0.02051855421449866
       }
     }
-  },
-  "overwrite": false
+  }
 }
