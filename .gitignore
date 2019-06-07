@@ -6,3 +6,9 @@ output/*
 .DS_Store
 test/*
 *.pdf
+*_scaled.csv
+cleaned_machine.csv
+mmodel_valid.csv
+cluter*
+tmp.csv
+train_env.sh
