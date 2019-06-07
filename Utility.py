@@ -81,6 +81,8 @@ def draw_ci(ci_file, output):
     ci_lows = []
     ci_upps = []
     means = []
+    highest = -99
+    lowest = 99
     with open(ci_file) as f:
         for line in f:
             items = line.split(',')
@@ -88,6 +90,8 @@ def draw_ci(ci_file, output):
             means.append(float(items[1]))
             ci_lows.append(float(items[1]) - float(items[2]))
             ci_upps.append(float(items[3]) - float(items[1]))
+            highest = max(float(items[3]),highest)
+            lowest = min(float(items[2]),lowest)
     (_, caps, _) = plt.errorbar(range(len(names)),
                                 means,
                                 yerr=[ci_lows, ci_upps],
@@ -98,7 +102,7 @@ def draw_ci(ci_file, output):
         cap.set_markeredgewidth(1)
     plt.xticks(range(len(names)), names, fontsize='10', rotation=30)
     plt.ylabel('Prediction MRE', fontsize='15')
-    plt.ylim(0.0, 0.35)
+    plt.ylim(lowest*2.0, highest*2.0)
     plt.savefig(output + '.png')
 
 
