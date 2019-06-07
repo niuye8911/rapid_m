@@ -1,4 +1,104 @@
 {
   "host_name": "example_machine",
-  "TRAINED": false
+  "TRAINED": true,
+  "model_params": {
+    "Metric": {
+      "avg_diff": 0.25607107103124876,
+      "AFREQ": 0.0014987070025519337,
+      "EXEC": 0.054788437440103914,
+      "FREQ": 0.06697188969896763,
+      "INST": 0.0384313227355957,
+      "INSTnom%": 0.05513743122473249,
+      "IPC": 0.03033436947014812,
+      "L2MISS": 0.2572779208751163,
+      "L2MPI": 0.7301683106135317,
+      "L3HIT": 0.026784775210930336,
+      "L3MISS": 0.2911619748390741,
+      "L3MPI": 1.6126659788015942,
+      "PhysIPC%": 0.03103554008927168,
+      "MEM": 0.13266726540461593
+    },
+    "Meta": {
+      "AFREQ": {
+        "name": "EN",
+        "isPoly": true,
+        "filepath": "outputs/machine/example_machine_AFREQ"
+      },
+      "EXEC": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_EXEC"
+      },
+      "FREQ": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_FREQ"
+      },
+      "INST": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_INST"
+      },
+      "INSTnom%": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_INSTnom%"
+      },
+      "IPC": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_IPC"
+      },
+      "L2MISS": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_L2MISS"
+      },
+      "L2MPI": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_L2MPI"
+      },
+      "L3HIT": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_L3HIT"
+      },
+      "L3MISS": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_L3MISS"
+      },
+      "L3MPI": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_L3MPI"
+      },
+      "PhysIPC%": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_PhysIPC%"
+      },
+      "MEM": {
+        "name": "NN",
+        "isPoly": false,
+        "filepath": "outputs/machine/example_machine_MEM"
+      }
+    }
+  },
+  "features": [
+    "AFREQ",
+    "EXEC",
+    "FREQ",
+    "INST",
+    "INSTnom%",
+    "IPC",
+    "L2MISS",
+    "L2MPI",
+    "L3HIT",
+    "L3MISS",
+    "L3MPI",
+    "PhysIPC%",
+    "MEM"
+  ]
 }
