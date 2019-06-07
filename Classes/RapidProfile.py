@@ -27,14 +27,14 @@ class RapidProfile:
         'SLOWDOWN',
         # some features that can be calculated by others
         'PhysIPC',
-        'L2MISS',
-        'L3MISS',
-        'L3MPI',
+        #'L2MISS',
+        #'L3MISS',
+        #'L3MPI',
         'INSTnom',  # this can be calculated by instnom /100 * 4
         'READ',
         'WRITE',
         'stresser',
-        'L2MPI'
+        #'L2MPI'
     }
 
     SCALAR_PATH = './RapidScalar.pkl'
