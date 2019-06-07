@@ -5,10 +5,10 @@
   "model_params": {
     "nn1": {
       "file": "outputs/nn/nn1.pkl",
-      "mse": 0.03781153940340594,
-      "mae": 0.02610140433993692,
-      "diff": 0.02218926006986329,
-      "r2": 0.9269880688168668,
+      "mse": 0.039660521065938495,
+      "mae": 0.027475809127613476,
+      "diff": 0.02343165734737086,
+      "r2": 0.9196729256769971,
       "feature": [
         "AFREQ",
         "EXEC",
@@ -16,10 +16,11 @@
         "INST",
         "INSTnom%",
         "IPC",
+        "L2MISS",
         "L2MPI",
-        "L3HIT",
-        "PhysIPC%",
-        "MEM"
+        "L3MISS",
+        "L3MPI",
+        "PhysIPC%"
       ],
       "poly": true,
       "model_type": "linear"
