@@ -14,10 +14,9 @@ class RapidEN(RapidLinear):
     def fit(self, X, Y):
         ''' train the model '''
         if self.model is None:
-            self.scale(X)
             self.model = ElasticNetCV(cv=3, max_iter=1000000)
             time1 = time.time()
-            self.model.fit(self.scaler.transform(X), Y)
+            self.model.fit(X, Y)
             time2 = time.time()
             return time2 - time1
         return -1

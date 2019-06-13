@@ -7,11 +7,6 @@ from sklearn.model_selection import train_test_split
 from Utility import *
 from models.ModelPool import *
 
-FEATURES = [
-    'AFREQ', 'EXEC', 'FREQ', 'INST', 'INSTnom', 'IPC', 'L2HIT', 'L2MPI',
-    'L3HIT', 'PhysIPC%', 'MEM'
-]
-
 
 class MModel:
     def __init__(self, file_loc=""):
@@ -23,6 +18,7 @@ class MModel:
         self.output_loc = ''
         self.features = []
         self.modelPool = ModelPool()
+        self.maxes = {}
         if file_loc != "":
             self.loadFromFile(file_loc)
 
@@ -41,13 +37,14 @@ class MModel:
                 file_loc = model_params['Meta'][feature]['filepath']
                 self.models[feature] = {
                     'model':
-                        self.modelPool.getModel(
-                            model_params['Meta'][feature]['name'], file_loc),
+                    self.modelPool.getModel(
+                        model_params['Meta'][feature]['name'], file_loc),
                     'isPoly':
-                        model_params['Meta'][feature]['isPoly'],
+                    model_params['Meta'][feature]['isPoly'],
                     'name':
-                        model_params['Meta'][feature]['name']
+                    model_params['Meta'][feature]['name']
                 }
+            self.maxes = mmodel['maxes']
             self.TRAINED = True
         return
 
@@ -63,11 +60,11 @@ class MModel:
             # write the metadata
             machine.model_params['Meta'][feature] = OrderedDict({
                 'name':
-                    self.models[feature]['name'],
+                self.models[feature]['name'],
                 'isPoly':
-                    self.models[feature]['isPoly'],
+                self.models[feature]['isPoly'],
                 'filepath':
-                    self.outfile[feature]
+                self.outfile[feature]
             })
 
     def setX(self, X):
@@ -88,104 +85,29 @@ class MModel:
                                           self.x_test,
                                           self.y_test[feature + '-C'], TEST)
 
-    def chooseModelAndPoly(self, feature, TEST=False):
-        ''' if TEST is set to True, then use all models '''
-        min_diff = 99
-        selected_model = None
-        poly = False
-        training_time = OrderedDict()
-        for model_name in self.modelPool.CANDIDATE_MODELS:
-            if model_name is not 'NN':
-                tmp_linear_model = self.modelPool.getModel(model_name)
-                tmp_poly_model = self.modelPool.getModel(model_name)
-
-                time_linear = tmp_linear_model.fit(
-                    self.x_train, self.y_train[feature + '-C'])
-                time_high = tmp_poly_model.fit(self.x_train_poly,
-                                               self.y_train[feature + '-C'])
-                r2_linear, mse_linear, diff_linear = tmp_linear_model.validate(
-                    self.x_test, self.y_test[feature + '-C'])
-                r2_poly, mse_poly, diff_poly = tmp_poly_model.validate(
-                    self.x_test_poly, self.y_test[feature + '-C'])
-                training_time[model_name + '-1'] = {
-                    'time': time_linear,
-                    'r2': r2_linear,
-                    'mse': mse_linear,
-                    'diff': diff_linear
-                }
-                training_time[model_name + '-2'] = {
-                    'time': time_high,
-                    'r2': r2_poly,
-                    'mse': mse_poly,
-                    'diff': diff_poly
-                }
-                if diff_linear < diff_poly and diff_linear < min_diff:
-                    selected_model = tmp_linear_model
-                    poly = False
-                    min_diff = diff_linear
-                elif diff_poly > diff_linear and diff_poly > min_diff:
-                    selected_model = tmp_poly_model
-                    poly = True
-                    min_diff = diff_poly
-            else:
-                # if accuracy is enough, skip NN
-                if min_diff < 10 and not TEST:
-                    RAPID_info('M-Model', "Accuracy Reached, no need for NN")
-                    continue
-                # NN does not need to check high order
-                nn_model = self.modelPool.getModel('NN')
-                time_nn = nn_model.fit(self.x_train,
-                                       self.y_train[feature + '-C'])
-                r2, mse, diff = nn_model.validate(self.x_test,
-                                                  self.y_test[feature + '-C'])
-                training_time['nn'] = {
-                    'time': time_nn,
-                    'r2': r2,
-                    'mse': mse,
-                    'diff': diff
-                }
-                if min_diff >= 10:
-                    selected_model = nn_model
-                    poly = False
-                    min_diff = diff
-        # print the training time into the debug file
-        return selected_model, poly, training_time
-
-    def nnTrain(self, X, Y):
-        # use neural net for training
-        seed = 7
-        np.random.seed(seed)
-        estimators = []
-        estimators.append(('standardize', StandardScaler()))
-        estimators.append(('mlp',
-                           KerasRegressor(build_fn=self.initNNModel,
-                                          epochs=30,
-                                          batch_size=5,
-                                          verbose=0)))
-        pipeline = Pipeline(estimators)
-        kfold = KFold(n_splits=10, random_state=seed)
-        pipeline.fit(X, Y)
-        scores = pipeline.evaluate(X, Y)
-        return scores
-        print("%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
-
-    def initNNModel(self):
-        model = Sequential()
-        model.add(
-            Dense(40,
-                  input_dim=20,
-                  kernel_initializer='normal',
-                  activation='relu'))
-        model.add(Dense(1, kernel_initializer='normal'))
-        model.compile(loss='mean_squared_error', optimizer='adam')
-        return model
-
     def trainSingleFeature(self, feature, TEST=False):
         RAPID_info("TRAINING", feature)
         return self.getModel(feature, TEST)
 
+    def preprocess(self, X):
+        ''' scale the data '''
+        for col in X.columns:
+            # take the maximum number of two vectors per feature
+            if col[-1] == "C":
+                continue
+            if col[:-1] not in self.maxes:
+                self.maxes[col[:-1]] = X.max()[col]
+            if X.max()[col] > self.maxes[col[:-1]]:
+                self.maxes[col[:-1]] = X.max()[col]
+        scaled_X = pd.DataFrame()
+        for col in X.columns:
+            if col[-1] == 'C':
+                scaled_X[col] = X[col]
+            scaled_X[col] = X[col] / self.maxes[col[:-1]]
+        return scaled_X
+
     def train(self, TEST=False):
-        x = self.xDF
+        x = self.preprocess(self.xDF)
         y = self.yDFs
         y_all = self.yDF
         # first get the test data
