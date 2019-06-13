@@ -37,7 +37,6 @@ class RapidNN(RapidModel):
         ''' train the model '''
         if self.model is None:
             self.input_dim = X.shape[1]
-            print(self.input_dim)
             time1 = time.time()
             self.model = self.nnTrain(X, Y)
             time2 = time.time()

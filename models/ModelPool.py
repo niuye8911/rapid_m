@@ -7,11 +7,12 @@ from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
 from models.RapidNN import *
+from models.RapidSVR import *
 from Utility import *
 
 
 class ModelPool:
-    CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN']
+    CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN', 'SVR']
 
     def getModel(self, name, path=''):
         if name not in self.CANDIDATE_MODELS:
@@ -27,6 +28,8 @@ class ModelPool:
             return RapidBayesian(file_path=path)
         elif name == 'NN':
             return RapidNN(file_path=path)
+        elif name == 'SVR':
+            return RapidSVR(file_path=path)
 
     def selectFeature(self, x, y):
         pass
