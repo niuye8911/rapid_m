@@ -31,20 +31,20 @@ class ModelPool:
         elif name == 'SVR':
             return RapidSVR(file_path=path)
 
-    def selectFeature(self, x, y):
-        pass
+    def selectFeature(self, x_train, y_train, x_test, y_test, model_name):
+        ''' select a feature based on the selected model '''
+
 
     def selectModel(self, x_train, y_train, x_test, y_test, TEST=False):
         ''' choose a proper model with the lowest mre,
         if TEST is set to True, then use all models '''
+        min_mse = 99
         min_diff = 99
         selected_model = None
         poly = False
         training_time = OrderedDict()
-        x_train_poly = PolynomialFeatures(degree=2).fit_transform(
-            x_train)
-        x_test_poly = PolynomialFeatures(degree=2).fit_transform(
-            x_test)
+        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
+        x_test_poly = PolynomialFeatures(degree=2).fit_transform(x_test)
         for model_name in ModelPool.CANDIDATE_MODELS:
             if model_name is not 'NN':
                 tmp_linear_model = self.getModel(model_name)
@@ -68,14 +68,15 @@ class ModelPool:
                     'mse': mse_poly,
                     'diff': diff_poly
                 }
-                if diff_linear < diff_poly and diff_linear < min_diff:
+                if mse_linear < mse_poly and mse_linear < min_mse:
                     selected_model = tmp_linear_model
                     poly = False
-                    min_diff = diff_linear
-                elif diff_poly > diff_linear and diff_poly > min_diff:
+                    min_mse = mse_linear
+                elif mse_poly < mse_linear and mse_poly < min_mse:
                     selected_model = tmp_poly_model
                     poly = True
-                    min_diff = diff_poly
+                    min_mse = mse_poly
+                min_diff = min(min_diff, min(diff_linear, diff_poly))
             else:
                 # if accuracy is enough, skip NN
                 if min_diff < 10 and not TEST:
