@@ -15,8 +15,7 @@ import pandas as pd
 
 
 class ModelPool:
-    #CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN', 'SVR']
-    CANDIDATE_MODELS = ['LR']
+    CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN', 'SVR']
 
     def getModel(self, name, path=''):
         if name not in self.CANDIDATE_MODELS:
@@ -35,9 +34,11 @@ class ModelPool:
         elif name == 'SVR':
             return RapidSVR(file_path=path)
 
+
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
                       model_name, isPoly):
         ''' select a feature based on the selected model '''
+        print("selecting features:", model_name)
         features = [x for x in xdf.columns]
         target, current = self.__getCorr(xdf, ydf)
         best_model, mse, r2 = self.__avgmser2(model_name, current, x_train,
@@ -64,6 +65,7 @@ class ModelPool:
             current.append(bestnew)
             r2 = bestr2
             mse = bestmse
+            print(current)
         return best_model, current
 
     def selectModel(self, x_train, x_test, y_train, y_test, TEST=False):
@@ -123,7 +125,7 @@ class ModelPool:
                     'mse': mse,
                     'diff': diff
                 }
-                if min_diff >= 10:
+                if min_diff >= 10 and not TEST:
                     selected_model = nn_model
                     poly = False
                     min_diff = diff

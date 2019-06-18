@@ -64,7 +64,7 @@ class MModel:
                 self.models[feature]['name'],
                 'isPoly':
                 self.models[feature]['isPoly'],
-                'featires':
+                'features':
                 self.models[feature]['features'],
                 'filepath':
                 self.outfile[feature]
@@ -86,12 +86,31 @@ class MModel:
         # first pass: select model
         model, isPoly, training_time = self.modelPool.selectModel(
             self.x_train, self.x_test, self.y_train[feature + '-C'],
-            self.y_test[feature + '-C'])
+            self.y_test[feature + '-C'], TEST)
         # second pass: select feature
         model, min_features = self.modelPool.selectFeature(
             self.xDF_scaled, self.yDF[feature + '-C'], self.x_train,
             self.x_test, self.y_train[feature + '-C'],
             self.y_test[feature + '-C'], model.name, isPoly)
+        # third phase: finalize model
+        final_model = self.modelPool.getModel(model.name)
+        x = self.x_train[min_features]
+        x_test = self.x_test[min_features]
+        if isPoly:
+            x = PolynomialFeatures(degree=2).fit_transform(x)
+            x_test = PolynomialFeatures(degree=2).fit_transform(x_test)
+        time_start = time.time()
+        final_model.fit(x, self.y_train[feature + '-C'])
+        time_end = time.time()
+        elapsed_time = time_end - time_start
+        r2, mse, diff = final_model.validate(x_test,
+                                             self.y_test[feature + '-C'])
+        training_time['final'] = {
+            'time': elapsed_time,
+            'r2': r2,
+            'mse': mse,
+            'diff': diff
+        }
         return model, min_features, isPoly, training_time
 
     def trainSingleFeature(self, feature, TEST=False):
@@ -104,15 +123,15 @@ class MModel:
             # take the maximum number of two vectors per feature
             if col[-1] == "C":
                 continue
-            if col[:-1] not in self.maxes:
-                self.maxes[col[:-1]] = X.max()[col]
-            if X.max()[col] > self.maxes[col[:-1]]:
-                self.maxes[col[:-1]] = X.max()[col]
+            if col[:-2] not in self.maxes:
+                self.maxes[col[:-2]] = X.max()[col]
+            if X.max()[col] > self.maxes[col[:-2]]:
+                self.maxes[col[:-2]] = X.max()[col]
         scaled_X = pd.DataFrame()
         for col in X.columns:
             if col[-1] == 'C':
                 scaled_X[col] = X[col]
-            scaled_X[col] = X[col] / self.maxes[col[:-1]]
+            scaled_X[col] = X[col] / self.maxes[col[:-2]]
         return scaled_X
 
     def train(self, TEST=False):
@@ -126,6 +145,8 @@ class MModel:
         # train the model for each feature individually
         debug_info = OrderedDict()
         for feature, values in y.items():
+            if 'AFREQ' in feature:
+                continue
             model, min_features, isPoly, training_time = self.trainSingleFeature(
                 feature, TEST)
             self.models[feature] = {
@@ -202,6 +223,8 @@ class MModel:
             print('vec1', vec1)
             print('vec2', vec2)
             exit(1)
+        vec1 = self.__scaleInput(vec1)
+        vec2 = self.__scaleInput(vec2)
         # format the vec
         for i in range(0, len(vec1)):
             smaller = min(vec1[i], vec2[i])
@@ -216,15 +239,33 @@ class MModel:
         id = 0
         for feature in features:
             model = self.models[feature]['model']
-            input = vec
+            active_features = self.models[feature]['features']
+            # filter the input
+            input = self.__filterInput(vec, active_features)
             if self.models[feature]['isPoly']:
                 input = vec_poly
             combined_feature = model.predict(input)
+            # small fix: if predicted is smaller than 0, use the maximum one
             if combined_feature < 0:
-                combined_feature = (vec1[id] + vec2[id]) / 2.0
+                combined_feature = vec2[id]
             pred[feature] = combined_feature
             id += 1
         return pd.DataFrame(data=pred)
+
+    def __filterInput(self, vec, features):
+        feature_ids = list(map(lambda f: self.features.index(f), features))
+        filtered = list(map(lambda id: vec[id], feature_ids))
+        return filtered
+
+    def __scaleInput(self, vec):
+        id = 0
+        output = []
+        for feature in self.features:
+            raw_value = vec[id]
+            scaled_value = raw_value / self.maxes[feature]
+            output.append(scaled_value)
+            id += 1
+        return output
 
     def write_to_file(self, output_prefix):
         # save the model to disk
