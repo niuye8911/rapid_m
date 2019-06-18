@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import train_test_split
 
 from models.RapidBayesian import *
 from models.RapidEN import *
@@ -10,9 +11,12 @@ from models.RapidNN import *
 from models.RapidSVR import *
 from Utility import *
 
+import pandas as pd
+
 
 class ModelPool:
-    CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN', 'SVR']
+    #CANDIDATE_MODELS = ['LR', 'LS', 'EN', 'BR', 'NN', 'SVR']
+    CANDIDATE_MODELS = ['LR']
 
     def getModel(self, name, path=''):
         if name not in self.CANDIDATE_MODELS:
@@ -31,15 +35,42 @@ class ModelPool:
         elif name == 'SVR':
             return RapidSVR(file_path=path)
 
-    def selectFeature(self, x_train, y_train, x_test, y_test, model_name):
+    def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
+                      model_name, isPoly):
         ''' select a feature based on the selected model '''
+        features = [x for x in xdf.columns]
+        target, current = self.__getCorr(xdf, ydf)
+        best_model, mse, r2 = self.__avgmser2(model_name, current, x_train,
+                                              x_test, y_train, y_test, isPoly)
+        while r2 < 0.92:
+            bestr2 = 0
+            bestnew = "NONE"
+            bestmse = 0.0
+            for addition in features:
+                if addition in current:
+                    continue
+                tempcurrent = current.copy()
+                tempcurrent.append(addition)
+                model, tempmse, tempr2 = self.__avgmser2(
+                    model_name, tempcurrent, x_train, x_test, y_train, y_test,
+                    isPoly)
+                if tempr2 > bestr2:
+                    bestr2 = tempr2
+                    bestnew = addition
+                    bestmse = tempmse
+                    best_model = model
+            if bestnew == "NONE":
+                break
+            current.append(bestnew)
+            r2 = bestr2
+            mse = bestmse
+        return best_model, current
 
-
-    def selectModel(self, x_train, y_train, x_test, y_test, TEST=False):
+    def selectModel(self, x_train, x_test, y_train, y_test, TEST=False):
         ''' choose a proper model with the lowest mre,
         if TEST is set to True, then use all models '''
-        min_mse = 99
-        min_diff = 99
+        min_mse = 999999
+        min_diff = 999999
         selected_model = None
         poly = False
         training_time = OrderedDict()
@@ -98,3 +129,42 @@ class ModelPool:
                     min_diff = diff
         # print the training time into the debug file
         return selected_model, poly, training_time
+
+    def __avgmser2(self,
+                   model_name,
+                   factorlist,
+                   X_train,
+                   X_test,
+                   y_train,
+                   y_test,
+                   isPoly,
+                   k=5):
+        mses = []
+        r2s = []
+        X_train = X_train[factorlist]
+        X_test = X_test[factorlist]
+        X_train = X_train if not isPoly else PolynomialFeatures(
+            degree=2).fit_transform(X_train)
+        X_test = X_test if not isPoly else PolynomialFeatures(
+            degree=2).fit_transform(X_test)
+        for i in range(k):
+            # init the model
+            model = self.getModel(model_name)
+            # train the model
+            model.fit(X_train, y_train)
+            # validate the model
+            r2, mse, diff = model.validate(X_test, y_test)
+            mses.append(mse)
+            r2s.append(r2)
+        avg_r2 = sum(r2s) / len(r2s)
+        avg_mse = sum(mses) / len(mses)
+        return model, avg_mse, avg_r2
+
+    def __getCorr(self, xdf, ydf):
+        ndf = pd.concat([xdf, ydf], axis=1)
+        max_corr = ndf.corr(
+        ).loc[[x
+               for x in xdf.columns], [x for x in ndf.columns
+                                       if x[-1] == "C"]].abs().idxmax()
+        factors = {k: [v] for k, v in max_corr.iteritems()}
+        return list(factors.keys())[0], list(factors.values())[0]

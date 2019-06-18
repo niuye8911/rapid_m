@@ -53,6 +53,7 @@ class MModel:
         machine.features = self.features
         machine.model_params['Metric'] = OrderedDict()
         machine.model_params['Meta'] = OrderedDict()
+        machine.maxes = self.maxes
         machine.model_params['Metric']["avg_diff"] = self.avg_diff
         for feature in self.features:
             # write the metric
@@ -63,6 +64,8 @@ class MModel:
                 self.models[feature]['name'],
                 'isPoly':
                 self.models[feature]['isPoly'],
+                'featires':
+                self.models[feature]['features'],
                 'filepath':
                 self.outfile[feature]
             })
@@ -80,10 +83,16 @@ class MModel:
         self.features = list(map(lambda x: x[:-2], features))
 
     def getModel(self, feature, TEST=False):
-        return self.modelPool.selectModel(self.x_train,
-                                          self.y_train[feature + '-C'],
-                                          self.x_test,
-                                          self.y_test[feature + '-C'], TEST)
+        # first pass: select model
+        model, isPoly, training_time = self.modelPool.selectModel(
+            self.x_train, self.x_test, self.y_train[feature + '-C'],
+            self.y_test[feature + '-C'])
+        # second pass: select feature
+        model, min_features = self.modelPool.selectFeature(
+            self.xDF_scaled, self.yDF[feature + '-C'], self.x_train,
+            self.x_test, self.y_train[feature + '-C'],
+            self.y_test[feature + '-C'], model.name, isPoly)
+        return model, min_features, isPoly, training_time
 
     def trainSingleFeature(self, feature, TEST=False):
         RAPID_info("TRAINING", feature)
@@ -108,24 +117,22 @@ class MModel:
 
     def train(self, TEST=False):
         x = self.preprocess(self.xDF)
+        self.xDF_scaled = x
         y = self.yDFs
         y_all = self.yDF
         # first get the test data
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y_all, test_size=0.3, random_state=101)
-        self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
-            self.x_test)
-        self.x_train_poly = PolynomialFeatures(degree=2).fit_transform(
-            self.x_train)
         # train the model for each feature individually
         debug_info = OrderedDict()
         for feature, values in y.items():
-            model, isPoly, training_time = self.trainSingleFeature(
+            model, min_features, isPoly, training_time = self.trainSingleFeature(
                 feature, TEST)
             self.models[feature] = {
                 'model': model,
                 'isPoly': isPoly,
-                'name': model.name
+                'name': model.name,
+                'features': min_features
             }
             debug_info[feature] = training_time
         printTrainingInfo(debug_info)
@@ -138,9 +145,10 @@ class MModel:
         for feature, values in self.yDFs.items():
             # check if it's poly
             isPoly = self.models[feature]['isPoly']
-            input_feature = self.x_test_poly if isPoly else self.x_test
-            y_pred_feature = self.models[feature]['model'].predict(
-                input_feature)
+            x_test = self.x_test[self.models[feature]['features']]
+            if isPoly:
+                x_test = PolynomialFeatures(degree=2).fit_transform(x_test)
+            y_pred_feature = self.models[feature]['model'].predict(x_test)
             y_pred[feature] = y_pred_feature
         features = y_pred.keys()
         y_pred = pd.DataFrame(data=y_pred)
