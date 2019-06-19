@@ -29,11 +29,10 @@ class ModelPool:
             return RapidLasso(file_path=path)
         elif name == 'BR':
             return RapidBayesian(file_path=path)
-        elif name == 'NN':
-            return RapidNN(file_path=path)
         elif name == 'SVR':
             return RapidSVR(file_path=path)
-
+        elif name == 'NN':
+            return RapidNN(file_path=path)
 
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
                       model_name, isPoly):
@@ -43,10 +42,15 @@ class ModelPool:
         target, current = self.__getCorr(xdf, ydf)
         best_model, mse, r2 = self.__avgmser2(model_name, current, x_train,
                                               x_test, y_train, y_test, isPoly)
+
+        id = 1
         while r2 < 0.92:
+            print("current:", current)
             bestr2 = 0
             bestnew = "NONE"
             bestmse = 0.0
+            print("round", id)
+            id += 1
             for addition in features:
                 if addition in current:
                     continue
@@ -73,6 +77,7 @@ class ModelPool:
         if TEST is set to True, then use all models '''
         min_mse = 999999
         min_diff = 999999
+        max_r2 = 0
         selected_model = None
         poly = False
         training_time = OrderedDict()
@@ -110,9 +115,11 @@ class ModelPool:
                     poly = True
                     min_mse = mse_poly
                 min_diff = min(min_diff, min(diff_linear, diff_poly))
+                min_mse = min(min_mse, min(mse_linear, mse_poly))
+                max_r2 = max(max_r2, max(r2_linear, r2_poly))
             else:
                 # if accuracy is enough, skip NN
-                if min_diff < 10 and not TEST:
+                if max_r2 >= 0.92 and not TEST:
                     RAPID_info('ModelPool', "Accuracy Reached, no need for NN")
                     continue
                 # NN does not need to check high order
@@ -125,10 +132,12 @@ class ModelPool:
                     'mse': mse,
                     'diff': diff
                 }
-                if min_diff >= 10 and not TEST:
+                if r2 >= max_r2:
                     selected_model = nn_model
                     poly = False
                     min_diff = diff
+                    max_r2 = r2
+                    min_mse = mse
         # print the training time into the debug file
         return selected_model, poly, training_time
 
@@ -140,7 +149,7 @@ class ModelPool:
                    y_train,
                    y_test,
                    isPoly,
-                   k=5):
+                   k=1):
         mses = []
         r2s = []
         X_train = X_train[factorlist]

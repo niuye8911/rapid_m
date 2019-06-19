@@ -87,6 +87,7 @@ class MModel:
         model, isPoly, training_time = self.modelPool.selectModel(
             self.x_train, self.x_test, self.y_train[feature + '-C'],
             self.y_test[feature + '-C'], TEST)
+        print("selected Model:",model.name,"ispoly:",isPoly)
         # second pass: select feature
         model, min_features = self.modelPool.selectFeature(
             self.xDF_scaled, self.yDF[feature + '-C'], self.x_train,
@@ -99,10 +100,7 @@ class MModel:
         if isPoly:
             x = PolynomialFeatures(degree=2).fit_transform(x)
             x_test = PolynomialFeatures(degree=2).fit_transform(x_test)
-        time_start = time.time()
-        final_model.fit(x, self.y_train[feature + '-C'])
-        time_end = time.time()
-        elapsed_time = time_end - time_start
+        elapsed_time = final_model.fit(x, self.y_train[feature + '-C'])
         r2, mse, diff = final_model.validate(x_test,
                                              self.y_test[feature + '-C'])
         training_time['final'] = {
@@ -145,8 +143,6 @@ class MModel:
         # train the model for each feature individually
         debug_info = OrderedDict()
         for feature, values in y.items():
-            if 'AFREQ' in feature:
-                continue
             model, min_features, isPoly, training_time = self.trainSingleFeature(
                 feature, TEST)
             self.models[feature] = {
