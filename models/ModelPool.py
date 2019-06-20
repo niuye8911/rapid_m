@@ -35,11 +35,15 @@ class ModelPool:
             return RapidNN(file_path=path)
 
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
-                      model_name, isPoly):
+                      model_name, isPoly, speedup=True):
         ''' select a feature based on the selected model '''
         print("selecting features:", model_name)
         features = [x for x in xdf.columns]
         target, current = self.__getCorr(xdf, ydf)
+        if speedup:
+            first = current[0][:-2]
+            prefix='1' if current[0][-1]=='2' else '2'
+            current.append(first+'-'+prefix)
         best_model, mse, r2 = self.__avgmser2(model_name, current, x_train,
                                               x_test, y_train, y_test, isPoly)
 
@@ -51,22 +55,40 @@ class ModelPool:
             bestmse = 0.0
             print("round", id)
             id += 1
+            tried = []
             for addition in features:
-                if addition in current:
+                if addition in current or addition in tried:
                     continue
                 tempcurrent = current.copy()
-                tempcurrent.append(addition)
+                addition_prefix = addition[:-2]
+                if speedup:
+                    tempcurrent.append(addition_prefix+'-1')
+                    tempcurrent.append(addition_prefix+'-2')
+                else:
+                    tempcurrent.append(addition)
                 model, tempmse, tempr2 = self.__avgmser2(
                     model_name, tempcurrent, x_train, x_test, y_train, y_test,
                     isPoly)
                 if tempr2 > bestr2:
                     bestr2 = tempr2
-                    bestnew = addition
+                    if not speedup:
+                        bestnew = addition
+                    else:
+                        bestnew = addition_prefix
                     bestmse = tempmse
                     best_model = model
+                if speedup:
+                    tried.append(bestnew+"-1")
+                    tried.append(bestnew+"-2")
+                else:
+                    tried.append(bestnew)
             if bestnew == "NONE":
                 break
-            current.append(bestnew)
+            if speedup:
+                current.append(bestnew+'-1')
+                current.append(bestnew+'-2')
+            else:
+                current.append(bestnew)
             r2 = bestr2
             mse = bestmse
             print(current)
