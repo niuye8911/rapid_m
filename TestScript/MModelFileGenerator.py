@@ -6,14 +6,14 @@
 
 import pandas as pd
 
-BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/halfandhalf/'
+BASE_DIR = '~/Research/rapid_m_backend_server/testData/halfandhalf/'
 APPS = ['ferret', 'swaptions', 'bodytrack', 'svm', 'nn']
 RESULT = '../testData/mmodelfile_w_info.csv'
 
 HEADER_DONE = False
 
 
-def getMModelFile(sysFile, mperfFile, perfFile, result):
+def getMModelFile(app, sysFile, mperfFile, perfFile, result):
     # get the column names
     columns = pd.read_csv(sysFile).columns.values.tolist()[1:]
     # get all the configs
@@ -21,15 +21,15 @@ def getMModelFile(sysFile, mperfFile, perfFile, result):
     # get all the config sys
     config_footprint = getConfigFootprint(sysFile, columns)
     # get all the added environment to the configs
-    added_env = getAddedEnv(mperfFile, columns, mperf = True)
+    added_env = getAddedEnv(mperfFile, columns, mperf=True)
     # get all the overall environment according to the slowdown
     overall_env = getOverallEnv(perfFile, columns)
     # assemble everything into a dataFrame
-    assembleAlltoFile(columns, config_footprint, added_env, overall_env,
+    assembleAlltoFile(app, columns, config_footprint, added_env, overall_env,
                       result)
 
 
-def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs,
+def assembleAlltoFile(app, columns, config_footprint, added_envs, overall_envs,
                       result):
     global HEADER_DONE
     # write the header
@@ -41,25 +41,28 @@ def assembleAlltoFile(columns, config_footprint, added_envs, overall_envs,
         result.write(','.join(map(lambda x: x + '-C', columns)))
         # add two columns
         result.write(',cpu_load,mem_load')
+        # add the two columns for loads
+        result.write(',load1,load2')
         result.write('\n')
         HEADER_DONE = True
     # write the observations config by config
     for config in config_footprint.keys():
         lines = map(
             lambda x: ','.join(x) + '\n',
-            assemblePerConfig(config, config_footprint, added_envs,
+            assemblePerConfig(app, config, config_footprint, added_envs,
                               overall_envs))
         for line in lines:
             result.write(line)
 
 
-def assemblePerConfig(config, config_footprint, added_envs, overall_envs):
+def assemblePerConfig(app, config, config_footprint, added_envs, overall_envs):
     sys1 = config_footprint[config]
     lines = []
     for slowdown, added_env in added_envs[config].items():
         sys2 = added_env['env']
         cpu_load = added_env['load'][0]
         mem_load = added_env['load'][1]
+        stresser = added_env['stresser']
         if slowdown not in overall_envs[config]:
             # broken in perf
             continue
@@ -68,6 +71,8 @@ def assemblePerConfig(config, config_footprint, added_envs, overall_envs):
         line = list(map(lambda x: str(x), line))
         # add load info
         line += [str(cpu_load), str(mem_load)]
+        # add stresser infos
+        line += [app + ':' + config, stresser]
         lines.append(line)
     return lines
 
@@ -102,7 +107,8 @@ def getAddedEnv(mperfFile, columns, mperf=False):
             cpu_load, mem_load = getStresser(row['stresser'])
         added_envs[config][slowDown] = {
             'env': added_env,
-            'load': [cpu_load, mem_load]
+            'load': [cpu_load, mem_load],
+            'stresser': row['stresser'] if mperf else ''
         }
     return added_envs
 
@@ -143,5 +149,5 @@ for app in APPS:
     sys_file = BASE_DIR + app + "-sys.csv"
     mperf_file = BASE_DIR + app + "-mperf.csv"
     perf_file = BASE_DIR + app + "-perf.csv"
-    getMModelFile(sys_file, mperf_file, perf_file, result)
+    getMModelFile(app, sys_file, mperf_file, perf_file, result)
 result.close()
