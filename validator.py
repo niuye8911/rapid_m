@@ -16,10 +16,13 @@ def main(argv):
     m_model = getMModel(options.machine_summary)
     observation = getObservation(options.observation, app_name)
     appsys = getAppSys(options.app_sys, app_name)
-    validate(observation, app_summary, appsys, m_model)
+    validate_per_app(observation, app_summary, appsys, m_model)
 
+def validate_selection_per_app():
+    ''' validate the impact of slowdown->selection '''
+    # first get the correct selection
 
-def validate(observation, app_summary, appsys, m_model):
+def validate_per_app(observation, app_summary, appsys, m_model):
     '''validate the M+P model
     observation: the observated slowdown given an env
     app_summary: containing all the P_model for a specific bucket
