@@ -8,7 +8,7 @@ import pandas as pd
 
 BASE_DIR = '/home/liuliu/Research/rapid_m_backend_server/testData/halfandhalf/'
 APPS = ['ferret', 'swaptions', 'bodytrack', 'svm', 'nn']
-RESULT = './testData/mmodelfile_w_info.csv'
+RESULT = '../testData/mmodelfile_w_info.csv'
 
 HEADER_DONE = False
 

@@ -9,7 +9,7 @@ from scipy.cluster.hierarchy import dendrogram
 
 
 def printTrainingInfo(d):
-    output = open('./training_info.csv', 'w')
+    output = open('./outputs/training_info.csv', 'w')
     # get all features
     features = list(d.keys())
     # get all the models

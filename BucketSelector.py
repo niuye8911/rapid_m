@@ -24,7 +24,6 @@ DELIMITER = ","  # bucket comb delimiter
 def bucketSelect(active_apps_file, SELECTOR="P_M"):
     with open(active_apps_file, 'r') as file:
         active_apps = json.load(file)
-
         if SELECTOR == "P_M":
             return pmSelect(active_apps)
 
