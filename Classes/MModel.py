@@ -42,7 +42,9 @@ class MModel:
                     'isPoly':
                     model_params['Meta'][feature]['isPoly'],
                     'name':
-                    model_params['Meta'][feature]['name']
+                    model_params['Meta'][feature]['name'],
+                    'features':
+                    model_params['Meta'][feature]['features']
                 }
             self.maxes = mmodel['maxes']
             self.TRAINED = True
@@ -87,7 +89,7 @@ class MModel:
         model, isPoly, training_time = self.modelPool.selectModel(
             self.x_train, self.x_test, self.y_train[feature + '-C'],
             self.y_test[feature + '-C'], TEST)
-        print("selected Model:",model.name,"ispoly:",isPoly)
+        print("selected Model:", model.name, "ispoly:", isPoly)
         # second pass: select feature
         model, min_features = self.modelPool.selectFeature(
             self.xDF_scaled, self.yDF[feature + '-C'], self.x_train,
@@ -221,15 +223,13 @@ class MModel:
             exit(1)
         vec1 = self.__scaleInput(vec1)
         vec2 = self.__scaleInput(vec2)
-        # format the vec
+        # swap to format the vec
         for i in range(0, len(vec1)):
             smaller = min(vec1[i], vec2[i])
             bigger = max(vec1[i], vec2[i])
             vec[i] = smaller
             vec[i + len(vec1)] = bigger
         # predict per-feature
-        vec = [vec]
-        vec_poly = PolynomialFeatures(degree=2).fit_transform(vec)
         pred = OrderedDict()
         features = self.features
         id = 0
@@ -237,9 +237,9 @@ class MModel:
             model = self.models[feature]['model']
             active_features = self.models[feature]['features']
             # filter the input
-            input = self.__filterInput(vec, active_features)
+            input = [self.__filterInput(vec, active_features)]
             if self.models[feature]['isPoly']:
-                input = vec_poly
+                input = PolynomialFeatures(degree=2).fit_transform(input)
             combined_feature = model.predict(input)
             # small fix: if predicted is smaller than 0, use the maximum one
             if combined_feature < 0:
@@ -248,8 +248,10 @@ class MModel:
             id += 1
         return pd.DataFrame(data=pred)
 
-    def __filterInput(self, vec, features):
-        feature_ids = list(map(lambda f: self.features.index(f), features))
+    def __filterInput(self, vec, active_features):
+        all_features = list(map(lambda f: f + '-1', self.features)) + list(
+            map(lambda f: f + '-2', self.features))
+        feature_ids = list(map(lambda f: all_features.index(f), active_features))
         filtered = list(map(lambda id: vec[id], feature_ids))
         return filtered
 
