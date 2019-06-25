@@ -24,21 +24,21 @@ DELIMITER = ","  # bucket comb delimiter
 def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
     with open(active_apps_file, 'r') as file:
         active_apps = json.load(file)
+        # get all the apps
+        apps = getActiveApps(active_apps)
         if SELECTOR == "P_M":
-            return pmSelect(active_apps)
+            return pmSelect(apps)
         if SELECTOR == "P":
             if env == []:
                 exit(1)
-            return pSelect(active_apps, env)
+            return pSelect(apps, env)
 
 
-def pmSelect(active_apps):
+def pmSelect(apps):
     # get the M-Model
     m_model = MModel(MACHINE_FILE)
     features = m_model.features
     RAPID_info('M-Model Loader: ', m_model.TRAINED)
-    # get all the apps
-    apps = getActiveApps(active_apps)
     # get all the P_models {app_name: {bucket_name: model }}
     p_models = loadAppModels(apps)
     # convert apps to buckets
@@ -54,9 +54,7 @@ def pmSelect(active_apps):
     return getSelection(slowdowns, apps, buckets)
 
 
-def pSelect(active_apps, measured_env):
-    # get all the apps
-    apps = getActiveApps(active_apps)
+def pSelect(apps, measured_env):
     # get all the P_models {app_name: {bucket_name: model }}
     p_models = loadAppModels(apps)
     # convert apps to buckets
@@ -84,8 +82,8 @@ def getSelection(slowdowns, apps, buckets):
         # get overall mv per bucket list
         for app in app_names:
             bucket_name = list(filter(lambda x: app in x, bucket_list))[0]
-            bucket = list(filter(lambda x: x.b_name == bucket_name,
-                                 buckets[app]))[0]
+            bucket = list(
+                filter(lambda x: x.b_name == bucket_name, buckets[app]))[0]
             slow_down = appslowdowns[app]
             budget = list(filter(lambda x: x['app'].name == app,
                                  apps))[0]['budget']

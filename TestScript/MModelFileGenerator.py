@@ -43,6 +43,8 @@ def assembleAlltoFile(app, columns, config_footprint, added_envs, overall_envs,
         result.write(',cpu_load,mem_load')
         # add the two columns for loads
         result.write(',load1,load2')
+        # add the column for load1
+        result.write(',slowdown')
         result.write('\n')
         HEADER_DONE = True
     # write the observations config by config
@@ -73,6 +75,8 @@ def assemblePerConfig(app, config, config_footprint, added_envs, overall_envs):
         line += [str(cpu_load), str(mem_load)]
         # add stresser infos
         line += [app + ':' + config, stresser]
+        # add slowdown
+        line += [str(slowdown)]
         lines.append(line)
     return lines
 
