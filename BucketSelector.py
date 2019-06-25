@@ -21,11 +21,15 @@ MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_ma
 DELIMITER = ","  # bucket comb delimiter
 
 
-def bucketSelect(active_apps_file, SELECTOR="P_M"):
+def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
     with open(active_apps_file, 'r') as file:
         active_apps = json.load(file)
         if SELECTOR == "P_M":
             return pmSelect(active_apps)
+        if SELECTOR == "P":
+            if env == []:
+                exit(1)
+            return pSelect(active_apps, env)
 
 
 def pmSelect(active_apps):
@@ -42,11 +46,56 @@ def pmSelect(active_apps):
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
-    combined_envs = getEnvs(bucket_combs, m_model)
+    combined_envs = getEnvs(bucket_combs, mmodel=m_model)
     # predict the per-app slow-down
     slowdowns = getSlowdowns(combined_envs, p_models, features)
     # get the bucket selection based on slow-down
     PPRINT(slowdowns)
+    return getSelection(slowdowns, apps, buckets)
+
+
+def pSelect(active_apps, measured_env):
+    # get all the apps
+    apps = getActiveApps(active_apps)
+    # get all the P_models {app_name: {bucket_name: model }}
+    p_models = loadAppModels(apps)
+    # convert apps to buckets
+    buckets = genBuckets(apps, p_models)
+    # get all combinations of buckets
+    bucket_combs = getBucketCombs(buckets)
+    # formulate the measured combined envs
+    combined_envs = getEnvs(bucket_combs, P_ONLY=True, env=measured_env)
+    # predict the per-app slow-down
+    slowdowns = getSlowdowns(combined_envs, p_models, features)
+    # get the slowdown
+    PPRINT(slowdowns)
+    return getSelection(slowdowns, apps, buckets)
+
+
+def getSelection(slowdowns, apps, buckets):
+    ''' get the final selection of configs and buckets '''
+    selection = {}
+    best_mv = 0.0
+    for bucketlist, appslowdowns in slowdowns.items():
+        total_mv = 0.0
+        configs = {}
+        bucket_list = bucketlist.split(',')
+        app_names = list(appslowdowns.keys())
+        # get overall mv per bucket list
+        for app in app_names:
+            bucket_name = list(filter(lambda x: app in x, bucket_list))[0]
+            bucket = list(filter(lambda x: x.b_name == bucket_name,
+                                 buckets[app]))[0]
+            slow_down = appslowdowns[app]
+            budget = list(filter(lambda x: x['app'].name == app,
+                                 apps))[0]['budget']
+            config, mv = bucket.getOptimal(budget, slow_down)
+            configs[app] = config
+            total_mv += mv
+        if total_mv > best_mv:
+            selection = configs.copy()
+    PPRINT(selection)
+    return selection
 
 
 def getSlowdowns(combined_envs, p_models, features):
@@ -74,16 +123,20 @@ def env_to_frame(env, features):
     return pd.DataFrame(data=result)
 
 
-def getEnvs(bucket_combs, mmodel):
+def getEnvs(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
     ''' generate the combined env using M-Model '''
     result = {}
     for comb in bucket_combs:
         comb_name = DELIMITER.join((list(map(lambda x: x.b_name, comb))))
-        env_dicts = list(
-            map(lambda x: formatEnv(x.rep_env, mmodel.features), comb))
-        # cumulatively apply M-Model
-        final_env = functools.reduce(lambda x, y: mReducer(x, y, mmodel),
-                                     env_dicts)
+        if not P_ONLY:
+            env_dicts = list(
+                map(lambda x: formatEnv(x.rep_env, mmodel.features), comb))
+            # cumulatively apply M-Model
+            final_env = functools.reduce(lambda x, y: mReducer(x, y, mmodel),
+                                         env_dicts)
+        else:
+            # P_ONLY
+            final_env = env
         # print(final_env)
         result[comb_name] = final_env
     return result
