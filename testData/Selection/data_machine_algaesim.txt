@@ -11,6 +11,30 @@
             "budget": 10000,
             "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-swaptions",
             "status": 1
+        },
+	{
+            "id": "ferret",
+            "budget": 10000,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-ferret",
+            "status": 1
+        },
+	{
+            "id": "facedetect",
+            "budget": 10000,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-facedetect",
+            "status": 1
+        },
+	{
+            "id": "svm",
+            "budget": 10000,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-svm",
+            "status": 1
+        },
+	{
+            "id": "nn",
+            "budget": 10000,
+            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-nn",
+            "status": 1
         }
     ],
     "lastload": 1557431305,

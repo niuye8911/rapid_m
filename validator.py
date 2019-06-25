@@ -5,22 +5,95 @@ import sys
 from Classes.App import *
 from Classes.AppSysProfile import *
 from Classes.MModel import *
+from BucketSelector import *
 
-#TODO: use average sys in bucket
+MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
+
 
 def main(argv):
     parser = genParser()
     options, args = parser.parse_args()
-    app_summary = getApp(options.app_summary)
-    app_name = app_summary.name
-    m_model = getMModel(options.machine_summary)
-    observation = getObservation(options.observation, app_name)
-    appsys = getAppSys(options.app_sys, app_name)
-    validate_per_app(observation, app_summary, appsys, m_model)
+    if options.mode == 'SLOWDOWN':
+        #TODO: use average sys in bucket
+        app_summary = getApp(options.app_summary)
+        app_name = app_summary.name
+        m_model = getMModel(options.machine_summary)
+        observation = getObservation(options.observation, app_name)
+        appsys = getAppSys(options.app_sys, app_name)
+        validate_per_app(observation, app_summary, appsys, m_model)
+    if options.mode == 'SELECTION':
+        if options.active_apps == '':
+            print("no input active apps file")
+            exit(1)
+        with open(options.active_apps, 'r') as file:
+            active_apps = json.load(file)
+            apps = getActiveApps(active_apps)
+            # init all models
+            p_models = loadAppModels(apps)
+            # get M-Model
+            m_model = MModel(MACHINE_FILE)
+            # get the buckets
+            buckets = genBuckets(apps, p_models)
+            # get the highest and lowest budget
+            range = getBudgetRange(apps)
+            # split the budets
+            budgets = splitBudget(range)
+            validate_selection(apps, budgets, buckets, m_model, p_models)
 
-def validate_selection_per_app():
-    ''' validate the impact of slowdown->selection '''
-    # first get the correct selection
+
+def validate_selection(apps, budgets, buckets, m_model, p_models):
+    # TODO: check the env inputted to the P-Model
+    scenarios = pd.read_csv('./testData/mmodelfile_w_info.csv')
+    load1_ids = [x for x in scenarios.columns if x[-2:] == '-1']
+    load2_ids = [x for x in scenarios.columns if x[-2:] == '-2']
+    loadC_ids = [x for x in scenarios.columns if x[-2:] == '-C']
+    # iterate through all scenarios
+    features = m_model.features
+    for index, row in scenarios.iterrows():
+        target_app = row['load1'].split(':')[0]
+        target_config = row['load1'].split(':')[1]
+        load1 = row[load1_ids].values.tolist()
+        load2 = row[load2_ids].values.tolist()
+        loadC = row[loadC_ids].values.tolist()
+        # get the belonging bucket
+        target_bucket = list(
+            filter(lambda x: target_config in x.configurations,
+                   buckets[target_app]))[0]
+        p_model = target_bucket.p_model
+        # get the P-ONLY selection
+        slowdown_p = p_model.predict(env_to_frame(loadC, features))
+        # get the M-P selection
+        pred_env = m_model.predict(load1, load2)
+        slowdown_mp = p_model.predict(pred_env)
+        print(pred_env,loadC,slowdown_p,slowdown_mp)
+        exit(1)
+
+
+def splitBudget(b_range):
+    budgets = []
+    for i in range(1, 11):
+        budgets.append({app: getBudget(x, i) for app, x in b_range.items()})
+    return budgets
+
+
+def getBudget(range, i):
+    return (range[1] - range[0]) / 10.0 * i
+
+
+def getBudgetRange(apps):
+    range = {}
+    for app in apps:
+        dir = app['dir']
+        cost_file = open(dir + '/cost.csv', 'r')
+        highest = 0.0
+        lowest = 99999999
+        for line in cost_file:
+            cost = float(line.split(' ')[-1])
+            highest = max(highest, cost)
+            lowest = min(lowest, cost)
+        range[app['app'].name] = [lowest, highest]
+    return range
+
 
 def validate_per_app(observation, app_summary, appsys, m_model):
     '''validate the M+P model
@@ -162,6 +235,8 @@ def genParser():
     parser.add_option('--appsum', dest="app_summary")
     parser.add_option('--appsys', dest="app_sys")
     parser.add_option('--obs', dest="observation")
+    parser.add_option('-m', dest="mode", default='SLOWDOWN')
+    parser.add_option('--apps', dest="active_apps")
     return parser
 
 
