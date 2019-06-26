@@ -145,17 +145,17 @@ def mReducer(env1, env2, mmodel):
     return list(result.values[0])
 
 
-def formatEnv(env, features):
+def formatEnv(env, features, POSTFIX=''):
     result = []
     for feature in features:
         if feature == 'MEM':
-            result.append(env['READ'] + env['WRITE'])
+            result.append(env['READ' + POSTFIX] + env['WRITE' + POSTFIX])
         elif feature == 'INST':
-            result.append(env['ACYC'] / env['INST'])
+            result.append(env['ACYC' + POSTFIX] / env['INST' + POSTFIX])
         elif feature == 'INSTnom%' or feature == 'PhysIPC%':
-            result.append(env[feature] / 100.0)
+            result.append(env[feature + POSTFIX] / 100.0)
         else:
-            result.append(env[feature])
+            result.append(env[feature + POSTFIX])
     return list(map(lambda x: float(x), result))
 
 
