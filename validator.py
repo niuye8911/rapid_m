@@ -49,26 +49,75 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
     loadC_ids = [x for x in scenarios.columns if x[-2:] == '-C']
     # iterate through all scenarios
     features = m_model.features
-    for index, row in scenarios.iterrows():
-        target_app = row['load1'].split(':')[0]
-        target_config = row['load1'].split(':')[1]
-        load1 = row[load1_ids].values.tolist()
-        load2 = row[load2_ids].values.tolist()
-        loadC = row[loadC_ids].values.tolist()
-        # get the belonging bucket
-        target_bucket = list(
-            filter(lambda x: target_config in x.configurations,
-                   buckets[target_app]))[0]
-        p_model = target_bucket.p_model
-        # get the P-ONLY selection
-        slowdown_p = p_model.predict(env_to_frame(loadC, features))
-        # get the M-P selection
-        pred_env = m_model.predict(load1, load2)
-        slowdown_mp = p_model.predict(pred_env)
-        print(pred_env,loadC,slowdown_p,slowdown_mp)
-        exit(1)
+    result = {}
+    # iterate through apps
+    for app in apps:
+        target_app = app['app'].name
+        # select the frame
+        app_df = scenarios.loc[scenarios['load1'].str.contains(target_app)]
+        if target_app not in result:
+            result[target_app] = []
+        p_correct = [0]*10
+        pm_correct = [0]*10
+        # iterate through rows
+        total = app_df.shape[0]
+        for index, row in app_df.iterrows():
+            id = 0
+            for budget in budgets:
+                app_budget = budget[target_app]
+                target_config = row['load1'].split(':')[1]
+                load1 = formatEnv(row[load1_ids], features, POSTFIX='-1')
+                load2 = formatEnv(row[load2_ids], features, POSTFIX='-2')
+                loadC = formatEnv(row[loadC_ids], features, POSTFIX='-C')
+                # get the belonging bucket
+                target_bucket = list(
+                    filter(lambda x: target_config in x.configurations,
+                           buckets[target_app]))[0]
+                p_model = target_bucket.p_model
+                # get the P-ONLY slowdown
+                slowdown_p = p_model.predict(env_to_frame(loadC, features))[0]
+                # get the M-P slowdown
+                pred_env = m_model.predict(load1, load2)
+                slowdown_mp = p_model.predict(pred_env)[0]
+                # get the REAL slowdown
+                slowdown_gt = row['slowdown']
+                # get the optimal solutions
+                [s_p, s_mp, s_gt] = list(
+                    map(lambda x: target_bucket.getOptimal(app_budget, x),
+                        [slowdown_p, slowdown_mp, slowdown_gt]))
+                if s_p == s_gt:
+                    p_correct[id] += 1
+                if s_mp == s_gt:
+                    pm_correct[id] += 1
+                id += 1
+        # calculate the precision
+        p_correct = [x / total for x in p_correct]
+        pm_correct = [x / total for x in pm_correct]
+        result[target_app]={'P':p_correct,'PM':pm_correct}
+        RAPID_info('Valid Selector', "finished:"+target_app)
+        printSelection(result)
 
-
+def printSelection(selection):
+    output = open('./selection.csv','w')
+    # write the header
+    header = ['app']+list(map(lambda x:str(x)+'%', range(10,100,10)))
+    output.write(','.join(header))
+    # write app by app
+    p = []
+    pm = []
+    for app,results in selection.items():
+        p_line = [app]+list(map(lambda x: str(x),results['P']))
+        pm_line = [app]+list(map(lambda x: str(x),results['PM']))
+        p.append(p_line)
+        pm.append(pm_line)
+    # write out
+    for line in p:
+        output.write(','.join(line)+'\n')
+    output.write('\nP_M\n')
+    for line in pm:
+        output.write(','.join(line)+'\n')
+    output.close()
+    
 def splitBudget(b_range):
     budgets = []
     for i in range(1, 11):
@@ -77,7 +126,7 @@ def splitBudget(b_range):
 
 
 def getBudget(range, i):
-    return (range[1] - range[0]) / 10.0 * i
+    return range[0] + (range[1] - range[0]) / 10.0 * i
 
 
 def getBudgetRange(apps):
@@ -151,21 +200,6 @@ def genPred(observation, app_summary, appsys, m_model):
         debug_file.write(str(pred_slowdown) + '\n\n')
     debug_file.close()
     return y_pred
-
-
-def formatEnv(env, features):
-    result = []
-    for feature in features:
-        if feature == 'MEM':
-            result.append(env['READ'] + env['WRITE'])
-        elif feature == 'INST':
-            inst = env['ACYC'] / env['INST']
-            result.append(inst)
-        elif feature == 'INSTnom%' or feature == 'PhysIPC%':
-            result.append(env[feature] / 100.0)
-        else:
-            result.append(env[feature])
-    return list(map(lambda x: float(x), result))
 
 
 def combineEnvs(env1, env2):
