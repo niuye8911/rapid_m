@@ -1,0 +1,14 @@
+ ,AFREQ,EXEC,FREQ,INST,INSTnom%,IPC,L2MISS,L2MPI,L3HIT,L3MISS,L3MPI,PhysIPC%,MEM,Model,isPoly
+AFREQ,A,A,A,A,A,A,A,A,A,A,A,A,A,LS,True
+EXEC,-,A,-,-,-,-,-,-,-,-,-,-,-,LR,True
+FREQ,-,-,A,-,-,-,-,-,-,-,-,-,-,LR,True
+INST,-,-,A,A,-,-,-,-,A,-,-,-,-,LR,True
+INSTnom%,-,A,-,-,-,-,-,-,-,-,-,-,-,LR,True
+IPC,-,-,-,-,A,A,-,-,-,-,-,-,-,BR,True
+L2MISS,-,-,-,-,-,-,A,-,-,-,-,-,-,NN,False
+L2MPI,-,-,-,-,-,-,-,A,-,-,-,-,-,BR,True
+L3HIT,-,-,A,-,-,-,-,-,A,-,-,-,-,NN,False
+L3MISS,A,A,A,A,A,A,A,A,A,A,A,A,A,NN,False
+L3MPI,A,A,A,A,A,A,A,A,A,A,A,A,A,BR,True
+PhysIPC%,-,-,-,-,A,A,-,-,-,-,-,-,-,BR,True
+MEM,-,-,-,-,-,-,-,-,-,-,-,-,A,BR,True

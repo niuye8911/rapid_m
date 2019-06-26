@@ -1,0 +1,69 @@
+{
+  "name": "swaptions",
+  "machine_id": 0,
+  "model_type": "LINEAR",
+  "model_params": {
+    "swaptions1": {
+      "file": "outputs/swaptions/swaptions1.pkl",
+      "mse": 0.02386260611656018,
+      "mae": 0.01597607362565113,
+      "diff": 0.014836109818845459,
+      "r2": 0.5325129676197797,
+      "feature": [
+        "AFREQ",
+        "EXEC",
+        "FREQ",
+        "INST",
+        "INSTnom%",
+        "IPC",
+        "L2MISS",
+        "L2MPI",
+        "L3HIT",
+        "L3MPI",
+        "PhysIPC%"
+      ],
+      "poly": false,
+      "model_type": "Bayesian"
+    }
+  },
+  "TRAINED": true,
+  "CLUSTERED": true,
+  "num_of_cluster": 1,
+  "cluster_info": {
+    "swaptions1": {
+      "cluster": [
+        "num-400000",
+        "num-200000",
+        "num-800000",
+        "num-100000",
+        "num-600000",
+        "num-900000",
+        "num-300000",
+        "num-700000",
+        "num-500000",
+        "num-1000000"
+      ],
+      "env": {
+        "ACYC": 2270.4814695100004,
+        "AFREQ": 1.0695020577460002,
+        "EXEC": 0.35442741973709996,
+        "FREQ": 0.13426752908839998,
+        "INST": 5996.997705235999,
+        "INSTnom": 0.7088838289159999,
+        "INSTnom%": 17.72657843139,
+        "IPC": 2.6405056884299993,
+        "L2MISS": 0.056763403091989996,
+        "L2MPI": 9.390731291743e-06,
+        "L3HIT": 0.9331191294979,
+        "L3MISS": 0.0039646130596840004,
+        "L3MPI": 6.588484153200001e-07,
+        "PhysIPC": 5.28173283775,
+        "PhysIPC%": 132.05798965740001,
+        "READ": 0.0024997896956480007,
+        "TIME(ticks)": 2113.8778980839998,
+        "WRITE": 0.00037190885606550007
+      }
+    }
+  },
+  "overwrite": false
+}
