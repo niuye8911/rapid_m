@@ -9,6 +9,8 @@ from BucketSelector import *
 
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 
+TOLERANCE = 0.05
+
 
 def main(argv):
     parser = genParser()
@@ -57,8 +59,8 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
         app_df = scenarios.loc[scenarios['load1'].str.contains(target_app)]
         if target_app not in result:
             result[target_app] = []
-        p_correct = [0]*10
-        pm_correct = [0]*10
+        p_correct = [0] * 10
+        pm_correct = [0] * 10
         # iterate through rows
         total = app_df.shape[0]
         for index, row in app_df.iterrows():
@@ -82,42 +84,47 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
                 # get the REAL slowdown
                 slowdown_gt = row['slowdown']
                 # get the optimal solutions
-                [s_p, s_mp, s_gt] = list(
-                    map(lambda x: target_bucket.getOptimal(app_budget, x),
-                        [slowdown_p, slowdown_mp, slowdown_gt]))
-                if s_p == s_gt:
+                s_gt, mv_gt, success_gt = target_bucket.getOptimal(
+                    app_budget, slowdown_gt, TOLERANCE)
+                s_p, mv_p, success_p = target_bucket.getOptimal(
+                    app_budget, slowdown_p)
+                s_mp, mv_mp, success_mp = target_bucket.getOptimal(
+                    app_budget, slowdown_mp)
+                if s_p[0] in s_gt:
                     p_correct[id] += 1
-                if s_mp == s_gt:
+                if s_mp[0] in s_gt:
                     pm_correct[id] += 1
                 id += 1
         # calculate the precision
         p_correct = [x / total for x in p_correct]
         pm_correct = [x / total for x in pm_correct]
-        result[target_app]={'P':p_correct,'PM':pm_correct}
-        RAPID_info('Valid Selector', "finished:"+target_app)
+        result[target_app] = {'P': p_correct, 'PM': pm_correct}
+        RAPID_info('Valid Selector', "finished:" + target_app)
         printSelection(result)
 
+
 def printSelection(selection):
-    output = open('./selection.csv','w')
+    output = open('./selection.csv', 'w')
     # write the header
-    header = ['app']+list(map(lambda x:str(x)+'%', range(10,100,10)))
+    header = ['app'] + list(map(lambda x: str(x) + '%', range(10, 100, 10)))
     output.write(','.join(header))
     # write app by app
     p = []
     pm = []
-    for app,results in selection.items():
-        p_line = [app]+list(map(lambda x: str(x),results['P']))
-        pm_line = [app]+list(map(lambda x: str(x),results['PM']))
+    for app, results in selection.items():
+        p_line = [app] + list(map(lambda x: str(x), results['P']))
+        pm_line = [app] + list(map(lambda x: str(x), results['PM']))
         p.append(p_line)
         pm.append(pm_line)
     # write out
     for line in p:
-        output.write(','.join(line)+'\n')
+        output.write(','.join(line) + '\n')
     output.write('\nP_M\n')
     for line in pm:
-        output.write(','.join(line)+'\n')
+        output.write(','.join(line) + '\n')
     output.close()
-    
+
+
 def splitBudget(b_range):
     budgets = []
     for i in range(1, 11):

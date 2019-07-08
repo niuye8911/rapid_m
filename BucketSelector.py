@@ -87,9 +87,10 @@ def getSelection(slowdowns, apps, buckets):
             slow_down = appslowdowns[app]
             budget = list(filter(lambda x: x['app'].name == app,
                                  apps))[0]['budget']
-            config, mv = bucket.getOptimal(budget, slow_down)
-            configs[app] = config
-            total_mv += mv
+            config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
+            # TODO: what to use when SUCCESS is false
+            configs[app] = config[0]
+            total_mv += mv[0]
         if total_mv > best_mv:
             selection = configs.copy()
     PPRINT(selection)
