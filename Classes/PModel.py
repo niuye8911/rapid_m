@@ -64,7 +64,7 @@ class PModel:
         min_mse = 99999
         selected_model_name = ''
         for model_name, model in PModel.CANDIDATE_MODELS.items():
-            rfe = RFE(model, 11)
+            rfe = RFE(model, 5)
             fit = rfe.fit(x_train_scaled, y_train)
             # get the feature names:
             feature_names = list(
@@ -109,8 +109,8 @@ class PModel:
         if model is None:
             model = self.model
         self.y_pred = model.predict(x)
-        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test,
-                                                      self.y_pred))
+        self.mse = np.sqrt(
+            metrics.mean_squared_error(self.y_test, self.y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
         self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
@@ -153,10 +153,10 @@ class PModel:
     def drawPrediction(self, output):
         predictions = self.y_pred
         observations = self.y_test
-        normed_pred = (predictions - min(observations)) / (max(observations) -
-                                                           min(observations))
-        normed_obs = (observations - min(observations)) / (max(observations) -
-                                                           min(observations))
+        normed_pred = (predictions - min(observations)) / (
+            max(observations) - min(observations))
+        normed_obs = (observations - min(observations)) / (
+            max(observations) - min(observations))
         # plot the base line
         x = [0, 1]
         y = [0, 1]
