@@ -49,11 +49,9 @@ class ModelPool:
 
         id = 1
         while r2 < 0.92:
-            print("current:", current)
             bestr2 = 0
             bestnew = "NONE"
             bestmse = 0.0
-            print("round", id)
             id += 1
             tried = []
             for addition in features:
@@ -91,7 +89,6 @@ class ModelPool:
                 current.append(bestnew)
             r2 = bestr2
             mse = bestmse
-            print(current)
         return best_model, current
 
     def selectModel(self, x_train, x_test, y_train, y_test, TEST=False):

@@ -96,7 +96,7 @@ class Bucket:
             selected = paretos[min_id:max_id + 1]
         # clean up selected
         selected_conf = list(map(lambda x: x[0], selected))
-        selected_mv = list(map(lambda x: x[1]['mv'], selected))
+        selected_mv = list(map(lambda x: float(x[1]['mv']), selected))
         SUCCESS = True
         if selected_conf == []:
             SUCCESS = False
