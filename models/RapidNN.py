@@ -62,7 +62,7 @@ class RapidNN(RapidModel):
         model = Sequential()
         # first layer
         model.add(
-            Dense(self.input_dim * self.input_dim,
+            Dense(50,
                   input_dim=self.input_dim,
                   kernel_initializer='normal',
                   activation='relu'))
