@@ -207,6 +207,33 @@ class MModel:
             feature_diffs[self.features[i]] = feature_diff[i]
         return feature_diffs, average_diff
 
+    def predict_batch(self, load1, load2):
+        # clean up the data
+        load1['MEM-1'] = load1['READ-1'] + load1['WRITE-1']
+        load2['MEM-2'] = load2['READ-2'] + load2['WRITE-2']
+        load1['INST-1'] = load1['ACYC-1'] / load1['INST-1']
+        load2['INST-2'] = load2['ACYC-2'] / load2['INST-2']
+        load1['PhysIPC%'] = load1['PhysIPC%-1'] / 100.0
+        load2['PhysIPC%'] = load2['PhysIPC%-2'] / 100.0
+        load1['INSTnom%-1'] = load1['INSTnom%-1'] / 100.0
+        load2['INSTnom%-2'] = load2['INSTnom%-2'] / 100.0
+        x = pd.concat([load1, load2], axis=1)
+        y_pred = OrderedDict()
+        for feature in self.features:
+            # check if it's poly
+            isPoly = self.models[feature]['isPoly']
+            # filter out input
+            x_input = x[self.models[feature]['features']]
+            # scale input
+            for col in x_input.columns:
+                max_val = self.maxes[col[:-2]]
+                x_input[col] = x_input[col] / max_val
+            if isPoly:
+                x_input = PolynomialFeatures(degree=2).fit_transform(x_input)
+            y_pred_feature = self.models[feature]['model'].predict(x_input)
+            y_pred[feature] = y_pred_feature
+        return pd.DataFrame(data=y_pred)
+
     def predict(self, vec1, vec2):
         if len(vec1) != len(vec2):
             RAPID_warn('M-Model', "two vecs with different lengths")
@@ -251,7 +278,8 @@ class MModel:
     def __filterInput(self, vec, active_features):
         all_features = list(map(lambda f: f + '-1', self.features)) + list(
             map(lambda f: f + '-2', self.features))
-        feature_ids = list(map(lambda f: all_features.index(f), active_features))
+        feature_ids = list(
+            map(lambda f: all_features.index(f), active_features))
         filtered = list(map(lambda id: vec[id], feature_ids))
         return filtered
 
