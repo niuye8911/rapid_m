@@ -11,6 +11,7 @@ from sklearn.externals import joblib
 class RapidProfile:
     # pre_determined excluded system footprint that won't affect perf
     EXCLUDED_FEATURES = {
+        "AFREQ",
         "ACYC",
         'C0res%',
         'C10res%',
