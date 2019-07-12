@@ -16,7 +16,7 @@ class PModel:
         'Bayesian': linear_model.BayesianRidge()
     }
 
-    def __init__(self, p_info=''):
+    def __init__(self, p_info='', maxes={}):
         self.model = None
         self.TRAINED = False
         self.mse = -1.
@@ -24,35 +24,75 @@ class PModel:
         self.r2 = -1.
         self.output_loc = ''
         self.modelPool = ModelPool()
+        self.maxes = maxes
         if p_info is not '':
             # read from a file
-            self.fromInfo(p_info)
+            self.loadFromInfo(p_info)
 
-    def fromInfo(self, info):
-        self.model = pickle.load(open(info['file'], 'rb'))
+    def setMaxes(self, maxes):
+        self.maxes = maxes
+
+    def loadFromInfo(self, info):
+        # TODO: change
+        self.model = self.modelPool.getModel(info['model_type'], info['file'])
         self.TRAINED = True
         self.polyFeature = info['poly']
         self.model_type = info['model_type']
-        self.feature = info['feature']
+        self.features = info['feature']
 
     def setDF(self, dataFrame, feature):
         self.df = dataFrame
         self.features = feature
 
     def train(self):
-        x = self.df[self.features]
+        x = self.__scaleInput(self.df[self.features])
         y = self.df['SLOWDOWN']
         x_train, self.x_test, y_train, self.y_test = train_test_split(
-            x, y, test_size=0.2, random_state=0)
+            x, y, test_size=0.3, random_state=0)
         RAPID_info("TRAINED", x_train.shape[0])
-        x_train_poly = PolynomialFeatures(degree=2).fit_transform(x_train)
-        self.x_test_poly = PolynomialFeatures(degree=2).fit_transform(
-            self.x_test)
         # select the model and features
-        self.selectModelAndFeature(x_train, y_train)
+        self.getModel(x_train, y_train, self.x_test, self.y_test)
         self.TRAINED = True
 
-    def selectModelAndFeature(self, x_train, y_train):
+    def getModel(self, x_train, y_train, x_test, y_test):
+        # first pass: select model
+        model, isPoly, training_time = self.modelPool.selectModel(
+            x_train, x_test, y_train, y_test)
+        print("selected Model:", model.name, "ispoly:", isPoly)
+        # second pass: select feature
+        model, min_features = self.modelPool.selectFeature(
+            self.df[self.features],
+            self.df['SLOWDOWN'],
+            x_train,
+            x_test,
+            y_train,
+            y_test,
+            model.name,
+            isPoly,
+            speedup=False)
+        RAPID_info("SELECTED_FEATURES", min_features)
+        # third phase: finalize model
+        final_model = self.modelPool.getModel(model.name)
+        x = x_train[min_features]
+        x_test = x_test[min_features]
+        self.x_test = x_test
+        if isPoly:
+            x = PolynomialFeatures(degree=2).fit_transform(x)
+            x_test = PolynomialFeatures(degree=2).fit_transform(x_test)
+        elapsed_time = final_model.fit(x, y_train)
+        r2, mse, diff = final_model.validate(x_test, y_test)
+        training_time['final'] = {
+            'time': elapsed_time,
+            'r2': r2,
+            'mse': mse,
+            'diff': diff
+        }
+        self.model = final_model
+        self.polyFeature = isPoly
+        self.features = min_features
+        self.modelType = final_model.name
+
+    def getModel_deprecated(self, x_train, y_train, x_test, y_test):
         # use the validate process to pick the most important 10 linear features
         # scale the data
         min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
@@ -105,12 +145,13 @@ class PModel:
 
     def validate(self, x=None, model=None):
         if x is None:
-            x = self.x_test_selected
+            x = self.x_test if not self.polyFeature else PolynomialFeatures(
+                degree=2).fit_transform(self.x_test)
         if model is None:
             model = self.model
         self.y_pred = model.predict(x)
-        self.mse = np.sqrt(
-            metrics.mean_squared_error(self.y_test, self.y_pred))
+        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test,
+                                                      self.y_pred))
         self.mae = metrics.mean_absolute_error(self.y_test, self.y_pred)
         self.r2 = r2_score(self.y_test, self.y_pred)
         # relative error
@@ -122,11 +163,17 @@ class PModel:
         self.model = pickle.load(open(model_file, 'rb'))
         self.TRAINED = True
 
+    def __scaleInput(self, df):
+        for col in df.columns:
+            df[col] = df[col] / self.maxes[col]
+        return df
+
     def formulate_env(self, env):
         ''' given a df (env), filtered out the unwanted feature and get poly '''
-        input = env[self.feature]
+        input = env[self.features]
         if self.polyFeature:
-            input = PolynomialFeatures(degree=2).fit_transform(input)
+            input = PolynomialFeatures(degree=2).fit_transform(
+                self.__scaleInput(input))
         return input
 
     def predict(self, system_profile):
@@ -134,10 +181,10 @@ class PModel:
         pred_slowdown = self.model.predict(self.formulate_env(system_profile))
         return pred_slowdown
 
-    def write_to_file(self, output):
+    def write_to_file(self, output_prefix):
         # save the model to disk
-        pickle.dump(self.model, open(output, 'wb'))
-        self.output_loc = output
+        self.model.save(output_prefix)
+        self.output_loc = output_prefix
 
     def dump_into_app(self, app, name):
         app.model_params[name] = dict()
@@ -153,10 +200,10 @@ class PModel:
     def drawPrediction(self, output):
         predictions = self.y_pred
         observations = self.y_test
-        normed_pred = (predictions - min(observations)) / (
-            max(observations) - min(observations))
-        normed_obs = (observations - min(observations)) / (
-            max(observations) - min(observations))
+        normed_pred = (predictions - min(observations)) / (max(observations) -
+                                                           min(observations))
+        normed_obs = (observations - min(observations)) / (max(observations) -
+                                                           min(observations))
         # plot the base line
         x = [0, 1]
         y = [0, 1]

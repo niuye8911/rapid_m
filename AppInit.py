@@ -39,9 +39,11 @@ def init(app_file,
         slowDownProfile = SlowDownProfile(
             pd.read_csv(performance_file), app.name)
         appSysProfile = AppSysProfile(pd.read_csv(profile_file), app.name)
-
+        # get the maxes
+        maxes = getMaxes(slowDownProfile.dataFrame[slowDownProfile.x])
+        app.maxes = maxes
         pModelTrainer, cluster_list, Z = determine_k_incremental(
-            slowDownProfile, appSysProfile, directory, app.name)
+            slowDownProfile, appSysProfile, directory, app)
 
         # calculate the average envs
         rep_env = gen_rep_env(profile_file, cluster_list)
@@ -53,7 +55,7 @@ def init(app_file,
         pModelTrainer.write_to_file(directory)
 
         # write slow-down model to app
-        pModelTrainer.dump_into_app(app)
+        pModelTrainer.dump_into_app()
 
         app.TRAINED = True
 
@@ -66,6 +68,13 @@ def init(app_file,
         # write the scaled perf-file to disk
         slowDownProfile.writeOut(app.name + "-perf_scaled.csv")
 
+def getMaxes(X):
+    ''' scale the data '''
+    maxes = {}
+    for col in X.columns:
+        # take the maximum number of two vectors per feature
+        maxes[col] = X.max()[col]
+    return maxes
 
 def gen_rep_env(sys_file, cluster_list):
     sys = pd.read_csv(sys_file)
@@ -82,9 +91,9 @@ def write_to_file(app_file, app):
         json.dump(app.__dict__, output, indent=2)
 
 
-def determine_k(slowDownProfile, appSysProfile, directory, app_name):
+def determine_k(slowDownProfile, appSysProfile, directory, app):
     # iterate through different cluster numbers
-    pModelTrainer = PModelTrainer(app_name, slowDownProfile)
+    pModelTrainer = PModelTrainer(app, slowDownProfile)
     for num_of_cluster in range(1, MAX_ITERATION + 1):
         # partition the cluster with the hist error
         cluster_list, Z = get_k_cluster(appSysProfile, num_of_cluster)
@@ -103,9 +112,9 @@ def determine_k(slowDownProfile, appSysProfile, directory, app_name):
 
 
 def determine_k_incremental(slowDownProfile, appSysProfile, directory,
-                            app_name):
+                            app):
     # iterate through different cluster numbers
-    pModelTrainer = PModelTrainer(app_name, slowDownProfile)
+    pModelTrainer = PModelTrainer(app, slowDownProfile)
     cluster_list = []
     target_id = -1
     for num_of_cluster in range(1, MAX_ITERATION + 1):

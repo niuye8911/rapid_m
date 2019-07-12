@@ -12,14 +12,15 @@ from Utility import *
 
 
 class PModelTrainer:
-    def __init__(self, app_name, slowDownProfile, cluster_list=[]):
+    def __init__(self, app, slowDownProfile, cluster_list=[]):
         '''
         Train a performance model based on the measurement
-        :param app_name: the name of the app
+        :param app: the app
         :param slowDownProfile: formatted data of slow-down
         :param cluster_list: list of cluster
         '''
-        self.app_name = app_name
+        self.app_name = app.name
+        self.app = app
         self.slowDownProfile = slowDownProfile
         self.cluster_list = cluster_list
         self.p_models = []
@@ -82,6 +83,7 @@ class PModelTrainer:
     def pModelTrain(self, df, features):
         pModel = PModel()
         pModel.setDF(df, features)
+        pModel.setMaxes(self.app.maxes)
         pModel.train()
         pModel.validate()
         return pModel
@@ -93,8 +95,7 @@ class PModelTrainer:
             os.mkdir(dir_name)
 
         for model in self.p_models:
-            model.write_to_file(dir_name + "/" + self.app_name + str(id) +
-                                ".pkl")
+            model.write_to_file(dir_name + "/" + self.app_name + str(id))
             model.drawPrediction(dir_name + "/" + self.app_name + str(id) +
                                  ".png")
             model.printPrediction(dir_name + "/" + self.app_name + str(id) +
@@ -113,9 +114,9 @@ class PModelTrainer:
         output.write(",".join(line))
         output.close()
 
-    def dump_into_app(self, app):
+    def dump_into_app(self):
         id = 1
         for model in self.p_models:
-            model.dump_into_app(app, app.name + str(id))
+            model.dump_into_app(self.app, self.app.name + str(id))
             # print(model.model.coef_)
             id += 1

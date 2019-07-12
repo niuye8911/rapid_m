@@ -4,7 +4,6 @@
     1) name (string)
     2) machine_id (int)
     3) TRAINED (boolean)
-    4) model_type (enum PModelType)
     5) model_params<attribute, value> (dict<string,float>)
     6) CLUSTERED (boolean)
     7) num_of_cluster (int)
@@ -19,13 +18,13 @@ class App:
         '''if overwrite, the file will be overwritten by new content'''
         self.name = ""
         self.machine_id = -1
-        self.model_type = None
         self.model_params = OrderedDict()
         self.TRAINED = False
         self.CLUSTERED = False
         self.num_of_cluster = -1
         self.cluster_info = dict()
         self.overwrite = overwrite
+        self.maxes = {}
         if filePath:
             self.fromFile(filePath)
 
@@ -34,10 +33,9 @@ class App:
             app = json.load(app_json)
             self.name = app['name']
             self.machine_id = app['machine_id']
-            self.model_type = None if 'model_type' not in app else app[
-                'model_type']
             self.TRAINED = app['TRAINED']
             self.CLUSTERED = app['CLUSTERED']
+            self.maxes = {} if 'maxes' not in app else app['maxes']
             if app['TRAINED']:
                 self.readParams(app['model_params'])
                 self.TRAINED = True

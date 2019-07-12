@@ -211,6 +211,6 @@ def loadAppModels(apps):
         app = app['app']
         models[app.name] = {}
         for bucket_name, info in app.model_params.items():
-            models[app.name][bucket_name] = PModel(info)
+            models[app.name][bucket_name] = PModel(info, app.maxes)
         RAPID_info("Model Loader", "loaded P-Models for " + app.name)
     return models
