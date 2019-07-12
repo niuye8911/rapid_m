@@ -61,6 +61,8 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
             result[target_app] = []
         p_correct = [0] * 10
         pm_correct = [0] * 10
+        p_mv_dist = [0.0] * 10
+        pm_mv_dist = [0.0] * 10
         # iterate through rows
         total = app_df.shape[0]
         for index, row in app_df.iterrows():
@@ -86,6 +88,9 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
                 # get the optimal solutions
                 s_gt, mv_gt, success_gt = target_bucket.getOptimal(
                     app_budget, slowdown_gt, TOLERANCE)
+                # get the real optimal solution
+                s_gt_0, mv_gt_0, success_gt_0 = target_bucket.getOptimal(
+                    app_budget, slowdown_gt)
                 s_p, mv_p, success_p = target_bucket.getOptimal(
                     app_budget, slowdown_p)
                 s_mp, mv_mp, success_mp = target_bucket.getOptimal(
@@ -94,11 +99,21 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
                     p_correct[id] += 1
                 if s_mp[0] in s_gt:
                     pm_correct[id] += 1
+                pm_mv_dist[id] += abs(mv_gt_0[0] - mv_mp[0]) / mv_gt_0[0]
+                p_mv_dist[id] += abs(mv_gt_0[0] - mv_p[0]) / mv_gt_0[0]
                 id += 1
+                print(abs(mv_gt_0[0] - mv_mp[0]) / mv_gt_0[0])
         # calculate the precision
         p_correct = [x / total for x in p_correct]
         pm_correct = [x / total for x in pm_correct]
-        result[target_app] = {'P': p_correct, 'PM': pm_correct}
+        p_mv_dist = [x / total for x in p_mv_dist]
+        pm_mv_dist = [x / total for x in pm_mv_dist]
+        result[target_app] = {
+            'P': p_correct,
+            'PM': pm_correct,
+            'P_MV': p_mv_dist,
+            'PM_MV': pm_mv_dist
+        }
         RAPID_info('Valid Selector', "finished:" + target_app)
         printSelection(result)
 
@@ -107,20 +122,32 @@ def printSelection(selection):
     output = open('./selection.csv', 'w')
     # write the header
     header = ['app'] + list(map(lambda x: str(x) + '%', range(10, 100, 10)))
-    output.write(','.join(header))
+    output.write(','.join(header) + '\n')
     # write app by app
     p = []
     pm = []
+    p_mv = []
+    pm_mv = []
     for app, results in selection.items():
         p_line = [app] + list(map(lambda x: str(x), results['P']))
         pm_line = [app] + list(map(lambda x: str(x), results['PM']))
+        p_mv_line = [app] + list(map(lambda x: str(x), results['P_MV']))
+        pm_mv_line = [app] + list(map(lambda x: str(x), results['PM_MV']))
         p.append(p_line)
         pm.append(pm_line)
+        p_mv.append(p_mv_line)
+        pm_mv.append(pm_mv_line)
     # write out
     for line in p:
         output.write(','.join(line) + '\n')
     output.write('\nP_M\n')
     for line in pm:
+        output.write(','.join(line) + '\n')
+    output.write('\nP_mv\n')
+    for line in p_mv:
+        output.write(','.join(line) + '\n')
+    output.write('\nPM_mv\n')
+    for line in pm_mv:
         output.write(','.join(line) + '\n')
     output.close()
 
