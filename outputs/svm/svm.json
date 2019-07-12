@@ -1,29 +1,26 @@
 {
   "name": "svm",
   "machine_id": 0,
-  "model_type": "LINEAR",
   "model_params": {
     "svm1": {
-      "file": "outputs/svm/svm1.pkl",
-      "mse": 0.03249252076591043,
-      "mae": 0.02264151767126656,
-      "diff": 0.019662768432111323,
-      "r2": 0.9398534734264469,
+      "file": "outputs/svm/svm1",
+      "mse": 0.03722906477605115,
+      "mae": 0.025998539134433975,
+      "diff": 0.02246002640899236,
+      "r2": 0.9200745858299263,
       "feature": [
         "EXEC",
         "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
+        "MEM",
+        "L3MISS",
         "L2MISS",
-        "L2MPI",
-        "L3HIT",
-        "L3MPI",
         "PhysIPC%",
-        "MEM"
+        "L3HIT",
+        "INST",
+        "L3MPI"
       ],
       "poly": true,
-      "model_type": "linear"
+      "model_type": "LS"
     }
   },
   "TRAINED": true,
@@ -555,5 +552,20 @@
       }
     }
   },
-  "overwrite": false
+  "overwrite": false,
+  "maxes": {
+    "EXEC": 1.3183333333299998,
+    "FREQ": 0.990888888889,
+    "INST": 2.170754716981132,
+    "INSTnom%": 0.659666666667,
+    "IPC": 2.15833333333,
+    "L2MISS": 367.33333333300004,
+    "L2MPI": 0.027880000000000002,
+    "L3HIT": 0.997,
+    "L3MISS": 6.78285714286,
+    "L3MPI": 0.0007924285714289999,
+    "PhysIPC%": 1.0805,
+    "MEM": 6.31
+  },
+  "model_type": "LINEAR"
 }

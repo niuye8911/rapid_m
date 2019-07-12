@@ -1,29 +1,22 @@
 {
   "name": "nn",
   "machine_id": 0,
-  "model_type": "LINEAR",
   "model_params": {
     "nn1": {
-      "file": "outputs/nn/nn1.pkl",
-      "mse": 0.039660521065938495,
-      "mae": 0.027475809127613476,
-      "diff": 0.02343165734737086,
-      "r2": 0.9196729256769971,
+      "file": "outputs/nn/nn1",
+      "mse": 0.037446598393819405,
+      "mae": 0.026001679734853646,
+      "diff": 0.022065457190505577,
+      "r2": 0.9307990891483132,
       "feature": [
-        "AFREQ",
         "EXEC",
+        "L3HIT",
+        "MEM",
         "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2MISS",
-        "L2MPI",
-        "L3MISS",
-        "L3MPI",
-        "PhysIPC%"
+        "L2MISS"
       ],
       "poly": true,
-      "model_type": "linear"
+      "model_type": "LR"
     }
   },
   "TRAINED": true,
@@ -555,5 +548,20 @@
       }
     }
   },
-  "overwrite": false
+  "overwrite": false,
+  "maxes": {
+    "EXEC": 1.197,
+    "FREQ": 1.04375,
+    "INST": 2.1973765166276187,
+    "INSTnom%": 0.598,
+    "IPC": 2.18,
+    "L2MISS": 379.5,
+    "L2MPI": 0.044000000000000004,
+    "L3HIT": 0.996,
+    "L3MISS": 6.765,
+    "L3MPI": 0.004188,
+    "PhysIPC%": 1.091,
+    "MEM": 7.99714285714
+  },
+  "model_type": "LINEAR"
 }

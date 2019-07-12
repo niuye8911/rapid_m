@@ -1,29 +1,29 @@
 {
   "name": "bodytrack",
   "machine_id": 0,
-  "model_type": "LINEAR",
   "model_params": {
     "bodytrack1": {
-      "file": "outputs/bodytrack/bodytrack1.pkl",
-      "mse": 0.03378479179329256,
-      "mae": 0.02175382124572356,
-      "diff": 0.020909825553639558,
-      "r2": 0.732269969925349,
+      "file": "outputs/bodytrack/bodytrack1",
+      "mse": 0.036286150226584726,
+      "mae": 0.022370207792592394,
+      "diff": 0.021373827985505783,
+      "r2": 0.7275217913241718,
       "feature": [
         "EXEC",
-        "FREQ",
-        "INST",
-        "INSTnom%",
-        "IPC",
-        "L2MISS",
-        "L2MPI",
-        "L3HIT",
-        "L3MPI",
+        "L3MISS",
         "PhysIPC%",
-        "MEM"
+        "L3MPI",
+        "INSTnom%",
+        "L2MPI",
+        "FREQ",
+        "L2MISS",
+        "MEM",
+        "INST",
+        "L3HIT",
+        "IPC"
       ],
       "poly": true,
-      "model_type": "linear"
+      "model_type": "BR"
     }
   },
   "TRAINED": true,
@@ -100,5 +100,20 @@
       }
     }
   },
-  "overwrite": false
+  "overwrite": false,
+  "maxes": {
+    "EXEC": 1.5,
+    "FREQ": 0.942363636364,
+    "INST": 1.5498819362455727,
+    "INSTnom%": 0.75,
+    "IPC": 2.76,
+    "L2MISS": 313.88888888900004,
+    "L2MPI": 0.0277111111111,
+    "L3HIT": 1.0,
+    "L3MISS": 5.8275,
+    "L3MPI": 0.000695,
+    "PhysIPC%": 1.38,
+    "MEM": 7.0725
+  },
+  "model_type": "LINEAR"
 }
