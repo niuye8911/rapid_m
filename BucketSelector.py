@@ -16,6 +16,7 @@ from Classes.Bucket import *
 from Classes.MModel import *
 from Classes.PModel import *
 from Utility import *
+from DataUtil import *
 
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 DELIMITER = ","  # bucket comb delimiter
@@ -113,15 +114,6 @@ def getSlowdowns(combined_envs, p_models, features):
     return slowDownTable
 
 
-def env_to_frame(env, features):
-    result = OrderedDict()
-    i = 0
-    for feature in features:
-        result[feature] = [env[i]]
-        i += 1
-    return pd.DataFrame(data=result)
-
-
 def getEnvs(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
     ''' generate the combined env using M-Model '''
     result = {}
@@ -144,20 +136,6 @@ def getEnvs(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
 def mReducer(env1, env2, mmodel):
     result = mmodel.predict(env1, env2)
     return list(result.values[0])
-
-
-def formatEnv(env, features, POSTFIX=''):
-    result = []
-    for feature in features:
-        if feature == 'MEM':
-            result.append(env['READ' + POSTFIX] + env['WRITE' + POSTFIX])
-        elif feature == 'INST':
-            result.append(env['ACYC' + POSTFIX] / env['INST' + POSTFIX])
-        elif feature == 'INSTnom%' or feature == 'PhysIPC%':
-            result.append(env[feature + POSTFIX] / 100.0)
-        else:
-            result.append(env[feature + POSTFIX])
-    return list(map(lambda x: float(x), result))
 
 
 def getBucketCombs(buckets):

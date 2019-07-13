@@ -63,51 +63,72 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
         pm_correct = [0] * 10
         p_mv_dist = [0.0] * 10
         pm_mv_dist = [0.0] * 10
-        # iterate through rows
+        # get the total number of data for this app
         total = app_df.shape[0]
-        for index, row in app_df.iterrows():
-            id = 0
-            for budget in budgets:
-                app_budget = budget[target_app]
-                target_config = row['load1'].split(':')[1]
-                load1 = formatEnv(row[load1_ids], features, POSTFIX='-1')
-                load2 = formatEnv(row[load2_ids], features, POSTFIX='-2')
-                loadC = formatEnv(row[loadC_ids], features, POSTFIX='-C')
-                # get the belonging bucket
-                target_bucket = list(
-                    filter(lambda x: target_config in x.configurations,
-                           buckets[target_app]))[0]
-                p_model = target_bucket.p_model
-                # get the P-ONLY slowdown
-                slowdown_p = p_model.predict(env_to_frame(loadC, features))[0]
-                # get the M-P slowdown
-                pred_env = m_model.predict(load1, load2)
-                slowdown_mp = p_model.predict(pred_env)[0]
+        # iterate through budget
+        id = 0
+        for budget in budgets:
+            app_budget = budget[target_app]
+            # get df and p model by buckets
+            bucket_dfs = {}
+            for bucket in buckets[target_app]:
+                env_df = app_df.loc[app_df['load1'].apply(lambda x: x.split(
+                    ":")[1] in bucket.configurations)]
+                bucket_dfs[bucket.b_name] = {
+                    'env': env_df,
+                    'p': bucket.p_model
+                }
+                # get the corresponding env
+                env_p = formatEnv_df(env_df[loadC_ids], m_model.features, '-C')
+                env_pm = m_model.predict_batch(env_df[load1_ids],
+                                               env_df[load2_ids])
+                # get the P-ONLY slow-down
+                slowdown_pm = bucket.p_model.predict(env_pm)
+                # get the P+M slow-down
+                slowdown_p = bucket.p_model.predict(env_p)
                 # get the REAL slowdown
-                slowdown_gt = row['slowdown']
-                # get the optimal solutions
-                s_gt, mv_gt, success_gt = target_bucket.getOptimal(
-                    app_budget, slowdown_gt, TOLERANCE)
-                # get the real optimal solution
-                s_gt_0, mv_gt_0, success_gt_0 = target_bucket.getOptimal(
-                    app_budget, slowdown_gt)
-                s_p, mv_p, success_p = target_bucket.getOptimal(
-                    app_budget, slowdown_p)
-                s_mp, mv_mp, success_mp = target_bucket.getOptimal(
-                    app_budget, slowdown_mp)
-                if s_p[0] in s_gt:
-                    p_correct[id] += 1
-                if s_mp[0] in s_gt:
-                    pm_correct[id] += 1
-                pm_mv_dist[id] += abs(mv_gt_0[0] - mv_mp[0]) / mv_gt_0[0]
-                p_mv_dist[id] += abs(mv_gt_0[0] - mv_p[0]) / mv_gt_0[0]
-                id += 1
-                print(abs(mv_gt_0[0] - mv_mp[0]) / mv_gt_0[0])
-        # calculate the precision
-        p_correct = [x / total for x in p_correct]
-        pm_correct = [x / total for x in pm_correct]
-        p_mv_dist = [x / total for x in p_mv_dist]
-        pm_mv_dist = [x / total for x in pm_mv_dist]
+                slowdown_gt = env_df['slowdown'].tolist()
+                # get the optimal solution
+                p_sel = list(
+                    map(lambda x: bucket.getOptimal(app_budget, x),
+                        slowdown_p))
+                pm_sel = list(
+                    map(lambda x: bucket.getOptimal(app_budget, x),
+                        slowdown_pm))
+                gt_sel = list(
+                    map(lambda x: bucket.getOptimal(app_budget, x),
+                        slowdown_p))
+                gt_range_sel = list(
+                    map(lambda x: bucket.getOptimal(app_budget, x, TOLERANCE),
+                        slowdown_gt))
+                # calculate the hit rate on selection range
+                hr_p = [
+                    x[0][0] in gt_range_sel[i][0] for i, x in enumerate(p_sel)
+                ]
+                hr_pm = [
+                    x[0][0] in gt_range_sel[i][0] for i, x in enumerate(pm_sel)
+                ]
+                # calculate the MV loss
+                mv_loss_p = [
+                    abs(x[1][0] - gt_sel[i][1][0]) / gt_sel[i][1][0]
+                    for i, x in enumerate(p_sel)
+                ]
+                mv_loss_pm = [
+                    abs(x[1][0] - gt_sel[i][1][0]) / gt_sel[i][1][0]
+                    for i, x in enumerate(pm_sel)
+                ]
+                # record the hit rate and the mv loss
+                p_correct[id] += sum(hr_p)
+                pm_correct[id] += sum(hr_pm)
+                p_mv_dist[id] += sum(mv_loss_p)
+                pm_mv_dist[id] += sum(mv_loss_pm)
+            # summarize the bucket in this budget
+            p_correct[id] = float(p_correct[id]) / float(total)
+            pm_correct[id] = float(pm_correct[id]) / float(total)
+            p_mv_dist[id] = float(p_mv_dist[id]) / float(total)
+            pm_mv_dist[id] = float(pm_mv_dist[id]) / float(total)
+            # go to the next budget id
+            id += 1
         result[target_app] = {
             'P': p_correct,
             'PM': pm_correct,
