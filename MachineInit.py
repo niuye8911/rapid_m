@@ -15,7 +15,10 @@ from MModelTrainer import *
 from Utility import *
 
 
-def trainEnv(machine_file, machine_measurements, directory, DRAW=True,
+def trainEnv(machine_file,
+             machine_measurements,
+             directory,
+             DRAW=True,
              TEST=False):
     # load in the file
     machine = Machine(machine_file)

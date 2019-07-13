@@ -51,8 +51,11 @@ def main(argv):
 
     elif flow is Flow.TRAIN_ENV:
         # train the environment predictor by calling Liu's work
-        trainEnv(options.machine_file, options.machine_measurements,
-                 options.dir, TEST=DEBUG)
+        trainEnv(
+            options.machine_file,
+            options.machine_measurements,
+            options.dir,
+            TEST=DEBUG)
         # do something about the accuracy
 
     elif flow is Flow.INIT:

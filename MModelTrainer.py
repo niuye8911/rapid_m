@@ -54,8 +54,8 @@ class MModelTrainer:
         # write diffs raw data to a csv
         diff_list = pd.DataFrame(data=self.m_model.diffs)
         diff_list.dropna(thresh=1)
-        diff_list.to_csv(dir_name + '/' + self.host_name + '_diff.csv',
-                         index=False)
+        diff_list.to_csv(
+            dir_name + '/' + self.host_name + '_diff.csv', index=False)
         # calculate the CI
         output = open(dir_name + "/" + self.host_name + "_ci.csv", 'w')
         for feature in self.m_model.diffs.keys():

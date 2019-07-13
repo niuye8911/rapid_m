@@ -5,14 +5,12 @@
     11/2018
 """
 
-
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
 from Classes.App import App
 from Classes.SlowDownProfile import SlowDownProfile
 from Classes.AppSysProfile import AppSysProfile
-
 
 MAX_ITERATION = 5
 SLOWDOWN_THRESHOLD = .07
@@ -68,6 +66,7 @@ def init(app_file,
         # write the scaled perf-file to disk
         slowDownProfile.writeOut(app.name + "-perf_scaled.csv")
 
+
 def getMaxes(X):
     ''' scale the data '''
     maxes = {}
@@ -75,6 +74,7 @@ def getMaxes(X):
         # take the maximum number of two vectors per feature
         maxes[col] = X.max()[col]
     return maxes
+
 
 def gen_rep_env(sys_file, cluster_list):
     sys = pd.read_csv(sys_file)
@@ -111,8 +111,7 @@ def determine_k(slowDownProfile, appSysProfile, directory, app):
     return pModelTrainer, cluster_list, Z
 
 
-def determine_k_incremental(slowDownProfile, appSysProfile, directory,
-                            app):
+def determine_k_incremental(slowDownProfile, appSysProfile, directory, app):
     # iterate through different cluster numbers
     pModelTrainer = PModelTrainer(app, slowDownProfile)
     cluster_list = []

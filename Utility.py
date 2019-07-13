@@ -90,19 +90,20 @@ def draw_ci(ci_file, output):
             means.append(float(items[1]))
             ci_lows.append(float(items[1]) - float(items[2]))
             ci_upps.append(float(items[3]) - float(items[1]))
-            highest = max(float(items[3]),highest)
-            lowest = min(float(items[2]),lowest)
-    (_, caps, _) = plt.errorbar(range(len(names)),
-                                means,
-                                yerr=[ci_lows, ci_upps],
-                                fmt='o',
-                                ecolor='g',
-                                capsize=10)
+            highest = max(float(items[3]), highest)
+            lowest = min(float(items[2]), lowest)
+    (_, caps, _) = plt.errorbar(
+        range(len(names)),
+        means,
+        yerr=[ci_lows, ci_upps],
+        fmt='o',
+        ecolor='g',
+        capsize=10)
     for cap in caps:
         cap.set_markeredgewidth(1)
     plt.xticks(range(len(names)), names, fontsize='10', rotation=30)
     plt.ylabel('Prediction MRE', fontsize='15')
-    plt.ylim(lowest*2.0, highest*2.0)
+    plt.ylim(lowest * 2.0, highest * 2.0)
     plt.savefig(output + '.png')
 
 
@@ -125,11 +126,12 @@ def simplified_dendrogram(*args, **kwargs):
             y = d[1]
             if y > annotate_above:
                 plt.plot(x, y, 'o', c=c)
-                plt.annotate("%.3f" % y, (x, y),
-                             xytext=(0, -5),
-                             textcoords='offset points',
-                             va='top',
-                             ha='center')
+                plt.annotate(
+                    "%.3f" % y, (x, y),
+                    xytext=(0, -5),
+                    textcoords='offset points',
+                    va='top',
+                    ha='center')
         if max_d:
             plt.axhline(y=max_d, c='k')
     return ddata
