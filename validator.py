@@ -65,29 +65,23 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
         pm_mv_dist = [0.0] * 10
         # get the total number of data for this app
         total = app_df.shape[0]
-        # iterate through budget
-        id = 0
-        for budget in budgets:
-            app_budget = budget[target_app]
-            # get df and p model by buckets
-            bucket_dfs = {}
-            for bucket in buckets[target_app]:
-                env_df = app_df.loc[app_df['load1'].apply(lambda x: x.split(
-                    ":")[1] in bucket.configurations)]
-                bucket_dfs[bucket.b_name] = {
-                    'env': env_df,
-                    'p': bucket.p_model
-                }
-                # get the corresponding env
-                env_p = formatEnv_df(env_df[loadC_ids], m_model.features, '-C')
-                env_pm = m_model.predict_batch(env_df[load1_ids],
-                                               env_df[load2_ids])
-                # get the P-ONLY slow-down
-                slowdown_pm = bucket.p_model.predict(env_pm)
-                # get the P+M slow-down
-                slowdown_p = bucket.p_model.predict(env_p)
-                # get the REAL slowdown
-                slowdown_gt = env_df['slowdown'].tolist()
+        for bucket in buckets[target_app]:
+            env_df = app_df.loc[app_df['load1'].apply(lambda x: x.split(":")[
+                1] in bucket.configurations)]
+            # get the corresponding env
+            env_p = formatEnv_df(env_df[loadC_ids], m_model.features, '-C')
+            env_pm = m_model.predict_batch(env_df[load1_ids],
+                                           env_df[load2_ids])
+            # get the P-ONLY slow-down
+            slowdown_pm = bucket.p_model.predict(env_pm)
+            # get the P+M slow-down
+            slowdown_p = bucket.p_model.predict(env_p)
+            # get the REAL slowdown
+            slowdown_gt = env_df['slowdown'].tolist()
+            # iterate through budget
+            id = 0
+            for budget in budgets:
+                app_budget = budget[target_app]
                 # get the optimal solution
                 p_sel = list(
                     map(lambda x: bucket.getOptimal(app_budget, x),
@@ -122,13 +116,13 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
                 pm_correct[id] += sum(hr_pm)
                 p_mv_dist[id] += sum(mv_loss_p)
                 pm_mv_dist[id] += sum(mv_loss_pm)
-            # summarize the bucket in this budget
+                id += 1
+        # summarize the bucket in this budget
+        for id in range(0, 10):
             p_correct[id] = float(p_correct[id]) / float(total)
             pm_correct[id] = float(pm_correct[id]) / float(total)
             p_mv_dist[id] = float(p_mv_dist[id]) / float(total)
             pm_mv_dist[id] = float(pm_mv_dist[id]) / float(total)
-            # go to the next budget id
-            id += 1
         result[target_app] = {
             'P': p_correct,
             'PM': pm_correct,
