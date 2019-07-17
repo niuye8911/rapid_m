@@ -91,7 +91,7 @@ def validate_selection(apps, budgets, buckets, m_model, p_models):
                         slowdown_pm))
                 gt_sel = list(
                     map(lambda x: bucket.getOptimal(app_budget, x),
-                        slowdown_p))
+                        slowdown_gt))
                 gt_range_sel = list(
                     map(lambda x: bucket.getOptimal(app_budget, x, TOLERANCE),
                         slowdown_gt))
@@ -156,12 +156,15 @@ def printSelection(selection):
     for line in p:
         output.write(','.join(line) + '\n')
     output.write('\nP_M\n')
+    output.write(','.join(header) + '\n')
     for line in pm:
         output.write(','.join(line) + '\n')
     output.write('\nP_mv\n')
+    output.write(','.join(header) + '\n')
     for line in p_mv:
         output.write(','.join(line) + '\n')
     output.write('\nPM_mv\n')
+    output.write(','.join(header) + '\n')
     for line in pm_mv:
         output.write(','.join(line) + '\n')
     output.close()
