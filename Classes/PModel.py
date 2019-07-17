@@ -164,9 +164,10 @@ class PModel:
         self.TRAINED = True
 
     def __scaleInput(self, df):
+        result_df = pd.DataFrame()
         for col in df.columns:
-            df[col] = df[col] / self.maxes[col]
-        return df
+            result_df[col] = df[col] / self.maxes[col]
+        return result_df
 
     def formulate_env(self, env):
         ''' given a df (env), filtered out the unwanted feature and get poly '''
