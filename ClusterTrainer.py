@@ -11,19 +11,28 @@ from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import pdist
 
 
+def first_cut(appSysProfile):
+    ''' first cut the cluster so that the distance is below a threshold '''
+    data = appSysProfile.scale_tmp(appSysProfile.getData())
+    Z, c = hCluster(data)
+    clusters = fcluster(Z, t=4, criterion='distance')
+    cluster_list = get_cluster_list(clusters, appSysProfile.dataFrame)
+    return cluster_list
+
+
 def increment_cluster(appSysProfile, cluster_list, target_id):
     '''
     Rather than getting k clusteres, partition only the cluster with the highest
     Error
     '''
-    Z, c = hCluster(appSysProfile.getData())
+    Z, c = hCluster(appSysProfile.scale_tmp(appSysProfile.getData()))
     # the first cut
     if target_id == -1:
-        return get_cluster_list(
-            fcluster(Z, 1, criterion='maxclust'), appSysProfile.dataFrame,
-            1), Z
+        return get_cluster_list(fcluster(Z, 1, criterion='maxclust'),
+                                appSysProfile.dataFrame, 1), Z
     # else, cluster the target cluster into 2 parts
-    subFrame = appSysProfile.getSubFrameByConfigs(cluster_list[target_id])
+    subFrame = appSysProfile.scale_tmp(
+        appSysProfile.getSubFrameByConfigs(cluster_list[target_id]))
     x = appSysProfile.getX()
     subZ, c = hCluster(subFrame[x])
     clusters = fcluster(subZ, 2, criterion='maxclust')
@@ -45,7 +54,7 @@ def get_k_cluster(appSysProfile, k):
     '''
     # Z: the linkage matrix
     # c: the coefficient distance
-    Z, c = hCluster(appSysProfile.getData())
+    Z, c = hCluster(appSysProfile.scale_tmp(appSysProfile.getData()))
     # get the clusters
     clusters = fcluster(Z, k, criterion='maxclust')
     # get the cluster list
@@ -53,9 +62,11 @@ def get_k_cluster(appSysProfile, k):
     return cluster_list, Z
 
 
-def get_cluster_list(clusters, df, k):
+def get_cluster_list(clusters, df, k=-1):
     observations = df['Configuration'].values
     cluster_info_list = []
+    if k == -1:  # k is not determined
+        k = max(clusters) + 1
     for i in range(1, k + 1):
         cluster_info_list.append([])
     for i in range(0, len(clusters)):

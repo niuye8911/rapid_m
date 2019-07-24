@@ -34,8 +34,8 @@ def init(app_file,
     if not app.isClustered():
         RAPID_info("clustering for ", app.name)
         # read in the slow-down file
-        slowDownProfile = SlowDownProfile(
-            pd.read_csv(performance_file), app.name)
+        slowDownProfile = SlowDownProfile(pd.read_csv(performance_file),
+                                          app.name)
         appSysProfile = AppSysProfile(pd.read_csv(profile_file), app.name)
         # get the maxes
         maxes = getMaxes(slowDownProfile.dataFrame[slowDownProfile.x])
@@ -116,9 +116,10 @@ def determine_k_incremental(slowDownProfile, appSysProfile, directory, app):
     pModelTrainer = PModelTrainer(app, slowDownProfile)
     cluster_list = []
     target_id = -1
-    for num_of_cluster in range(1, MAX_ITERATION + 1):
-        cluster_list, Z = increment_cluster(appSysProfile, cluster_list,
-                                            target_id)
+    cluster_list = first_cut(appSysProfile)
+    k = len(cluster_list)
+    print('based on the criterion, clustered into',k)
+    for num_of_cluster in range(k, MAX_ITERATION + 1):
         # if any cluster cannot be separated to another cluster
         if [] in cluster_list:
             # go for traditional cluster
@@ -135,4 +136,6 @@ def determine_k_incremental(slowDownProfile, appSysProfile, directory, app):
         print("\n")
         if sum(diff) / len(diff) <= SLOWDOWN_THRESHOLD:
             break
+        cluster_list, Z = increment_cluster(appSysProfile, cluster_list,
+                                            target_id)
     return pModelTrainer, cluster_list, Z

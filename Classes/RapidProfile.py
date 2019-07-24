@@ -90,6 +90,12 @@ class RapidProfile:
         self.dataFrame[self.x] = pd.DataFrame(
             self.scalar.transform(self.dataFrame[self.x]))
 
+    def scale_tmp(self, data):
+        ''' temporarily scale the data and return '''
+        min_max_scaler = preprocessing.MinMaxScaler(feature_range=(0, 1))
+        scaler = min_max_scaler.fit(data)
+        return scaler.transform(data)
+
     def cleanData(self, postfix=''):
         # !!!! REMEMBER TO UPDATE foramtEnv() in BucketSelector
         ''' clean the PCM data to correct form '''
