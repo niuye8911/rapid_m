@@ -137,10 +137,6 @@ class ModelPool:
                 min_mse = min(min_mse, min(mse_linear, mse_poly))
                 max_r2 = max(max_r2, max(r2_linear, r2_poly))
             else:
-                # if accuracy is enough, skip NN
-                if max_r2 >= 0.92 and not TEST:
-                    RAPID_info('ModelPool', "Accuracy Reached, no need for NN")
-                    continue
                 # NN does not need to check high order
                 nn_model = self.getModel('NN')
                 time_nn = nn_model.fit(x_train, y_train)

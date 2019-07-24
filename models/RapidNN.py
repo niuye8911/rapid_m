@@ -3,10 +3,10 @@
 import time
 
 import numpy as np
-from keras.layers import Dense
-from keras.models import Sequential
-from keras.models import load_model
-from keras.wrappers.scikit_learn import KerasRegressor
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.externals import joblib
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
