@@ -6,11 +6,13 @@ from Classes.App import *
 from Classes.AppSysProfile import *
 from Classes.MModel import *
 from BucketSelector import *
+import os
 
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 
 TOLERANCE = 0.05
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
 
 def main(argv):
     parser = genParser()
