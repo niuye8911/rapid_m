@@ -12,7 +12,8 @@ MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_ma
 
 TOLERANCE = 0.05
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
 
 def main(argv):
     parser = genParser()
@@ -43,6 +44,65 @@ def main(argv):
             # split the budets
             budgets = splitBudget(range)
             validate_selection(apps, budgets, buckets, m_model, p_models)
+    if options.mode == 'MMODEL':
+        # get M-Model
+        m_model = MModel(MACHINE_FILE)
+        with open(options.active_apps, 'r') as file:
+            active_apps = json.load(file)
+            apps = getActiveApps(active_apps)
+            # get the buckets
+            buckets = genBuckets(apps, None)
+            validate_mmodel(apps, buckets, m_model)
+
+
+def validate_mmodel(apps, buckets, m_model):
+    scenarios = pd.read_csv('./testData/mmodelfile_w_info.csv')
+    load1_ids = [x for x in scenarios.columns if x[-2:] == '-1']
+    load2_ids = [x for x in scenarios.columns if x[-2:] == '-2']
+    loadC_ids = [x for x in scenarios.columns if x[-2:] == '-C']
+    # iterate through all scenarios
+    features = m_model.features
+    # replace the first load by canonical
+    error = {}
+    for app in apps:
+        target_app = app['app'].name
+        # select the app frame
+        app_df = scenarios.loc[scenarios['load1'].str.contains(target_app)]
+        for bucket in buckets[target_app]:
+            env_df = app_df.loc[app_df['load1'].apply(lambda x: x.split(":")[
+                1] in bucket.configurations)]
+            # get the gt (measured env)
+            env_gt = formatEnv_df(env_df[loadC_ids], m_model.features, '-C')
+            # replace the first vec by canonical
+            num_of_rows = env_gt.shape[0]
+            load = bucket.rep_env.copy()
+            load1 = OrderedDict()
+            for key, value in load.items():
+                load1[key + '-1'] = [value] * num_of_rows
+            load1 = pd.DataFrame(data=load1)
+            idx = env_df[load2_ids].index.values
+            load1 = load1.set_index(idx)
+            # get the predicted env
+            env_pm = m_model.predict_batch(load1, env_df[load2_ids])
+            # evaluate the accuracy
+            tmp_error = m_error(env_gt, env_pm)
+            for k, v in tmp_error.items():
+                if k not in error:
+                    error[k] = v
+                else:
+                    error[k] = error[k] + v
+    for k, v in error.items():
+        error[k] = sum(v)/len(v)
+    print(error)
+
+def m_error(gt, pred):
+    ''' predict two df '''
+    gt = gt.reset_index(drop=True)
+    pred = pred.reset_index(drop=True)
+    error = {}
+    for column in gt.columns:
+        error[column] = abs((gt[column] - pred[column]) / (gt[column])).tolist()
+    return error
 
 
 def validate_selection(apps, budgets, buckets, m_model, p_models):

@@ -13,6 +13,9 @@ class Bucket:
         self.profile = {}
         self.rep_env = rep_env
         self.genSubProfile(cost_fact, mv_fact)
+        # convert rep_env back to float
+        for f,v in self.rep_env.items():
+            self.rep_env[f]=float(v)
 
     def genSubProfile(self, cost_fact_file, mv_fact_file):
         ''' genrate the cost / quality profile for configurations '''

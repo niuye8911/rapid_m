@@ -157,9 +157,10 @@ def genBuckets(apps, models):
         app = app['app']
         buckets[app.name] = []
         for bucket_name, info in app.cluster_info.items():
-            bucket = Bucket(app.name, bucket_name, info['cluster'],
-                            models[app.name][bucket_name], dir + '/cost.csv',
-                            dir + '/mv.csv', info['env'])
+            pmodel = models[
+                app.name][bucket_name] if models is not None else None
+            bucket = Bucket(app.name, bucket_name, info['cluster'], pmodel,
+                            dir + '/cost.csv', dir + '/mv.csv', info['env'])
             buckets[app.name].append(bucket)
         RAPID_info("Bucket Loader", "loaded Buckets for " + app.name)
     return buckets
