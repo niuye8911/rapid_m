@@ -6,6 +6,7 @@ from Classes.App import *
 from Classes.AppSysProfile import *
 from Classes.MModel import *
 from BucketSelector import *
+from Utility import *
 import os
 
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
@@ -92,8 +93,10 @@ def validate_mmodel(apps, buckets, m_model):
                 else:
                     error[k] = error[k] + v
     for k, v in error.items():
-        error[k] = sum(v)/len(v)
+        error[k] = sum(v) / len(v)
     print(error)
+    printDicToFile(error, 'mmodel_validator.csv', CSV=True)
+
 
 def m_error(gt, pred):
     ''' predict two df '''
@@ -101,7 +104,8 @@ def m_error(gt, pred):
     pred = pred.reset_index(drop=True)
     error = {}
     for column in gt.columns:
-        error[column] = abs((gt[column] - pred[column]) / (gt[column])).tolist()
+        error[column] = abs(
+            (gt[column] - pred[column]) / (gt[column])).tolist()
     return error
 
 
