@@ -181,6 +181,22 @@ class MModel:
         self.diff = diffs
         self.avg_diff = avg_diff
 
+    def validate_batch(self):
+        debug_file = open('./mmodel_valid.csv', 'w')
+        id1_s = list(map(lambda x: x+'-1', self.features))
+        id1_s = list(map(lambda x: x+'-2', self.features))
+        load1 = self.x_test[id1_s]
+        load2 = self.x_test[id2_s]
+        y_pred = self.predict_batch(self, load1, load2)
+        # get the CI for feature
+        self.getDiffPerFeature(y_pred, self.y_test, features)
+        self.mse = np.sqrt(metrics.mean_squared_error(self.y_test, y_pred))
+        self.mae = metrics.mean_absolute_error(self.y_test, y_pred)
+        self.r2 = r2_score(self.y_test, y_pred)
+        diffs, avg_diff = self.diffOfTwoMatrix(y_pred, self.y_test)
+        self.diff = diffs
+        self.avg_diff = avg_diff
+
     def getDiffPerFeature(self, y_pred, y_test, features):
         diffs = {}
         for feature in features:
@@ -212,7 +228,7 @@ class MModel:
         # clean up the data
         load1 = formatEnv_df(load1, self.features, '-1', REMOVE_POSTFIX=False)
         load2 = formatEnv_df(load2, self.features, '-2', REMOVE_POSTFIX=False)
-        x = pd.concat([load1, load2], axis=1)
+        x = reformat_dfs(load1, load2)
         # scale X
         scaled_x = pd.DataFrame()
         for col in x.columns:

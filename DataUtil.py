@@ -1,5 +1,5 @@
 import pandas as pd
-
+from collections import OrderedDict
 
 def formatEnv_df(env, filters=[], POSTFIX='', REMOVE_POSTFIX=True):
     ''' input a df, return a df with scaled and filtered data'''
@@ -21,11 +21,25 @@ def formatEnv_df(env, filters=[], POSTFIX='', REMOVE_POSTFIX=True):
         result_df['MEM' +
                   R_POST] = env['READ' + POSTFIX] + env['WRITE' + POSTFIX]
         result_df['INST' +
-                  R_POST] = env['ACYC' + POSTFIX] / env['INST' + POSTFIX]
+                  R_POST] = env['ACYC' + POSTFIX].div(['INST' + POSTFIX])
         result_df['INSTnom%' + R_POST] = env['INSTnom%' + POSTFIX] / 100.0
         result_df['PhysIPC%' + R_POST] = env['PhysIPC%' + POSTFIX] / 100.0
     return result_df
 
+def reformat_dfs(df1, df2):
+    ''' reformat the dfs so that each pair is represented by [smaller, sum] '''
+    # the first row
+    columns = df1.columns.values
+    columns = list(map(lambda x: x[:-2], columns))
+    # reorder the data
+    combined_df = pd.concat([df1, df2], axis=1)
+    for index, row in combined_df.iterrows():
+        for feature in columns:
+            f1 = row[feature + '-1']
+            f2 = row[feature + '-2']
+            row[feature + '-1'] = min(f1, f2)
+            row[feature + '-2'] = max(f1, f2)
+    return combined_df
 
 def formatEnv(env, features, POSTFIX=''):
     result = []

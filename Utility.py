@@ -6,6 +6,7 @@ import numpy as np
 import scipy.stats
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
+import csv
 
 
 def printTrainingInfo(d):
@@ -45,9 +46,16 @@ def printTrainingInfo(d):
     output.close()
 
 
-def printDicToFile(d, f):
+def printDicToFile(d, f, CSV=False):
     output = open(f, 'w')
-    json.dump(d, output, indent=2)
+    if CSV:  # write in csv
+        csv_headers = list(d.keys())
+        writer = csv.DictWriter(output, fieldnames=csv_headers)
+        writer.writeheader()
+        writer.writerow(d)
+    else:  # write in json
+        json.dump(d, output, indent=2)
+    output.close()
 
 
 def PPRINT(stuff):
@@ -92,13 +100,12 @@ def draw_ci(ci_file, output):
             ci_upps.append(float(items[3]) - float(items[1]))
             highest = max(float(items[3]), highest)
             lowest = min(float(items[2]), lowest)
-    (_, caps, _) = plt.errorbar(
-        range(len(names)),
-        means,
-        yerr=[ci_lows, ci_upps],
-        fmt='o',
-        ecolor='g',
-        capsize=10)
+    (_, caps, _) = plt.errorbar(range(len(names)),
+                                means,
+                                yerr=[ci_lows, ci_upps],
+                                fmt='o',
+                                ecolor='g',
+                                capsize=10)
     for cap in caps:
         cap.set_markeredgewidth(1)
     plt.xticks(range(len(names)), names, fontsize='10', rotation=30)
@@ -126,12 +133,11 @@ def simplified_dendrogram(*args, **kwargs):
             y = d[1]
             if y > annotate_above:
                 plt.plot(x, y, 'o', c=c)
-                plt.annotate(
-                    "%.3f" % y, (x, y),
-                    xytext=(0, -5),
-                    textcoords='offset points',
-                    va='top',
-                    ha='center')
+                plt.annotate("%.3f" % y, (x, y),
+                             xytext=(0, -5),
+                             textcoords='offset points',
+                             va='top',
+                             ha='center')
         if max_d:
             plt.axhline(y=max_d, c='k')
     return ddata

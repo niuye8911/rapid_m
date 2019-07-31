@@ -5,7 +5,7 @@ from collections import OrderedDict
 import pandas as pd
 
 from Classes.RapidProfile import RapidProfile
-
+from DataUtil import *
 
 class EnvProfile(RapidProfile):
     def __init__(self, df, host_name):
@@ -55,7 +55,7 @@ class EnvProfile(RapidProfile):
             self.sys2DF.dataFrame[self.sys2DF.x]
         ],
             axis=1)
-        concated_df = self.reformat_dfs(self.sys1DF.dataFrame[self.sys1DF.x],
+        concated_df = reformat_dfs(self.sys1DF.dataFrame[self.sys1DF.x],
                                         self.sys2DF.dataFrame[self.sys2DF.x])
         # second_df = pd.concat([
         #        self.sys2DF.dataFrame[self.sys2DF.x],
@@ -65,25 +65,6 @@ class EnvProfile(RapidProfile):
         # concated_df = first_df.append(second_df, ignore_index=True, sort=False)
         concated_df.to_csv('./cleaned_machine.csv')
         return concated_df
-
-    def reformat_dfs(self, df1, df2):
-        ''' reformat the dfs so that we get a symetric matrix where each pair
-        is represented by [smaller, sum] '''
-        # the first row
-        columns = df1.columns.values
-        columns = list(map(lambda x: x[:-2], columns))
-        # first_columns = list(map(lambda x: x+'-smaller', columns))
-        # second_columns = list(map(lambda x: x+'-sum', columns))
-        # columns = first_columns + second_columns
-        # reorder the data
-        combined_df = pd.concat([df1, df2], axis=1)
-        for index, row in combined_df.iterrows():
-            for feature in columns:
-                f1 = row[feature + '-1']
-                f2 = row[feature + '-2']
-                row[feature + '-1'] = min(f1, f2)
-                row[feature + '-2'] = max(f1, f2)
-        return combined_df
 
     def getY(self):
         forward_df = self.combinedDF.dataFrame[self.combinedDF.x]

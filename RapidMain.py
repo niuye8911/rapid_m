@@ -7,6 +7,7 @@
 
 import optparse
 import sys
+import os
 from enum import Enum
 
 import ClusterTrainer
@@ -18,6 +19,7 @@ from Utility import not_none
 
 DEBUG = False
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 # flows supported by this learner
 class Flow(Enum):
