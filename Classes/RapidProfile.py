@@ -100,18 +100,20 @@ class RapidProfile:
         # !!!! REMEMBER TO UPDATE foramtEnv() in BucketSelector
         ''' clean the PCM data to correct form '''
         # re-calculate the numerical value
-        # 1) INST
-        self.dataFrame['INST' +
-                       postfix] = self.dataFrame['ACYC' + postfix].div(
-            self.dataFrame['INST' + postfix])
-        # 2) INSTnom%
-        self.dataFrame['INSTnom%' + postfix] = self.dataFrame[
-            'INSTnom%' + postfix].apply(lambda x: x / 100.0)
-        # 3) PhysIPC%
-        self.dataFrame['PhysIPC%' + postfix] = self.dataFrame[
-            'PhysIPC%' + postfix].apply(lambda x: x / 100.0)
-        # 4) READ / WRITE, add MEM to the frame
-        self.dataFrame['MEM' + postfix] = self.dataFrame[
-                                              'READ' + postfix] + \
-                                          self.dataFrame['WRITE' + postfix]
+        new_frame = pd.DataFrame()
+        for col in self.dataFrame.columns:
+            # 1) INST
+            if col == 'INST' + postfix:
+                new_frame[col] = self.dataFrame['ACYC' + postfix].div(
+                    self.dataFrame['INST' + postfix])
+            # 2) INSTnom% and PhysIPC%
+            elif col == 'INSTnom%' + postfix or col == 'PhysIPC%' + postfix:
+                new_frame[col] = self.dataFrame[col].apply(lambda x: x / 100.0)
+            else:
+                new_frame[col] = self.dataFrame[col]
+        # add the MEM
+        new_frame['MEM' +
+                  postfix] = self.dataFrame['READ' +
+                                            postfix] + self.dataFrame['WRITE' +                                                          postfix]
         self.x.append('MEM' + postfix)
+        self.dataFrame = new_frame
