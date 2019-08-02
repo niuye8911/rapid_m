@@ -120,14 +120,15 @@ class MModel:
 
     def preprocess(self, X):
         ''' scale the data '''
-        for col in X.columns:
-            # take the maximum number of two vectors per feature
-            if col[-1] == "C":
-                continue
-            if col[:-2] not in self.maxes:
-                self.maxes[col[:-2]] = X.max()[col]
-            if X.max()[col] > self.maxes[col[:-2]]:
-                self.maxes[col[:-2]] = X.max()[col]
+        if not self.maxes:
+            for col in X.columns:
+                # take the maximum number of two vectors per feature
+                if col[-1] == "C":
+                    continue
+                if col[:-2] not in self.maxes:
+                    self.maxes[col[:-2]] = X.max()[col]
+                if X.max()[col] > self.maxes[col[:-2]]:
+                    self.maxes[col[:-2]] = X.max()[col]
         scaled_X = pd.DataFrame()
         for col in X.columns:
             if col[-1] == 'C':
@@ -230,9 +231,7 @@ class MModel:
         load2 = formatEnv_df(load2, self.features, '-2', REMOVE_POSTFIX=False)
         x = reformat_dfs(load1, load2)
         # scale X
-        scaled_x = pd.DataFrame()
-        for col in x.columns:
-            scaled_x[col] = x[col] / self.maxes[col[:-2]]
+        scaled_x = self.preprocess(x)
         y_pred = OrderedDict()
         for feature in self.features:
             # check if it's poly

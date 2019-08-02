@@ -21,7 +21,7 @@ def formatEnv_df(env, filters=[], POSTFIX='', REMOVE_POSTFIX=True):
         result_df['MEM' +
                   R_POST] = env['READ' + POSTFIX] + env['WRITE' + POSTFIX]
         result_df['INST' +
-                  R_POST] = env['ACYC' + POSTFIX].div(['INST' + POSTFIX])
+                  R_POST] = env['ACYC' + POSTFIX].div(env['INST' + POSTFIX])
         result_df['INSTnom%' + R_POST] = env['INSTnom%' + POSTFIX] / 100.0
         result_df['PhysIPC%' + R_POST] = env['PhysIPC%' + POSTFIX] / 100.0
     return result_df

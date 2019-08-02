@@ -54,6 +54,30 @@ def main(argv):
             # get the buckets
             buckets = genBuckets(apps, None)
             validate_mmodel(apps, buckets, m_model)
+    if options.mode == 'MMODEL_ALL':
+        # get M-Model
+        m_model = MModel(MACHINE_FILE)
+        validate_mmodel_all(m_model)
+
+
+def validate_mmodel_all(m_model):
+    scenarios = pd.read_csv('./testData/mmodelfile_w_info.csv')
+    load1_ids = [x for x in scenarios.columns if x[-2:] == '-1']
+    load2_ids = [x for x in scenarios.columns if x[-2:] == '-2']
+    loadC_ids = [x for x in scenarios.columns if x[-2:] == '-C']
+    # iterate through all scenarios
+    features = m_model.features
+    # replace the first load by canonical
+    error = {}
+    env_gt = formatEnv_df(scenarios[loadC_ids],
+                          m_model.features,
+                          '-C',
+                          REMOVE_POSTFIX=False)
+    env_1 = scenarios[load1_ids]
+    env_2 = scenarios[load2_ids]
+    env_pm = m_model.predict_batch(env_1, env_2)
+    diffs, avg_diffs = m_model.diffOfTwoMatrix(env_pm, env_gt)
+    print(diffs)
 
 
 def validate_mmodel(apps, buckets, m_model):
