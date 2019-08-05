@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from Utility import *
 from DataUtil import *
 from models.ModelPool import *
+from Classes.Bucket import *
 
 
 class MModel:
@@ -184,8 +185,8 @@ class MModel:
 
     def validate_batch(self):
         debug_file = open('./mmodel_valid.csv', 'w')
-        id1_s = list(map(lambda x: x+'-1', self.features))
-        id1_s = list(map(lambda x: x+'-2', self.features))
+        id1_s = list(map(lambda x: x + '-1', self.features))
+        id1_s = list(map(lambda x: x + '-2', self.features))
         load1 = self.x_test[id1_s]
         load2 = self.x_test[id2_s]
         y_pred = self.predict_batch(self, load1, load2)
@@ -225,7 +226,35 @@ class MModel:
             feature_diffs[self.features[i]] = feature_diff[i]
         return feature_diffs, average_diff
 
+    def predict_seq(self, loads):
+        ''' predict the overall ens with sequences of envs
+            @param loads: lists of bucket lists
+        '''
+        # get the rep-env values
+        rep_cols = list(loads[0][0].rep_env.keys())
+        # get the comb names
+        comb_names = list(
+            map(lambda comb: ",".join((list(map(lambda x: x.b_name, comb)))),
+                loads))
+        # get the rep envs of each bucket
+        load_matrix = list(
+            map(lambda x: list(map(lambda y: y.rep_env.copy(), x)), loads))
+        # convert the envs column to row
+        converted_m = list(map(list, zip(*load_matrix)))
+        # convert each element to a df
+        env_dfs = list(
+            map(lambda x: pd.DataFrame.from_records(x, columns=rep_cols),
+                converted_m))
+        # predict the envs cumulatively
+        env = env_dfs[0]
+        for i in range(0, len(converted_m) - 1):
+            env = self.predict_batch(add_postfix(env, '-1'),
+                                     add_postfix(env_dfs[i + 1], '-2'))
+        env['comb_name'] = comb_names
+        return env
+
     def predict_batch(self, load1, load2):
+        ''' predict a batch of pairs of vectors '''
         # clean up the data
         load1 = formatEnv_df(load1, self.features, '-1', REMOVE_POSTFIX=False)
         load2 = formatEnv_df(load2, self.features, '-2', REMOVE_POSTFIX=False)
@@ -245,6 +274,7 @@ class MModel:
         return pd.DataFrame(data=y_pred)
 
     def predict(self, vec1, vec2):
+        ''' predict a single output with two vectos '''
         if len(vec1) != len(vec2):
             RAPID_warn('M-Model', "two vecs with different lengths")
         # assemble the two vecs into a single vec
