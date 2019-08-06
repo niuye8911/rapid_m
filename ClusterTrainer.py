@@ -17,7 +17,7 @@ def first_cut(appSysProfile):
     Z, c = hCluster(data)
     clusters = fcluster(Z, t=4, criterion='distance')
     cluster_list = get_cluster_list(clusters, appSysProfile.dataFrame)
-    return cluster_list
+    return cluster_list,Z
 
 
 def increment_cluster(appSysProfile, cluster_list, target_id):
@@ -66,7 +66,7 @@ def get_cluster_list(clusters, df, k=-1):
     observations = df['Configuration'].values
     cluster_info_list = []
     if k == -1:  # k is not determined
-        k = max(clusters) + 1
+        k = max(clusters)
     for i in range(1, k + 1):
         cluster_info_list.append([])
     for i in range(0, len(clusters)):

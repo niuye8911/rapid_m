@@ -35,7 +35,7 @@ class ModelPool:
             return RapidNN(file_path=path)
 
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
-                      model_name, isPoly, speedup=True):
+                      model_name, isPoly, speedup=False):
         ''' select a feature based on the selected model '''
         print("selecting features:", model_name)
         features = [x for x in xdf.columns]
@@ -48,7 +48,7 @@ class ModelPool:
                                               x_test, y_train, y_test, isPoly)
 
         id = 1
-        while r2 < 0.92:
+        while r2 < 0.94:
             bestr2 = 0
             bestnew = "NONE"
             bestmse = 0.0
@@ -164,7 +164,7 @@ class ModelPool:
                    y_train,
                    y_test,
                    isPoly,
-                   k=1):
+                   k=2):
         mses = []
         r2s = []
         X_train = X_train[factorlist]

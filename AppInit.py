@@ -12,7 +12,7 @@ from Classes.App import App
 from Classes.SlowDownProfile import SlowDownProfile
 from Classes.AppSysProfile import AppSysProfile
 
-MAX_ITERATION = 5
+MAX_ITERATION = 10
 SLOWDOWN_THRESHOLD = .07
 
 INCREMENTAL = "incremental"
@@ -42,7 +42,6 @@ def init(app_file,
         app.maxes = maxes
         pModelTrainer, cluster_list, Z = determine_k_incremental(
             slowDownProfile, appSysProfile, directory, app)
-
         # calculate the average envs
         rep_env = gen_rep_env(profile_file, cluster_list)
 
@@ -111,14 +110,22 @@ def determine_k(slowDownProfile, appSysProfile, directory, app):
     return pModelTrainer, cluster_list, Z
 
 
-def determine_k_incremental(slowDownProfile, appSysProfile, directory, app):
+def determine_k_incremental(slowDownProfile,
+                            appSysProfile,
+                            directory,
+                            app,
+                            UPDATE_THROUGH_P=True):
     # iterate through different cluster numbers
     pModelTrainer = PModelTrainer(app, slowDownProfile)
     cluster_list = []
     target_id = -1
-    cluster_list = first_cut(appSysProfile)
+    cluster_list, Z = first_cut(appSysProfile)
     k = len(cluster_list)
-    print('based on the criterion, clustered into',k)
+    print('based on the criterion, clustered into', k)
+    pModelTrainer.updateCluster(cluster_list)
+    pModelTrainer.train()
+    if not UPDATE_THROUGH_P:
+        return pModelTrainer, cluster_list, Z
     for num_of_cluster in range(k, MAX_ITERATION + 1):
         # if any cluster cannot be separated to another cluster
         if [] in cluster_list:
