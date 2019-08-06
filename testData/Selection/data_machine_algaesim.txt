@@ -3,37 +3,37 @@
         {
             "id": "bodytrack",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-bodytrack",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/bodytrack",
             "status": 1
         },
         {
             "id": "swaptions",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-swaptions",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/swaptions",
             "status": 1
         },
 	{
             "id": "ferret",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-ferret",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/ferret",
             "status": 1
         },
 	{
             "id": "facedetect",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-facedetect",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/facedetect",
             "status": 1
         },
 	{
             "id": "svm",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-svm",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/svm",
             "status": 1
         },
 	{
             "id": "nn",
             "budget": 10000,
-            "dir": "\/var\/www\/html\/rapid_server\/storage\/apps\/algaesim-nn",
+            "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/nn",
             "status": 1
         }
     ],
