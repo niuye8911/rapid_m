@@ -3,7 +3,6 @@
 import numpy as np
 from sklearn import metrics
 from sklearn.metrics import r2_score
-from sklearn.preprocessing import StandardScaler
 from sklearn.externals import joblib
 
 
