@@ -15,7 +15,7 @@ def writeSelectionToFile(f, comb_name, selection):
     bucket_list = comb_name.split(',')
     for app, config in selection.items():
         bucket = list(filter(lambda x: app in x, bucket_list))[0]
-        result[app]={'bucket':bucket,'config':config}
+        result[app] = {'bucket': bucket, 'config': config}
     json.dump(result, output, indent=2)
     output.close()
 

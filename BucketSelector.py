@@ -76,8 +76,8 @@ def getSelection_batch(slowdowns, apps, buckets):
     results = slowdowns.apply(lambda x: mv_per_row(x, apps, buckets), axis=1)
     mv_col = results.apply(lambda x: x['mv'])
     configs_col = results.apply(lambda x: x['configs'])
-    slowdowns['mv']= mv_col
-    slowdowns['configs']= configs_col
+    slowdowns['mv'] = mv_col
+    slowdowns['configs'] = configs_col
     max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
     return max_row['comb_name'], max_row['configs']
 
@@ -94,9 +94,10 @@ def mv_per_row(row, apps, buckets):
         budget = list(filter(lambda x: x['app'].name == app_name,
                              apps))[0]['budget']
         config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
-        configs[app_name]=config[0]
+        configs[app_name] = config[0]
         total_mv += mv[0]
-    return {'mv':total_mv,'configs':configs}
+    return {'mv': total_mv, 'configs': configs}
+
 
 def getSelection(slowdowns, apps, buckets):
     ''' get the final selection of configs and buckets '''
