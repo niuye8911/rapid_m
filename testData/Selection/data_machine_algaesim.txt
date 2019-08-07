@@ -2,37 +2,37 @@
     "applications": [
         {
             "id": "bodytrack",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/bodytrack",
             "status": 1
         },
         {
             "id": "swaptions",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/swaptions",
             "status": 1
         },
 	{
             "id": "ferret",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/ferret",
             "status": 1
         },
 	{
             "id": "facedetect",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/facedetect",
             "status": 1
         },
 	{
             "id": "svm",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/svm",
             "status": 1
         },
 	{
             "id": "nn",
-            "budget": 10000,
+            "budget": 100,
             "dir": "/home/liuliu/Research/rapid_m_backend_server/outputs/nn",
             "status": 1
         }
