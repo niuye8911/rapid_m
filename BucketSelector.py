@@ -47,12 +47,12 @@ def pmSelect(apps):
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
-    combined_envs = getEnvs(bucket_combs, mmodel=m_model)
+    combined_envs = getEnvs_batch(bucket_combs, mmodel=m_model)
     # predict the per-app slow-down
-    slowdowns = getSlowdowns(combined_envs, p_models, features)
+    slowdowns = getSlowdowns_batch(combined_envs, p_models, features)
     # get the bucket selection based on slow-down
-    PPRINT(slowdowns)
-    return getSelection(slowdowns, apps, buckets)
+    selections = getSelection_batch(slowdowns, apps, buckets)
+    return selections
 
 
 def pSelect(apps, measured_env):
@@ -66,10 +66,37 @@ def pSelect(apps, measured_env):
     combined_envs = getEnvs(bucket_combs, P_ONLY=True, env=measured_env)
     # predict the per-app slow-down
     slowdowns = getSlowdowns(combined_envs, p_models, features)
-    # get the slowdown
-    PPRINT(slowdowns)
     return getSelection(slowdowns, apps, buckets)
 
+
+def getSelection_batch(slowdowns, apps, buckets):
+    ''' get the final selection of configs and buckets
+    @param slowdowns: a slowdown df with column: [comb_name, app_1, ... app_n]
+    '''
+    results = slowdowns.apply(lambda x: mv_per_row(x, apps, buckets), axis=1)
+    mv_col = results.apply(lambda x: x['mv'])
+    configs_col = results.apply(lambda x: x['configs'])
+    slowdowns['mv']= mv_col
+    slowdowns['configs']= configs_col
+    max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
+    return max_row['comb_name'], max_row['configs']
+
+
+def mv_per_row(row, apps, buckets):
+    bucket_list = row['comb_name'].split(',')
+    total_mv = 0.0
+    configs = {}
+    for bucket_name in bucket_list:
+        app_name = bucket_name[:-1]  #!!!there should not be > 10 buckets
+        bucket = list(
+            filter(lambda x: x.b_name == bucket_name, buckets[app_name]))[0]
+        slow_down = row[app_name]
+        budget = list(filter(lambda x: x['app'].name == app_name,
+                             apps))[0]['budget']
+        config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
+        configs[app_name]=config[0]
+        total_mv += mv[0]
+    return {'mv':total_mv,'configs':configs}
 
 def getSelection(slowdowns, apps, buckets):
     ''' get the final selection of configs and buckets '''
@@ -98,6 +125,42 @@ def getSelection(slowdowns, apps, buckets):
     return selection
 
 
+def getSlowdowns_batch(combined_envs, p_models, features):
+    ''' return the slow-down for each app with slow-down
+    @param combined_envs: a df with all comb_name and envs(processed)
+    '''
+    slowDownTable = {}
+    env_ids = list(combined_envs.columns)
+    env_ids.remove('comb_name')
+    return_ids = ['comb_name']
+    num = combined_envs.shape[0]
+    # calculate the slow-down with all p_models
+    for app in p_models.keys():
+        return_ids.append(app)
+        combined_envs[app] = [0.0] * num
+        for bucket, p_model in p_models[app].items():
+            # get the df containing the bucekt name
+            sub_df = combined_envs.loc[combined_envs['comb_name'].str.contains(
+                bucket)]
+            # apply the p_model to get the slowdown
+            slowdown = p_model.predict(sub_df[env_ids])
+            # set the corresponding rows to slowdown
+            combined_envs.loc[sub_df.index.values, [app]] = slowdown
+    return combined_envs
+
+    for comb_name, env in combined_envs.items():
+        buckets = comb_name.split(DELIMITER)
+        comb_slowdown = {}
+        for bucket in buckets:
+            app_name = bucket[:-1]
+            p_model = p_models[app_name][bucket]
+            # tranform the vector to dataframe
+            slowdown = p_model.predict(env_to_frame(env, features))
+            comb_slowdown[app_name] = slowdown[0]
+        slowDownTable[comb_name] = comb_slowdown
+    return slowDownTable
+
+
 def getSlowdowns(combined_envs, p_models, features):
     ''' return the slow-down for each app with slow-down '''
     slowDownTable = {}
@@ -112,6 +175,12 @@ def getSlowdowns(combined_envs, p_models, features):
             comb_slowdown[app_name] = slowdown[0]
         slowDownTable[comb_name] = comb_slowdown
     return slowDownTable
+
+
+def getEnvs_batch(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
+    result = {}
+    envs = mmodel.predict_seq(bucket_combs)
+    return envs
 
 
 def getEnvs(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
@@ -175,7 +244,7 @@ def getActiveApps(active_apps):
         if status == 0:
             # inactive apps
             continue
-        application = App(app['dir'] + '/profile.json')
+        application = App(app['dir'] + '/' + app['id'] + '.json')
         apps.append({
             'app': application,
             'budget': app['budget'],
