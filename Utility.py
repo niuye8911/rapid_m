@@ -9,6 +9,17 @@ from scipy.cluster.hierarchy import dendrogram
 import csv
 
 
+def writeSelectionToFile(f, comb_name, selection):
+    output = open(f, 'w')
+    result = {}
+    bucket_list = comb_name.split(',')
+    for app, config in selection.items():
+        bucket = list(filter(lambda x: app in x, bucket_list))[0]
+        result[app]={'bucket':bucket,'config':config}
+    json.dump(result, output, indent=2)
+    output.close()
+
+
 def printTrainingInfo(d):
     output = open('./outputs/training_info.csv', 'w')
     # get all features

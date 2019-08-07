@@ -12,14 +12,20 @@ from enum import Enum
 
 import ClusterTrainer
 import PModelTrainer
+import warnings
 from AppInit import init
 from BucketSelector import bucketSelect
 from MachineInit import trainEnv
-from Utility import not_none
+from Utility import not_none, writeSelectionToFile
+from sklearn.exceptions import DataConversionWarning
 
 DEBUG = False
 
+# ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+# ignore the data conversion
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+
 
 # flows supported by this learner
 class Flow(Enum):
@@ -53,11 +59,10 @@ def main(argv):
 
     elif flow is Flow.TRAIN_ENV:
         # train the environment predictor by calling Liu's work
-        trainEnv(
-            options.machine_file,
-            options.machine_measurements,
-            options.dir,
-            TEST=DEBUG)
+        trainEnv(options.machine_file,
+                 options.machine_measurements,
+                 options.dir,
+                 TEST=DEBUG)
         # do something about the accuracy
 
     elif flow is Flow.INIT:
@@ -68,7 +73,8 @@ def main(argv):
 
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
-        bucketSelect(options.active_apps)
+        result = bucketSelect(options.active_apps)
+        writeSelectionToFile(options.result_file, result[0], result[1])
 
 
 def checkParams(flow, options):
@@ -79,7 +85,7 @@ def checkParams(flow, options):
     elif flow is Flow.TRAIN_CLUSTER:  # Asheley's work starts here
         return not_none([options.app_profiles])
     elif flow is Flow.GET_BUCKETS:  # runtime compute
-        return not_none([options.active_apps])
+        return not_none([options.active_apps, options.result_file])
     elif flow is Flow.INIT:  # All our work starts here
         return not_none([
             options.app_file, options.app_measurements, options.app_profiles,
@@ -99,6 +105,7 @@ def genParser():
     parser.add_option('--apppfs', dest="app_profiles")
     # for bucket selection
     parser.add_option('--apps', dest="active_apps")
+    parser.add_option('--result', dest='result_file')
     # for mode
     parser.add_option('--flow', dest="flow")
     # for server maintainance
