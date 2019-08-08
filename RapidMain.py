@@ -74,7 +74,7 @@ def main(argv):
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
         result = bucketSelect(options.active_apps)
-        writeSelectionToFile(options.result_file, result[0], result[1])
+        writeSelectionToFile(options.result_file, result[0], result[1],result[2])
 
 
 def checkParams(flow, options):

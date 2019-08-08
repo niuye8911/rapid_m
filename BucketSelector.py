@@ -79,7 +79,16 @@ def getSelection_batch(slowdowns, apps, buckets):
     slowdowns['mv'] = mv_col
     slowdowns['configs'] = configs_col
     max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
-    return max_row['comb_name'], max_row['configs']
+    return max_row['comb_name'], max_row['configs'], slowdown_table(
+        max_row, apps)
+
+
+def slowdown_table(row, apps):
+    slowdown = {}
+    for app in apps:
+        app_name = app['app'].name
+        slowdown[app_name] = row[app_name]
+    return slowdown
 
 
 def mv_per_row(row, apps, buckets):

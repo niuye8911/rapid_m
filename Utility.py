@@ -9,13 +9,18 @@ from scipy.cluster.hierarchy import dendrogram
 import csv
 
 
-def writeSelectionToFile(f, comb_name, selection):
+def writeSelectionToFile(f, comb_name, selection, slowDownTable):
     output = open(f, 'w')
-    result = {}
+    result = []
     bucket_list = comb_name.split(',')
     for app, config in selection.items():
         bucket = list(filter(lambda x: app in x, bucket_list))[0]
-        result[app] = {'bucket': bucket, 'config': config}
+        result.append({
+            'name': app,
+            'bucket': bucket,
+            'config': config,
+            'slowdown': slowDownTable[app]
+        })
     json.dump(result, output, indent=2)
     output.close()
 
