@@ -44,6 +44,9 @@ def pmSelect(apps):
     p_models = loadAppModels(apps)
     # convert apps to buckets
     buckets = genBuckets(apps, p_models)
+    if len(apps) == 1:
+        selections = getSelection_batch(None, apps, buckets, single_app=True)
+        return selections
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
@@ -69,10 +72,13 @@ def pSelect(apps, measured_env):
     return getSelection(slowdowns, apps, buckets)
 
 
-def getSelection_batch(slowdowns, apps, buckets):
+def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     ''' get the final selection of configs and buckets
     @param slowdowns: a slowdown df with column: [comb_name, app_1, ... app_n]
     '''
+    if single_app:
+        # only 1 app active
+        return single_app_select(apps[0]['app'], apps[0]['budget'], buckets)
     results = slowdowns.apply(lambda x: mv_per_row(x, apps, buckets), axis=1)
     mv_col = results.apply(lambda x: x['mv'])
     configs_col = results.apply(lambda x: x['configs'])
@@ -81,6 +87,24 @@ def getSelection_batch(slowdowns, apps, buckets):
     max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
     return max_row['comb_name'], max_row['configs'], slowdown_table(
         max_row, apps)
+
+
+def single_app_select(app, budget, buckets):
+    #only 1 app active
+    configs = {}
+    app_name = app.name
+    max_mv = 0.0
+    bucket_selection = ''
+    for bucket in buckets[app_name]:
+        bucket_name = bucket.b_name
+        slow_down = 1.0
+        budget = float(budget)
+        config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
+        if mv[0] > max_mv:
+            configs[app_name] = config[0]
+            max_mv = mv[0]
+            bucket_selection = bucket.b_name
+    return bucket_selection, configs, {app_name: 1.0}
 
 
 def slowdown_table(row, apps):
