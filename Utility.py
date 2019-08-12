@@ -16,10 +16,16 @@ def writeSelectionToFile(f, comb_name, selection, slowDownTable):
     for app, config in selection.items():
         bucket = list(filter(lambda x: app in x, bucket_list))[0]
         result.append({
-            'name': app,
-            'bucket': bucket,
-            'config': config,
-            'slowdown': slowDownTable[app]
+            'name':
+            app,
+            'bucket':
+            bucket,
+            'config':
+            config,
+            'slowdown_p':
+            slowDownTable[app],
+            'slowdown':
+            slowDownTable[app] if slowDownTable[app] >= 1.0 else 1.0
         })
     json.dump(result, output, indent=2)
     output.close()

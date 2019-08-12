@@ -123,10 +123,11 @@ def mv_per_row(row, apps, buckets):
         app_name = bucket_name[:-1]  #!!!there should not be > 10 buckets
         bucket = list(
             filter(lambda x: x.b_name == bucket_name, buckets[app_name]))[0]
-        slow_down = row[app_name]
+        slow_down = 1.0 if float(row[app_name]) < 1.0 else row[app_name]
         budget = list(filter(lambda x: x['app'].name == app_name,
                              apps))[0]['budget']
-        config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
+        config, mv, SUCCESS = bucket.getOptimal(float(budget),
+                                                float(slow_down))
         configs[app_name] = config[0]
         total_mv += mv[0]
     return {'mv': total_mv, 'configs': configs}
@@ -275,7 +276,7 @@ def getActiveApps(active_apps):
     applications = active_apps['applications']
     for app in applications:
         status = app['status']
-        if status == 0:
+        if status == 0 or status == 4:
             # inactive apps
             continue
         application = App(app['dir'] + '/' + app['id'] + '.json')
