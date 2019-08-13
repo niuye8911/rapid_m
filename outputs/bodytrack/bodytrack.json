@@ -4,26 +4,26 @@
   "model_params": {
     "bodytrack1": {
       "file": "outputs/bodytrack/bodytrack1",
-      "mse": 0.061943681848841796,
-      "mae": 0.04219786205766636,
-      "diff": 0.03995502371042421,
-      "r2": 0.30837987481790174,
+      "mse": 0.06255911091794776,
+      "mae": 0.050190466506082436,
+      "diff": 0.04829274931421274,
+      "r2": 0.29456869785309325,
       "feature": [
         "EXEC",
         "L2MISS",
-        "L3HIT",
-        "L3MISS",
+        "IPC",
         "PhysIPC%",
-        "L3MPI",
+        "FREQ",
         "L2MPI",
         "MEM",
-        "IPC",
+        "L3HIT",
+        "L3MISS",
         "INST",
-        "FREQ",
+        "L3MPI",
         "INSTnom%"
       ],
-      "poly": false,
-      "model_type": "NN"
+      "poly": true,
+      "model_type": "BR"
     },
     "bodytrack2": {
       "file": "outputs/bodytrack/bodytrack2",
