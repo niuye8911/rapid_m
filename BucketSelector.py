@@ -279,7 +279,7 @@ def getActiveApps(active_apps):
         if status == 0 or status == 4:
             # inactive apps
             continue
-        application = App(app['dir'] + '/' + app['id'] + '.json')
+        application = App(app['dir'] + '/' + 'profile' + '.json')
         apps.append({
             'app': application,
             'budget': app['budget'],
