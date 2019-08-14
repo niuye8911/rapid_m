@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import pandas as pd
 
-from Classes.RapidProfile import RapidProfile
+from Rapid_M_Classes.RapidProfile import RapidProfile
 from DataUtil import *
 
 class EnvProfile(RapidProfile):

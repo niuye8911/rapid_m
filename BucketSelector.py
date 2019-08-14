@@ -11,10 +11,10 @@ import json
 
 import pandas as pd
 
-from Classes.App import *
-from Classes.Bucket import *
-from Classes.MModel import *
-from Classes.PModel import *
+from Rapid_M_Classes.App import *
+from Rapid_M_Classes.Bucket import *
+from Rapid_M_Classes.MModel import *
+from Rapid_M_Classes.PModel import *
 from Utility import *
 from DataUtil import *
 
@@ -27,6 +27,8 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
         active_apps = json.load(file)
         # get all the apps
         apps = getActiveApps(active_apps)
+        if SELECTOR == 'INDIVIDUAL':
+            return indiSelect(apps)
         if SELECTOR == "P_M":
             return pmSelect(apps)
         if SELECTOR == "P":
@@ -34,6 +36,19 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
                 exit(1)
             return pSelect(apps, env)
 
+def indiSelect(apps):
+    p_models = loadAppModels(apps)
+    # convert apps to buckets
+    buckets = genBuckets(apps, p_models)
+    bucket_selection = []
+    configs = {}
+    slowdowns = {}
+    for app in apps:
+         bucket, config, slow = single_app_select(app['app'], app['budget'], buckets)
+         bucket_selection.append(bucket)
+         configs[app['app'].name] = config
+         slowdowns[app['app'].name] = 1.0
+    return bucket_selection, configs, slowdowns
 
 def pmSelect(apps):
     # get the M-Model

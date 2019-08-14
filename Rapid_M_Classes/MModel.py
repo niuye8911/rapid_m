@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from Utility import *
 from DataUtil import *
 from models.ModelPool import *
-from Classes.Bucket import *
+from Rapid_M_Classes.Bucket import *
 
 
 class MModel:

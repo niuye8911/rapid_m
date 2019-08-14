@@ -1,1 +1,4 @@
-__all__ = ["DataUtil", "Utility", "ClusterTrainer", "AppInit"]
+__all__ = [
+    "DataUtil", "Utility", "ClusterTrainer", "AppInit", "BucketSelector",
+    "TestScript", "Rapid_M_Classes"
+]

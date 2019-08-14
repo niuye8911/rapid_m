@@ -8,9 +8,9 @@
 from ClusterTrainer import *
 from PModelTrainer import *
 from Utility import *
-from Classes.App import App
-from Classes.SlowDownProfile import SlowDownProfile
-from Classes.AppSysProfile import AppSysProfile
+from Rapid_M_Classes.App import App
+from Rapid_M_Classes.SlowDownProfile import SlowDownProfile
+from Rapid_M_Classes.AppSysProfile import AppSysProfile
 
 MAX_ITERATION = 10
 SLOWDOWN_THRESHOLD = .07

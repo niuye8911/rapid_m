@@ -1,4 +1,4 @@
-from Classes.RapidProfile import RapidProfile
+from Rapid_M_Classes.RapidProfile import RapidProfile
 
 
 class AppSysProfile(RapidProfile):

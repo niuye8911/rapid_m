@@ -1,6 +1,6 @@
 # This is the parser for an App's profile
 
-from Classes.RapidProfile import *
+from Rapid_M_Classes.RapidProfile import *
 
 
 class SlowDownProfile(RapidProfile):
