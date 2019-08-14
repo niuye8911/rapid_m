@@ -12,6 +12,7 @@ class Bucket:
         self.p_model = p_model
         self.profile = {}
         self.rep_env = rep_env
+        self.max_mv = 0.0
         self.genSubProfile(cost_fact, mv_fact)
         # convert rep_env back to float
         for f,v in self.rep_env.items():
@@ -20,13 +21,13 @@ class Bucket:
     def genSubProfile(self, cost_fact_file, mv_fact_file):
         ''' genrate the cost / quality profile for configurations '''
         cost_fact = self.readFact(cost_fact_file)
-        mv_fact = self.readFact(mv_fact_file)
+        mv_fact = self.readFact(mv_fact_file, MV=True)
         for configuration, cost in cost_fact.items():
             self.profile[configuration] = {}
             self.profile[configuration]['cost'] = cost_fact[configuration]
             self.profile[configuration]['mv'] = mv_fact[configuration]
 
-    def readFact(self, factfile):
+    def readFact(self, factfile, MV=False):
         fact_dict = {}
         end_of_config = -1
         with open(factfile) as fact:
@@ -36,6 +37,11 @@ class Bucket:
                     end_of_config = self.getEndOfConfig(columns)
                 configuration = "-".join(columns[:end_of_config])
                 value = float(columns[len(columns) - 1])
+                if configuration not in self.configurations:
+                    # filter out non-bucket configs
+                    continue
+                if MV and value > self.max_mv:
+                    self.max_mv = value
                 fact_dict[configuration] = value
         return fact_dict
 
@@ -104,5 +110,5 @@ class Bucket:
         if selected_conf == []:
             SUCCESS = False
             selected_conf = [paretos[0][0]]
-            selected_mv = [paretos[0][1]['mv']]
+            selected_mv = [paretos[0][1]['mv']/self.max_mv*100.0]
         return selected_conf, selected_mv, SUCCESS
