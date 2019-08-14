@@ -68,15 +68,16 @@ def run_a_comb(apps):
     progress_map = {}
     thread_list = []
     configs = bucketSelect(TEST_APP_FILE, SELECTOR="INDIVIDUAL")
-    print(configs[1], configs[2])
-    exit(1)
+    configs = configs[1]
     for app in apps:
         progress_map[app] = -1
         appMethod = app_info[app]['met']
         run_dir = app_info[app]['dir']
         max_budget = appMethod.max_cost * appMethod.fullrun_units
 
-        app_cmd = appMethod.getCommand(qosRun=True)
+        app_cmd = appMethod.getCommandWithConfig(configs[app],qosRun=True)
+        print(app_cmd)
+        exit(1)
         app_thread = Rapid_M_Thread(name=app + "_thread",
                                     target=rapid_worker,
                                     dir=run_dir,

@@ -46,7 +46,7 @@ def indiSelect(apps):
     for app in apps:
          bucket, config, slow = single_app_select(app['app'], app['budget'], buckets)
          bucket_selection.append(bucket)
-         configs[app['app'].name] = config
+         configs[app['app'].name] = config[app['app'].name]
          slowdowns[app['app'].name] = 1.0
     return bucket_selection, configs, slowdowns
 
