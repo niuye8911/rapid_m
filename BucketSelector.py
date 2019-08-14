@@ -31,10 +31,33 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
             return indiSelect(apps)
         if SELECTOR == "P_M":
             return pmSelect(apps)
+        if SELECTOR == "N":
+            return nSelect(apps)
         if SELECTOR == "P":
             if env == []:
                 exit(1)
             return pSelect(apps, env)
+
+
+def nSelect(apps):
+    num_of_apps = len(apps)
+    p_models = loadAppModels(apps)
+    # convert apps to buckets
+    buckets = genBuckets(apps, p_models)
+    bucket_selection = []
+    configs = {}
+    slowdowns = {}
+    for app in apps:
+        bucket, config, slow = single_app_select(
+            app['app'],
+            app['budget'],
+            buckets,
+            fixed_slowdown=float(num_of_apps))
+        bucket_selection.append(bucket)
+        configs[app['app'].name] = config[app['app'].name]
+        slowdowns[app['app'].name] = float(num_of_apps)
+    return bucket_selection, configs, slowdowns
+
 
 def indiSelect(apps):
     p_models = loadAppModels(apps)
@@ -44,11 +67,13 @@ def indiSelect(apps):
     configs = {}
     slowdowns = {}
     for app in apps:
-         bucket, config, slow = single_app_select(app['app'], app['budget'], buckets)
-         bucket_selection.append(bucket)
-         configs[app['app'].name] = config[app['app'].name]
-         slowdowns[app['app'].name] = 1.0
+        bucket, config, slow = single_app_select(app['app'], app['budget'],
+                                                 buckets)
+        bucket_selection.append(bucket)
+        configs[app['app'].name] = config[app['app'].name]
+        slowdowns[app['app'].name] = 1.0
     return bucket_selection, configs, slowdowns
+
 
 def pmSelect(apps):
     # get the M-Model
@@ -104,7 +129,7 @@ def getSelection_batch(slowdowns, apps, buckets, single_app=False):
         max_row, apps)
 
 
-def single_app_select(app, budget, buckets):
+def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
     #only 1 app active
     configs = {}
     app_name = app.name
@@ -112,14 +137,14 @@ def single_app_select(app, budget, buckets):
     bucket_selection = ''
     for bucket in buckets[app_name]:
         bucket_name = bucket.b_name
-        slow_down = 1.0
+        slow_down = fixed_slowdown
         budget = float(budget)
         config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
         if mv[0] > max_mv:
             configs[app_name] = config[0]
             max_mv = mv[0]
             bucket_selection = bucket.b_name
-    return bucket_selection, configs, {app_name: 1.0}
+    return bucket_selection, configs, {app_name: fixed_slowdown}
 
 
 def slowdown_table(row, apps):
