@@ -2,6 +2,7 @@
 import threading
 import time
 import os
+import subprocess
 
 
 class Rapid_M_Thread(threading.Thread):
@@ -26,10 +27,12 @@ class Rapid_M_Thread(threading.Thread):
 
 def rapid_worker(dir, app_time, cmd, app):
     # run command under dir and record time
-    os.chdir(dir)
-    print("executing:", " ".join(cmd))
     start_time = time.time()
-    os.system(" ".join(cmd))
+    #os.chdir(dir)
+    #os.system(" ".join(cmd))
+    print(dir)
+    p = subprocess.Popen(" ".join(cmd),shell=True, cwd=dir)
+    p.wait()
     exec_time = time.time() - start_time
     app_time[app] = exec_time
 
