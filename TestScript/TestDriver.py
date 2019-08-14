@@ -75,7 +75,7 @@ def run_a_comb(apps):
         run_dir = app_info[app]['dir']
         max_budget = appMethod.max_cost * appMethod.fullrun_units
 
-        app_cmd = appMethod.getCommandWithConfig(configs[app],qosRun=True)
+        app_cmd = appMethod.getCommandWithConfig(configs[app], qosRun=True)
         print(app_cmd)
         exit(1)
         app_thread = Rapid_M_Thread(name=app + "_thread",
