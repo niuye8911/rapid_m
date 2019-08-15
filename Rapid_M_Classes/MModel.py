@@ -271,7 +271,23 @@ class MModel:
                 x_input = PolynomialFeatures(degree=2).fit_transform(x_input)
             y_pred_feature = self.models[feature]['model'].predict(x_input)
             y_pred[feature] = y_pred_feature
+        df = pd.DataFrame(data=y_pred)
+        df = self.__fine_tune(load1,load2,df)
         return pd.DataFrame(data=y_pred)
+
+    def __fine_tune(self, load1, load2, pred):
+        ''' fine tune the output so that the output does not have neg values '''
+        for col in pred.columns:
+            if (pred[col]>0).all():
+                continue
+            neg_index = pred.index[pred[col]<0].tolist()
+            # for each index update the value to greater
+            load1_v = load1.loc[neg_index, col+'-1']
+            load2_v = load2.loc[neg_index, col+'-2']
+            for id in neg_index:
+                new_v = max(load1_v[id], load2_v[id] )
+                pred.at[id, col]=new_v
+        return pred
 
     def predict(self, vec1, vec2):
         ''' predict a single output with two vectos '''
