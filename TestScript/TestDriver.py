@@ -14,12 +14,23 @@ import Rapids.Classes
 import Rapids.App.AppSummary
 from BucketSelector import bucketSelect
 from Rapid_M_Thread import Rapid_M_Thread, rapid_callback, rapid_worker
-#apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-apps = ['swaptions', 'bodytrack']
+from TestDriver_Helper import *
+import warnings
+from sklearn.exceptions import DataConversionWarning
+
+# ignore the TF debug info
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+# ignore the data conversion
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+
+apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
+#apps = ['nn', 'swaptions']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
-TEST_APP_FILE = './test_app_file.txt'
+TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_app_file.txt'
 
 app_info = {}
+
+STRAWMANS = ['P_M']
 
 
 # preparation
@@ -38,17 +49,18 @@ def genInfo():
 
 # gen apps' gt
 def genGT():
+    processes = []
     for app, info in app_info.items():
-        if app is not "facedetect":
-            pass
-        cmd = info['met'].getCommand(qosRun=True)
+        if app in ["svm", "nn", "facedetect"]:
+            continue
+        cmd = info['met'].getCommand(qosRun=False)
         working_dir = info['dir']
         # change working dir
         os.chdir(working_dir)
         # run all command and get the output
-        stresser = subprocess.Popen(" ".join(cmd),
-                                    shell=True,
-                                    preexec_fn=os.setsid)
+        p = subprocess.Popen(" ".join(cmd), shell=True)
+        processes.append(p)
+    exit_codes = [p.wait() for p in processes]
 
 
 # generate the app running instances
@@ -63,21 +75,19 @@ def genRunComb():
     return combs
 
 
-def run_a_comb(apps):
+def run_a_comb(apps, mode):
     '''comb is a list of app names'''
     progress_map = {}
     thread_list = []
-    configs = bucketSelect(TEST_APP_FILE, SELECTOR="INDIVIDUAL")
-    configs = configs[1]
+    selections = bucketSelect(TEST_APP_FILE, SELECTOR=mode)
+    slowdowns = selections[2]
+    configs = selections[1]
+    expect_finish_times = selections[3]
     for app in apps:
         progress_map[app] = -1
         appMethod = app_info[app]['met']
         run_dir = app_info[app]['dir']
-        max_budget = appMethod.max_cost * appMethod.fullrun_units
-
-        app_cmd = appMethod.getCommandWithConfig(configs[app], qosRun=True)
-        print(app_cmd)
-        exit(1)
+        app_cmd = appMethod.getCommandWithConfig(configs[app], qosRun=False)
         app_thread = Rapid_M_Thread(name=app + "_thread",
                                     target=rapid_worker,
                                     dir=run_dir,
@@ -90,21 +100,47 @@ def run_a_comb(apps):
     # kick off all threads
     for t in thread_list:
         t.start()
-    print("all workers started")
     for t in thread_list:
         t.join()
-    print(progress_map)
+    # assemble a slowdown entry for slow-down validation
+    sd_entry = []
+    for app, slowdown in slowdowns.items():
+        ind_time = float(expect_finish_times[app]) / 1000.0 * float(
+            app_info[app]['met'].training_units)
+        sd_entry.append({
+            'num': len(apps),
+            'app': app,
+            'config': configs[app],
+            'exec': progress_map[app],
+            'slowdown_p': slowdowns[app],
+            'ind_exec': ind_time,
+            'slowdown_gt': float(progress_map[app]) / ind_time
+        })
+    return progress_map, sd_entry, expect_finish_times
 
 
-def run(combs, mode="INDIVIDUAL"):
-    qos = {}
-    exec_time = {}
-    if mode == "INDIVIDUAL":
+def run(combs):
+    for mode in STRAWMANS:
+        qos = {}
+        data = {}
+        slowdowns = []
+        budgets = genBudgets(app_info)
         for num_of_app, comb in combs.items():
+            per_data = {}
+            counter = 0
             for apps in comb:
                 update_app_file(apps)
-                run_a_comb(apps)
-                exit(1)
+                progress_map, sd_entry, expect_exec = run_a_comb(apps, mode)
+                slowdowns = slowdowns + sd_entry
+                clean_up(per_data, app_info, progress_map)
+            data[num_of_app] = per_data
+
+        summarize_data(data, app_info, budgets, slowdowns)
+        os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
+        os.rename('mv.json', 'mv_' + mode + ".json")
+        os.rename('exceed.json', 'exceed_' + mode + ".json")
+        os.rename('slowdown_validator.csv',
+                  'slowdown_validator_' + mode + ".csv")
 
 
 def update_app_file(apps):
