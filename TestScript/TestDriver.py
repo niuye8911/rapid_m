@@ -1,6 +1,7 @@
 ''' Test driver to run multiple apps together '''
-import os, sys, imp, subprocess, json
-from itertools import combinations
+import os, sys, imp, subprocess, json, time
+import pandas as pd
+from itertools import combinations, permutations
 from concurrent.futures import ThreadPoolExecutor as Pool
 
 RAPIDS_DIR = '/home/liuliu/Research/rapidlib-linux/modelConstr/'
@@ -24,13 +25,22 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-#apps = ['nn', 'swaptions']
+#apps = ['nn', 'svm']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
 TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_app_file.txt'
 
 app_info = {}
 
-STRAWMANS = ['P_M']
+STRAWMANS = ['N']
+
+GEN_SYS = False
+
+PCM_COMMAND = [
+    'sudo /home/liuliu/Research/pcm/pcm.x', '0.5', '-nc', '-ns', '2>/dev/null',
+    '-i=5', '-csv=tmp.csv'
+]  #monitor for 2 seconds
+
+metric_df = None
 
 
 # preparation
@@ -75,19 +85,38 @@ def genRunComb():
     return combs
 
 
+def getEnvByComb(apps):
+    # numerate different names of comb
+    possible_names = list(permutations(apps))
+    possible_names = list(map(lambda x: '+'.join(x), possible_names))
+    row = metric_df.loc[metric_df['comb'].isin(possible_names)]
+    return row
+
+
 def run_a_comb(apps, mode):
-    '''comb is a list of app names'''
+    '''comb is a list of app names
+    GEN_SYS: generate environment if True'''
     progress_map = {}
     thread_list = []
-    selections = bucketSelect(TEST_APP_FILE, SELECTOR=mode)
-    slowdowns = selections[2]
-    configs = selections[1]
-    expect_finish_times = selections[3]
+    if not GEN_SYS:
+        if mode == 'P':
+            row = getEnvByComb(apps)
+            selections = bucketSelect(TEST_APP_FILE, SELECTOR='P', env=row)
+        else:
+            selections = bucketSelect(TEST_APP_FILE, SELECTOR=mode)
+        slowdowns = selections[3]
+        configs = selections[1]
+        successes = selections[2]
+        expect_finish_times = selections[4]
     for app in apps:
         progress_map[app] = -1
         appMethod = app_info[app]['met']
         run_dir = app_info[app]['dir']
-        app_cmd = appMethod.getCommandWithConfig(configs[app], qosRun=False)
+        if not GEN_SYS:
+            app_cmd = appMethod.getCommandWithConfig(configs[app],
+                                                         qosRun=False)
+        else:
+            app_cmd = appMethod.getCommand()  # default command
         app_thread = Rapid_M_Thread(name=app + "_thread",
                                     target=rapid_worker,
                                     dir=run_dir,
@@ -100,47 +129,88 @@ def run_a_comb(apps, mode):
     # kick off all threads
     for t in thread_list:
         t.start()
+    if GEN_SYS:
+        # start the monitor to get system environment
+        time.sleep(1)
+        monitor = __start_monitor()
     for t in thread_list:
         t.join()
     # assemble a slowdown entry for slow-down validation
     sd_entry = []
-    for app, slowdown in slowdowns.items():
-        ind_time = float(expect_finish_times[app]) / 1000.0 * float(
-            app_info[app]['met'].training_units)
-        sd_entry.append({
-            'num': len(apps),
-            'app': app,
-            'config': configs[app],
-            'exec': progress_map[app],
-            'slowdown_p': slowdowns[app],
-            'ind_exec': ind_time,
-            'slowdown_gt': float(progress_map[app]) / ind_time
-        })
-    return progress_map, sd_entry, expect_finish_times
+    if not GEN_SYS:
+        for app, slowdown in slowdowns.items():
+            ind_time = float(expect_finish_times[app]) / 1000.0 * float(
+                app_info[app]['met'].training_units)
+            sd_entry.append({
+                'num': len(apps),
+                'app': app,
+                'config': configs[app],
+                'exec': progress_map[app],
+                'slowdown_p': slowdowns[app],
+                'success': successes[app],
+                'ind_exec': ind_time,
+                'slowdown_gt': float(progress_map[app]) / ind_time
+            })
+        return progress_map, sd_entry, expect_finish_times
+    else:  # return the recorded ENV
+        os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
+        env = app_info['swaptions']['met'].parseTmpCSV()
+        return env
+
+
+def __start_monitor():
+    os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
+    os.system(" ".join(PCM_COMMAND))
 
 
 def run(combs):
+    global metric_df
     for mode in STRAWMANS:
+        if mode == 'P':
+            metric_df = pd.read_csv('./ALL_METRIC.csv')
         qos = {}
         data = {}
         slowdowns = []
+        metrics = {}
         budgets = genBudgets(app_info)
         for num_of_app, comb in combs.items():
             per_data = {}
             counter = 0
             for apps in comb:
-                update_app_file(apps)
-                progress_map, sd_entry, expect_exec = run_a_comb(apps, mode)
-                slowdowns = slowdowns + sd_entry
-                clean_up(per_data, app_info, progress_map)
-            data[num_of_app] = per_data
+                if GEN_SYS:
+                    metric = run_a_comb(apps, mode)
+                    metrics["+".join(apps)] = metric
+                else:
+                    update_app_file(apps)
+                    progress_map, sd_entry, expect_exec = run_a_comb(
+                        apps, mode)
+                    slowdowns = slowdowns + sd_entry
+                    clean_up(per_data, app_info, progress_map, sd_entry)
+            if not GEN_SYS:
+                data[num_of_app] = per_data
 
-        summarize_data(data, app_info, budgets, slowdowns)
-        os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
-        os.rename('mv.json', 'mv_' + mode + ".json")
-        os.rename('exceed.json', 'exceed_' + mode + ".json")
-        os.rename('slowdown_validator.csv',
-                  'slowdown_validator_' + mode + ".csv")
+        if not GEN_SYS:
+            summarize_data(data, app_info, budgets, slowdowns)
+            os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
+            os.rename('mv.json', 'mv_' + mode + ".json")
+            os.rename('miss_pred.json', 'miss_pred_' + mode + ".json")
+            os.rename('exceed.json', 'exceed_' + mode + ".json")
+            os.rename('slowdown_validator.csv',
+                      'slowdown_validator_' + mode + ".csv")
+        else:
+            gen_metric_csv(metrics)
+
+
+def gen_metric_csv(metrics):
+    # write the header
+    file = open('./metric.csv', 'w')
+    file.write(list(metrics.values())[0].printAsHeader(',', leading="comb,"))
+    file.write('\n')
+    for comb_name, metric in metrics.items():
+        file.write(comb_name + ',')
+        file.write(metric.printAsCSVLine(','))
+        file.write('\n')
+    file.close()
 
 
 def update_app_file(apps):
