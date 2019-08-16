@@ -21,7 +21,6 @@ class Rapid_M_Thread(threading.Thread):
     def target_with_callback(self, app_time, dir, cmd, app):
         self.method(dir, app_time, cmd, app)
         if self.callback is not None:
-            print(*self.callback_args)
             self.callback(*self.callback_args)
 
 
@@ -30,7 +29,6 @@ def rapid_worker(dir, app_time, cmd, app):
     start_time = time.time()
     #os.chdir(dir)
     #os.system(" ".join(cmd))
-    print(dir)
     p = subprocess.Popen(" ".join(cmd),shell=True, cwd=dir)
     p.wait()
     exec_time = time.time() - start_time
