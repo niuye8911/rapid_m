@@ -13,10 +13,13 @@ class Bucket:
         self.profile = {}
         self.rep_env = rep_env
         self.max_mv = 0.0
+        self.min_mv = 99999
+        self.min_cost = 9999999
+        self.lowest_setting = ''
         self.genSubProfile(cost_fact, mv_fact)
         # convert rep_env back to float
-        for f,v in self.rep_env.items():
-            self.rep_env[f]=float(v)
+        for f, v in self.rep_env.items():
+            self.rep_env[f] = float(v)
 
     def genSubProfile(self, cost_fact_file, mv_fact_file):
         ''' genrate the cost / quality profile for configurations '''
@@ -40,6 +43,9 @@ class Bucket:
                 if configuration not in self.configurations:
                     # filter out non-bucket configs
                     continue
+                if not MV and value < self.min_cost:
+                    self.min_cost = value
+                    self.lowest_setting = configuration
                 if MV and value > self.max_mv:
                     self.max_mv = value
                 fact_dict[configuration] = value
@@ -105,10 +111,16 @@ class Bucket:
             selected = paretos[min_id:max_id + 1]
         # clean up selected
         selected_conf = list(map(lambda x: x[0], selected))
-        selected_mv = list(map(lambda x: float(x[1]['mv']), selected))
+        selected_mv = list(
+            map(lambda x: float(x[1]['mv']) / self.max_mv * 100.0, selected))
         SUCCESS = True
-        if selected_conf == []:
+        if selected_conf == []:  #none is selected
             SUCCESS = False
-            selected_conf = [paretos[0][0]]
-            selected_mv = [paretos[0][1]['mv']/self.max_mv*100.0]
+            #selected_conf = [paretos[0][0]]
+            selected_conf = [self.lowest_setting]
+            #selected_mv = [paretos[0][1]['mv']/self.max_mv*100.0]
+            selected_mv = [
+                float(self.profile[self.lowest_setting]['mv']) / self.max_mv *
+                100.0
+            ]
         return selected_conf, selected_mv, SUCCESS

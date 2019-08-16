@@ -21,6 +21,7 @@ from DataUtil import *
 MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_machine_empty.json'
 DELIMITER = ","  # bucket comb delimiter
 
+
 def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
     with open(active_apps_file, 'r') as file:
         active_apps = json.load(file)
@@ -33,13 +34,15 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
         if SELECTOR == "N":
             return nSelect(apps)
         if SELECTOR == "P":
-            if env == []:
-                exit(1)
             return pSelect(apps, env)
 
 
 def nSelect(apps):
     num_of_apps = len(apps)
+    return indiSelect(apps, float(num_of_apps))
+
+
+def indiSelect(apps, f_slowdown=1.0):
     p_models = loadAppModels(apps)
     # convert apps to buckets
     buckets = genBuckets(apps, p_models)
@@ -47,35 +50,16 @@ def nSelect(apps):
     configs = {}
     slowdowns = {}
     expectation = {}
+    successes = {}
     for app in apps:
-        bucket, config, slow, expected = single_app_select(
-            app['app'],
-            app['budget'],
-            buckets,
-            fixed_slowdown=float(num_of_apps))
+        bucket, config, success, slow, expected = single_app_select(
+            app['app'], app['budget'], buckets, fixed_slowdown=f_slowdown)
         bucket_selection.append(bucket)
         configs[app['app'].name] = config[app['app'].name]
-        slowdowns[app['app'].name] = float(num_of_apps)
-        expectation[app['app'].name]=expected[app['app'].name]
-    return ",".join(bucket_selection), configs, slowdowns, expectation
-
-
-def indiSelect(apps):
-    p_models = loadAppModels(apps)
-    # convert apps to buckets
-    buckets = genBuckets(apps, p_models)
-    bucket_selection = []
-    configs = {}
-    slowdowns = {}
-    expectation = {}
-    for app in apps:
-        bucket, config, slow, expected = single_app_select(app['app'], app['budget'],
-                                                 buckets)
-        bucket_selection.append(bucket)
-        configs[app['app'].name] = config[app['app'].name]
-        slowdowns[app['app'].name] = 1.0
-        expectation[app['app'].name]=expected[app['app'].name]
-    return bucket_selection, configs, slowdowns, expectation
+        slowdowns[app['app'].name] = f_slowdown
+        successes[app['app'].name] = success[app['app'].name]
+        expectation[app['app'].name] = expected[app['app'].name]
+    return bucket_selection, configs, successes, slowdowns, expectation
 
 
 def pmSelect(apps):
@@ -95,7 +79,7 @@ def pmSelect(apps):
     # predict the overall envs for each comb
     combined_envs = getEnvs_batch(bucket_combs, mmodel=m_model)
     # predict the per-app slow-down
-    slowdowns = getSlowdowns_batch(combined_envs, p_models, features)
+    slowdowns = getSlowdowns_batch(combined_envs, p_models)
     # get the bucket selection based on slow-down
     selections = getSelection_batch(slowdowns, apps, buckets)
     return selections
@@ -109,12 +93,13 @@ def pSelect(apps, measured_env):
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # formulate the measured combined envs
-    combined_envs = getEnvs(bucket_combs, P_ONLY=True, env=measured_env)
+    combined_envs = getEnvs_batch(bucket_combs, P_ONLY=True, env=measured_env)
     # predict the per-app slow-down
-    slowdowns = getSlowdowns(combined_envs, p_models, features)
-    return getSelection(slowdowns, apps, buckets)
+    slowdowns = getSlowdowns_batch(combined_envs, p_models)
+    return getSelection_batch(slowdowns, apps, buckets)
 
-def _get_expected(config_dicts,buckets,comb_name):
+
+def _get_expected(config_dicts, buckets, comb_name):
     expected = {}
     bucket_names = comb_name.split(',')
     for app_name, config in config_dicts.items():
@@ -123,6 +108,7 @@ def _get_expected(config_dicts,buckets,comb_name):
             filter(lambda x: x.b_name == bucket_name, buckets[app_name]))[0]
         expected[app_name] = bucket.profile[config]['cost']
     return expected
+
 
 def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     ''' get the final selection of configs and buckets
@@ -134,15 +120,18 @@ def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     results = slowdowns.apply(lambda x: mv_per_row(x, apps, buckets), axis=1)
     mv_col = results.apply(lambda x: x['mv'])
     configs_col = results.apply(lambda x: x['configs'])
+    success_col = results.apply(lambda x: x['success'])
+    slowdowns['success'] = success_col
     slowdowns['mv'] = mv_col
     slowdowns['configs'] = configs_col
     max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
     # the result
     comb_name = max_row['comb_name']
     config_dict = max_row['configs']
+    success_dict = max_row['success']
     slowdown_t = slowdown_table(max_row, apps)
     expected_exec = _get_expected(config_dict, buckets, comb_name)
-    return comb_name, config_dict, slowdown_t, expected_exec
+    return comb_name, config_dict, success_dict, slowdown_t, expected_exec
 
 
 def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
@@ -151,17 +140,43 @@ def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
     app_name = app.name
     max_mv = 0.0
     bucket_selection = ''
+    found = False
+    failed_selection = ''
+    failed_cost = 9999
     for bucket in buckets[app_name]:
         bucket_name = bucket.b_name
         slow_down = fixed_slowdown
         budget = float(budget)
         config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
+        # if not succeed, no result
+        if not SUCCESS:
+            # find the minimum cost config
+            if bucket.profile[config[0]]['cost'] < failed_cost:
+                failed_selection = config[0]
+                failed_cost = bucket.profile[config[0]]['cost']
+                bucket_selection = bucket.b_name
+                configs[app_name] = config[0]
+            continue
+        found = True
         if mv[0] > max_mv:
             configs[app_name] = config[0]
             max_mv = mv[0]
             bucket_selection = bucket.b_name
     expected_exec = _get_expected(configs, buckets, bucket_selection)
-    return bucket_selection, configs, {app_name: fixed_slowdown}, expected_exec
+    if found:
+        return bucket_selection, configs, {
+            app_name: True
+        }, {
+            app_name: fixed_slowdown
+        }, expected_exec
+    else:
+        return bucket_selection, {
+            app_name: failed_selection
+        }, {
+            app_name: False
+        }, {
+            app_name: fixed_slowdown
+        }, expected_exec
 
 
 def slowdown_table(row, apps):
@@ -176,6 +191,7 @@ def mv_per_row(row, apps, buckets):
     bucket_list = row['comb_name'].split(',')
     total_mv = 0.0
     configs = {}
+    successes = {}
     for bucket_name in bucket_list:
         app_name = bucket_name[:-1]  #!!!there should not be > 10 buckets
         bucket = list(
@@ -185,9 +201,10 @@ def mv_per_row(row, apps, buckets):
                              apps))[0]['budget']
         config, mv, SUCCESS = bucket.getOptimal(float(budget),
                                                 float(slow_down))
-        configs[app_name] = config[0]
-        total_mv += mv[0]
-    return {'mv': total_mv, 'configs': configs}
+        configs[app_name] = config[0] if SUCCESS else None
+        successes[app_name] = SUCCESS
+        total_mv = total_mv + mv[0] if SUCCESS else +0
+    return {'mv': total_mv, 'configs': configs, 'success': successes}
 
 
 def getSelection(slowdowns, apps, buckets):
@@ -217,7 +234,7 @@ def getSelection(slowdowns, apps, buckets):
     return selection
 
 
-def getSlowdowns_batch(combined_envs, p_models, features):
+def getSlowdowns_batch(combined_envs, p_models):
     ''' return the slow-down for each app with slow-down
     @param combined_envs: a df with all comb_name and envs(processed)
     '''
@@ -240,18 +257,6 @@ def getSlowdowns_batch(combined_envs, p_models, features):
             combined_envs.loc[sub_df.index.values, [app]] = slowdown
     return combined_envs
 
-    for comb_name, env in combined_envs.items():
-        buckets = comb_name.split(DELIMITER)
-        comb_slowdown = {}
-        for bucket in buckets:
-            app_name = bucket[:-1]
-            p_model = p_models[app_name][bucket]
-            # tranform the vector to dataframe
-            slowdown = p_model.predict(env_to_frame(env, features))
-            comb_slowdown[app_name] = slowdown[0]
-        slowDownTable[comb_name] = comb_slowdown
-    return slowDownTable
-
 
 def getSlowdowns(combined_envs, p_models, features):
     ''' return the slow-down for each app with slow-down '''
@@ -271,7 +276,25 @@ def getSlowdowns(combined_envs, p_models, features):
 
 def getEnvs_batch(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
     result = {}
-    envs = mmodel.predict_seq(bucket_combs)
+    if not P_ONLY:
+        envs = mmodel.predict_seq(bucket_combs)
+    else:
+        comb_names = list(
+            map(lambda comb: (list(map(lambda x: x.b_name, comb))),
+                bucket_combs))
+        comb_name_strs = list(map(lambda x: ",".join(x), comb_names))
+        # convert the env to df
+        env_formatted = formatEnv_df(env, env.columns.tolist())
+        # num of comb
+        num_of_comb = len(comb_names)
+        # generate the fake df
+        measured_env = OrderedDict()
+        for col in env_formatted.columns:
+            if col == 'comb':
+                continue
+            measured_env[col] = list(env_formatted[col].values) * num_of_comb
+        envs = pd.DataFrame(data=measured_env)
+        envs['comb_name'] = comb_name_strs
     return envs
 
 
