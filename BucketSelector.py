@@ -201,7 +201,7 @@ def mv_per_row(row, apps, buckets):
                              apps))[0]['budget']
         config, mv, SUCCESS = bucket.getOptimal(float(budget),
                                                 float(slow_down))
-        configs[app_name] = config[0] if SUCCESS else None
+        configs[app_name] = config[0]
         successes[app_name] = SUCCESS
         total_mv = total_mv + mv[0] if SUCCESS else +0
     return {'mv': total_mv, 'configs': configs, 'success': successes}
