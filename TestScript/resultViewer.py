@@ -35,23 +35,35 @@ def readFile(dir):
                         result[budget][mode].append(sum(c)/len(c))
 
 def draw():
+    sub_graphs = ['exceed','miss_pred','mv']
     for budget in budgets:
         id = 0
-        fig,axes = plt.subplots(3)
+        fig,axes = plt.subplots(nrows=3)
+        fig.tight_layout()
         bar_width=0.2
         opacity = 0.8
         index = np.arange(n_groups)
         plt.xlabel('Num Of Apps')
         plt.xticks(index+bar_width,range(2,n_groups+2))
-        for data, result in datas.items():
+        rects = []
+        for data in sub_graphs:
+            result=datas[data]
             # assign bars
             i = 0
+            axes[id].set_ylim([0.0,1.0])
+            axes[id].set_yticks([0.0,0.25,0.5,0.75,1.0])
+            rects_done = len(rects)>0
             for mode in modes:
-                rect = axes[id].bar(index+i*bar_width, result[budget][mode], bar_width, alpha=opacity,label=mode)
+                rect = axes[id].bar(index+i*bar_width, result[budget][mode], bar_width, alpha=opacity)
+                if not rects_done:
+                    rects.append(rect)
                 i+=1
             axes[id].set(ylabel=data)
+            axes[id].yaxis.grid(which="major",linestyle='--', linewidth=0.7)
             id += 1
-        plt.legend(loc='upper right')
+        #axes[0].axis("off")
+        fig.legend(rects,modes,loc='upper center',ncol=4)
+        plt.subplots_adjust(bottom=0.1, left=0.1, top=0.9)
         plt.savefig('result_'+str(budget)+'.png')
 
 
