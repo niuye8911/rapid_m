@@ -31,7 +31,8 @@ TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_ap
 
 app_info = {}
 
-STRAWMANS = ['N']
+STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL']
+#STRAWMANS = ['P']
 
 GEN_SYS = False
 
@@ -114,7 +115,7 @@ def run_a_comb(apps, mode):
         run_dir = app_info[app]['dir']
         if not GEN_SYS:
             app_cmd = appMethod.getCommandWithConfig(configs[app],
-                                                         qosRun=False)
+                                                     qosRun=False)
         else:
             app_cmd = appMethod.getCommand()  # default command
         app_thread = Rapid_M_Thread(name=app + "_thread",
@@ -165,40 +166,47 @@ def __start_monitor():
 
 def run(combs):
     global metric_df
-    for mode in STRAWMANS:
-        if mode == 'P':
-            metric_df = pd.read_csv('./ALL_METRIC.csv')
-        qos = {}
-        data = {}
-        slowdowns = []
-        metrics = {}
-        budgets = genBudgets(app_info)
-        for num_of_app, comb in combs.items():
-            per_data = {}
-            counter = 0
-            for apps in comb:
-                if GEN_SYS:
-                    metric = run_a_comb(apps, mode)
-                    metrics["+".join(apps)] = metric
-                else:
-                    update_app_file(apps)
-                    progress_map, sd_entry, expect_exec = run_a_comb(
-                        apps, mode)
-                    slowdowns = slowdowns + sd_entry
-                    clean_up(per_data, app_info, progress_map, sd_entry)
-            if not GEN_SYS:
-                data[num_of_app] = per_data
+    budget_scale = [0.8, 1.0, 1.5]
+    for scale in budget_scale:
+        for mode in STRAWMANS:
+            if mode == 'P':
+                metric_df = pd.read_csv('./ALL_METRIC.csv')
+            qos = {}
+            data = {}
+            slowdowns = []
+            metrics = {}
+            budgets = genBudgets(app_info, scale)
+            for num_of_app, comb in combs.items():
+                per_data = {}
+                counter = 0
+                for apps in comb:
+                    if GEN_SYS:
+                        metric = run_a_comb(apps, mode)
+                        metrics["+".join(apps)] = metric
+                    else:
+                        update_app_file(apps, scale)
+                        progress_map, sd_entry, expect_exec = run_a_comb(
+                            apps, mode)
+                        slowdowns = slowdowns + sd_entry
+                        clean_up(per_data, app_info, progress_map, sd_entry,
+                                 budgets)
+                if not GEN_SYS:
+                    data[num_of_app] = per_data
 
-        if not GEN_SYS:
-            summarize_data(data, app_info, budgets, slowdowns)
-            os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
-            os.rename('mv.json', 'mv_' + mode + ".json")
-            os.rename('miss_pred.json', 'miss_pred_' + mode + ".json")
-            os.rename('exceed.json', 'exceed_' + mode + ".json")
-            os.rename('slowdown_validator.csv',
-                      'slowdown_validator_' + mode + ".csv")
-        else:
-            gen_metric_csv(metrics)
+            if not GEN_SYS:
+                summarize_data(data, app_info, budgets, slowdowns)
+                os.chdir(
+                    '/home/liuliu/Research/rapid_m_backend_server/TestScript')
+                os.rename('mv.json', 'mv_' + mode + "_" + str(scale) + ".json")
+                os.rename('miss_pred.json',
+                          'miss_pred_' + mode + "_" + str(scale) + ".json")
+                os.rename('exceed.json',
+                          'exceed_' + mode + "_" + str(scale) + ".json")
+                os.rename(
+                    'slowdown_validator.csv',
+                    'slowdown_validator_' + mode + "_" + str(scale) + ".csv")
+            else:
+                gen_metric_csv(metrics)
 
 
 def gen_metric_csv(metrics):
@@ -213,7 +221,7 @@ def gen_metric_csv(metrics):
     file.close()
 
 
-def update_app_file(apps):
+def update_app_file(apps, scale=1.0):
     active_apps = {}
     with open(TEST_APP_FILE, 'r') as file:
         active_apps = json.load(file)
@@ -224,7 +232,7 @@ def update_app_file(apps):
                 app['status'] = 0
             else:
                 app['status'] = 1
-                app['budget'] = app_info[app_name]['met'].max_cost
+                app['budget'] = app_info[app_name]['met'].max_cost * scale
     with open(TEST_APP_FILE, 'w') as file:
         json.dump(active_apps, file, indent=2)
 

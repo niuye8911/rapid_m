@@ -7,21 +7,22 @@ SD_FILE_COLUMNS = [
 ]
 
 
-def genBudgets(app_info):
+def genBudgets(app_info, scale=1.0):
     result = {}
     for app_name, info in app_info.items():
-        budget = info['met'].training_units * info['met'].max_cost / 1000.0
+        budget = info['met'].training_units * scale * info[
+            'met'].max_cost / 1000.0
         result[app_name] = budget
     return result
 
 
-def clean_up(data, app_info, exec_time, sd_entry):
+def clean_up(data, app_info, exec_time, sd_entry, budgets):
     qos_s = {}
-    for app_name, info in exec_time.items():
+    for app_name, real_exec in exec_time.items():
         # check if succeed
         success = list(filter(lambda x: x['app'] == app_name,
                               sd_entry))[0]['success']
-        if success:
+        if success and budgets[app_name] * 1.1 > real_exec:
             app_dir = app_info[app_name]['dir']
             app_method = app_info[app_name]['met']
             # calculate qos
@@ -47,7 +48,10 @@ def clean_up(data, app_info, exec_time, sd_entry):
         if app_name not in data.keys():
             data[app_name] = {'qos': [], 'time': []}
         data[app_name]['qos'].append(qos)
-        data[app_name]['time'].append({'success':success,'real_time':exec_time[app_name]})
+        data[app_name]['time'].append({
+            'success': success,
+            'real_time': exec_time[app_name]
+        })
     return
 
 
@@ -65,12 +69,17 @@ def summarize_data(data, app_info, budget, slowdowns):
             times = d['time']
             qoss = d['qos']
             # check exceeds
-            exc = list(map(lambda x: 1 if x['success'] and x['real_time'] > (1.1 * max_budget) else 0,
-                           times))
-            miss_pred = list(map(lambda x: 1 if ((not x['success']) and x['real_time'] < max_budget) else 0,
-                           times))
+            exc = list(
+                map(
+                    lambda x: 1 if x['success'] and x['real_time'] > (
+                        1.1 * max_budget) else 0, times))
+            miss_pred = list(
+                map(
+                    lambda x: 1 if ((not x['success']) and x['real_time'] <
+                                    max_budget) else 0, times))
             exceeds[num_of_app][app_name] = float(sum(exc)) / float(len(exc))
-            miss_preds[num_of_app][app_name] = float(sum(miss_pred)) / float(len(miss_pred))
+            miss_preds[num_of_app][app_name] = float(sum(miss_pred)) / float(
+                len(miss_pred))
             # check mvs
             mvs[num_of_app][app_name] = sum(qoss) / float(len(qoss))
     # write it to file
