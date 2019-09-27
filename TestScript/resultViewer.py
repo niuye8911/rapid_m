@@ -46,7 +46,7 @@ def draw():
         opacity = 0.8
         index = np.arange(n_groups)
         plt.xlabel('Num Of Apps')
-        plt.xticks(index + bar_width, range(2, n_groups + 2))
+        #plt.xticks(index + bar_width, range(2, n_groups + 2))
         rects = []
         for data in sub_graphs:
             result = datas[data]
@@ -65,6 +65,8 @@ def draw():
                 i += 1
             axes[id].set(ylabel=data)
             axes[id].yaxis.grid(which="major", linestyle='--', linewidth=0.7)
+            plt.sca(axes[id])
+            plt.xticks(index + bar_width, range(2, n_groups + 2))
             id += 1
         #axes[0].axis("off")
         fig.legend(rects, modes, loc='upper center', ncol=4)
@@ -72,5 +74,5 @@ def draw():
         plt.savefig('result_' + str(budget) + '.png')
 
 
-readFile('./aug19')
+readFile('./sep29')
 draw()
