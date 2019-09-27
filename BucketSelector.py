@@ -138,7 +138,7 @@ def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
     #only 1 app active
     configs = {}
     app_name = app.name
-    max_mv = 0.0
+    max_mv = -10
     bucket_selection = ''
     found = False
     failed_selection = ''
@@ -148,20 +148,21 @@ def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
         slow_down = fixed_slowdown
         budget = float(budget)
         config, mv, SUCCESS = bucket.getOptimal(budget, slow_down)
-        # if not succeed, no result
-        if not SUCCESS:
-            # find the minimum cost config
-            if bucket.profile[config[0]]['cost'] < failed_cost:
-                failed_selection = config[0]
-                failed_cost = bucket.profile[config[0]]['cost']
-                bucket_selection = bucket.b_name
+        if SUCCESS:
+            found = True
+            if mv[0] > max_mv:
                 configs[app_name] = config[0]
-            continue
-        found = True
-        if mv[0] > max_mv:
-            configs[app_name] = config[0]
-            max_mv = mv[0]
-            bucket_selection = bucket.b_name
+                max_mv = mv[0]
+                bucket_selection = bucket.b_name
+        # if not succeed, no result
+        else:
+            if not found:
+                # find the minimum cost config
+                if bucket.profile[config[0]]['cost'] < failed_cost:
+                    failed_selection = config[0]
+                    failed_cost = bucket.profile[config[0]]['cost']
+                    bucket_selection = bucket.b_name
+                    configs[app_name] = config[0]
     expected_exec = _get_expected(configs, buckets, bucket_selection)
     if found:
         return bucket_selection, configs, {
