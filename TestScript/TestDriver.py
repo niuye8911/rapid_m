@@ -11,7 +11,6 @@ sys.path.append(os.path.dirname(RAPIDS_DIR))
 sys.path.append(os.path.dirname(RAPIDS_M_DIR))
 sys.path.append(os.path.dirname(RAPIDS_SOURCE_DIR))
 
-import Rapids.Classes
 import Rapids.App.AppSummary
 from BucketSelector import bucketSelect
 from Rapid_M_Thread import Rapid_M_Thread, rapid_callback, rapid_worker
@@ -25,14 +24,14 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-#apps = ['nn', 'svm']
+#apps = ['bodytrack','swaptions']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
 TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_app_file.txt'
 
 app_info = {}
 
 STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL']
-#STRAWMANS = ['P']
+#STRAWMANS = ['P_M']
 
 GEN_SYS = False
 
@@ -115,7 +114,7 @@ def run_a_comb(apps, mode):
         run_dir = app_info[app]['dir']
         if not GEN_SYS:
             app_cmd = appMethod.getCommandWithConfig(configs[app],
-                                                     qosRun=False)
+                                                     qosRun=False,fullRun=False)
         else:
             app_cmd = appMethod.getCommand()  # default command
         app_thread = Rapid_M_Thread(name=app + "_thread",
