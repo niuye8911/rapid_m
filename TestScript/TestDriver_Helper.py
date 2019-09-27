@@ -6,6 +6,25 @@ SD_FILE_COLUMNS = [
     'success'
 ]
 
+MINMAX_FILE = '/home/liuliu/Research/rapidlib-linux/modelConstr/Rapids/outputs/app_min_max.json'
+
+def readMinMaxMV():
+    minmax = {}
+    with open(MINMAX_FILE) as minmax_mv_file:
+        data = json.load(minmax_mv_file)
+        for app, values in data.items():
+            minmax[app] = {'min': values[0], 'max': values[1]}
+    return minmax
+
+minmax = readMinMaxMV()
+
+def scale_mv(app, mv):
+    global minmax
+    min_mv = minmax[app]['min']
+    max_mv = minmax[app]['max']
+    scaled_mv =  min(1.0,max(0.0, (mv - min_mv) / (max_mv - min_mv)
+                          ))
+    return scaled_mv
 
 def genBudgets(app_info, scale=1.0):
     result = {}
@@ -39,8 +58,7 @@ def clean_up(data, app_info, exec_time, sd_entry, budgets):
                 qos = app_method.getQoS()
                 qos = qos[2]
             # scale the qos
-            qos = (qos - app_method.min_mv) / (app_method.max_mv -
-                                               app_method.min_mv)
+            qos = scale_mv(app_name, qos)
         else:
             qos = 0.0
 
