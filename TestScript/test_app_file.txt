@@ -2,13 +2,13 @@
   "applications": [
     {
       "id": "bodytrack",
-      "budget": 293,
+      "budget": 439.5,
       "dir": "/var/www/html/rapid_server/storage/apps/algaesim-bodytrack",
       "status": 1
     },
     {
       "id": "swaptions",
-      "budget": 2194,
+      "budget": 3306.0,
       "dir": "/var/www/html/rapid_server/storage/apps/algaesim-swaptions",
       "status": 1
     },
