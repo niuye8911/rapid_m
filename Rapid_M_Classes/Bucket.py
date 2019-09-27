@@ -40,14 +40,15 @@ class Bucket:
                     end_of_config = self.getEndOfConfig(columns)
                 configuration = "-".join(columns[:end_of_config])
                 value = float(columns[len(columns) - 1])
+                # max_mv should be global max mv
+                if MV and value > self.max_mv:
+                    self.max_mv = value
                 if configuration not in self.configurations:
                     # filter out non-bucket configs
                     continue
                 if not MV and value < self.min_cost:
                     self.min_cost = value
                     self.lowest_setting = configuration
-                if MV and value > self.max_mv:
-                    self.max_mv = value
                 fact_dict[configuration] = value
         return fact_dict
 
@@ -109,6 +110,7 @@ class Bucket:
         else:
             # both min and max != -1
             selected = paretos[min_id:max_id + 1]
+
         # clean up selected
         selected_conf = list(map(lambda x: x[0], selected))
         selected_mv = list(
