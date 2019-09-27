@@ -1,0 +1,42 @@
+{
+  "applications": [
+    {
+      "id": "bodytrack",
+      "budget": 439.5,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-bodytrack",
+      "status": 1
+    },
+    {
+      "id": "swaptions",
+      "budget": 3306.0,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-swaptions",
+      "status": 1
+    },
+    {
+      "id": "facedetect",
+      "budget": 1500.0,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-facedetect",
+      "status": 1
+    },
+    {
+      "id": "ferret",
+      "budget": 148.5,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-ferret",
+      "status": 1
+    },
+    {
+      "id": "nn",
+      "budget": 4689.0,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-nn",
+      "status": 1
+    },
+    {
+      "id": "svm",
+      "budget": 5344.5,
+      "dir": "/var/www/html/rapid_server/storage/apps/algaesim-svm",
+      "status": 1
+    }
+  ],
+  "lastload": 1565709020,
+  "compute": "/var/www/html/rapid_server/storage/data_machine_algaesim_result.txt"
+}
