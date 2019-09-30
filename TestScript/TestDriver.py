@@ -214,19 +214,25 @@ def run(combs):
 
             if not GEN_SYS:
                 # write the slowdowns to a csv
-                slowdown_file = writeSlowDown(slowdowns)
-                summarize_data(slowdown_file)
                 os.chdir(
                     '/home/liuliu/Research/rapid_m_backend_server/TestScript')
-                os.rename('mv.json', 'mv_' + mode + "_" + str(scale) + ".json")
-                os.rename('miss_pred.json',
-                          'miss_pred_' + mode + "_" + str(scale) + ".json")
-                os.rename('exceed.json',
-                          'exceed_' + mode + "_" + str(scale) + ".json")
-                os.rename('raw_mv.json',
-                          'raw_mv' + mode + "_" + str(scale) + ".json")
+                folderName = getFolderName()
+                if not os.path.exists(folderName):
+                    os.mkdir(folderName)
+                folderName += '/'
+                slowdown_file = writeSlowDown(slowdowns)
+                summarize_data(slowdown_file)
                 os.rename(
-                    'slowdown_validator.csv',
+                    'mv.json',
+                    foldername + 'mv_' + mode + "_" + str(scale) + ".json")
+                os.rename(
+                    'miss_pred.json', foldername + 'miss_pred_' + mode + "_" +
+                    str(scale) + ".json")
+                os.rename(
+                    'exceed.json',
+                    foldername + 'exceed_' + mode + "_" + str(scale) + ".json")
+                os.rename(
+                    'slowdown_validator.csv', foldername +
                     'slowdown_validator_' + mode + "_" + str(scale) + ".csv")
             else:
                 gen_metric_csv(metrics)

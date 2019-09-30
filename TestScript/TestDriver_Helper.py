@@ -1,5 +1,5 @@
 ''' helper function for cleaning up '''
-import os, json, csv
+import os, json, csv, datetime
 import pandas as pd
 from Utility import updateAppMinMax
 
@@ -9,6 +9,12 @@ SD_FILE_COLUMNS = [
 ]
 
 MINMAX_FILE = '/home/liuliu/Research/rapidlib-linux/modelConstr/Rapids/outputs/app_min_max.json'
+
+def getFolderName():
+    now = datetime.datetime.now()
+    month = now.month
+    day = now.day
+    return str(month)+'_'+str(day)
 
 
 def readMinMaxMV():
