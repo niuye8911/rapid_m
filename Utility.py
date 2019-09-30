@@ -1,4 +1,4 @@
-import json
+import json, os
 import pprint
 from functools import reduce
 
@@ -7,6 +7,32 @@ import scipy.stats
 from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 import csv
+
+
+def __get_minmax(file):
+    min_v = 999999.0
+    max_v = -999999.0
+    with open(file, 'r') as f:
+        for line in f:
+            col = line.rstrip().split(' ')
+            v = float(col[-1])
+            min_v = min(min_v, v)
+            max_v = max(max_v, v)
+    return min_v, max_v
+
+
+def updateAppMinMax(app_name, appMethod):
+    base_dir = "/home/liuliu/Research/rapid_m_backend_server/outputs/"
+    cost_file = base_dir + app_name + '/cost.csv'
+    mv_file = base_dir + app_name + '/mv.csv'
+    if os.path.exists(cost_file):
+        min_cost, max_cost = __get_minmax(cost_file)
+        appMethod.min_cost = min_cost
+        appMethod.max_cost = max_cost
+    if os.path.exists(mv_file):
+        min_mv, max_mv = __get_minmax(mv_file)
+        appMethod.min_mv = min_mv
+        appMethod.max_mv = max_mv
 
 
 def writeSelectionToFile(f, comb_name, selection, slowDownTable):
