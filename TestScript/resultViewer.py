@@ -74,5 +74,5 @@ def draw():
         plt.savefig('result_' + str(budget) + '.png')
 
 
-readFile('./sep29')
+readFile('./sep30')
 draw()
