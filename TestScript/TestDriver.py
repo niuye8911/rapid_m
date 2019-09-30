@@ -198,7 +198,6 @@ def run(combs):
             metrics = {}
             budgets = genBudgets(app_info, scale)
             for num_of_app, comb in combs.items():
-                break
                 per_data = {}  # all data for current num_of_app
                 counter = 0
                 for apps in comb:
