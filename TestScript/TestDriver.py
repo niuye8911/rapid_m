@@ -24,7 +24,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-#apps = ['bodytrack','swaptions']
+#apps = ['bodytrack', 'swaptions', 'ferret']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
 TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_app_file.txt'
 
@@ -93,7 +93,7 @@ def getEnvByComb(apps):
     return row
 
 
-def run_a_comb(apps, mode):
+def run_a_comb(apps, budgets, mode):
     '''comb is a list of app names
     GEN_SYS: generate environment if True'''
     progress_map = {}
@@ -114,7 +114,8 @@ def run_a_comb(apps, mode):
         run_dir = app_info[app]['dir']
         if not GEN_SYS:
             app_cmd = appMethod.getCommandWithConfig(configs[app],
-                                                     qosRun=False,fullRun=False)
+                                                     qosRun=False,
+                                                     fullRun=False)
         else:
             app_cmd = appMethod.getCommand()  # default command
         app_thread = Rapid_M_Thread(name=app + "_thread",
@@ -141,17 +142,38 @@ def run_a_comb(apps, mode):
         for app, slowdown in slowdowns.items():
             ind_time = float(expect_finish_times[app]) / 1000.0 * float(
                 app_info[app]['met'].training_units)
+            if not successes[app]:
+                raw_qos = 0.0
+                qos = 0.0
+            else:
+                raw_qos, qos = getMV(app, app_info)
             sd_entry.append({
-                'num': len(apps),
-                'app': app,
-                'config': configs[app],
-                'exec': progress_map[app],
-                'slowdown_p': slowdowns[app],
-                'success': successes[app],
-                'ind_exec': ind_time,
-                'slowdown_gt': float(progress_map[app]) / ind_time
+                'num':
+                len(apps),
+                'app':
+                app,
+                'config':
+                configs[app],
+                'exec':
+                progress_map[app],
+                'slowdown_p':
+                slowdown,
+                'success_p':
+                successes[app],
+                'success_gt':
+                progress_map[app] < 1.1 * budgets[app],
+                'ind_exec':
+                ind_time,
+                'budget':
+                budgets[app],
+                'slowdown_gt':
+                float(progress_map[app]) / ind_time,
+                'raw_qos':
+                raw_qos,
+                'qos':
+                qos
             })
-        return progress_map, sd_entry, expect_finish_times
+        return sd_entry
     else:  # return the recorded ENV
         os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript')
         env = app_info['swaptions']['met'].parseTmpCSV()
@@ -176,24 +198,25 @@ def run(combs):
             metrics = {}
             budgets = genBudgets(app_info, scale)
             for num_of_app, comb in combs.items():
-                per_data = {}
+                break
+                per_data = {}  # all data for current num_of_app
                 counter = 0
                 for apps in comb:
                     if GEN_SYS:
-                        metric = run_a_comb(apps, mode)
+                        metric = run_a_comb(apps, budgets, mode)
                         metrics["+".join(apps)] = metric
                     else:
                         update_app_file(apps, scale)
-                        progress_map, sd_entry, expect_exec = run_a_comb(
-                            apps, mode)
+                        # sd_entry: all app in current comb
+                        sd_entry = run_a_comb(apps, budgets, mode)
                         slowdowns = slowdowns + sd_entry
-                        clean_up(per_data, app_info, progress_map, sd_entry,
-                                 budgets)
                 if not GEN_SYS:
                     data[num_of_app] = per_data
 
             if not GEN_SYS:
-                summarize_data(data, app_info, budgets, slowdowns)
+                # write the slowdowns to a csv
+                slowdown_file = writeSlowDown(slowdowns)
+                summarize_data(slowdown_file)
                 os.chdir(
                     '/home/liuliu/Research/rapid_m_backend_server/TestScript')
                 os.rename('mv.json', 'mv_' + mode + "_" + str(scale) + ".json")
@@ -201,6 +224,8 @@ def run(combs):
                           'miss_pred_' + mode + "_" + str(scale) + ".json")
                 os.rename('exceed.json',
                           'exceed_' + mode + "_" + str(scale) + ".json")
+                os.rename('raw_mv.json',
+                          'raw_mv' + mode + "_" + str(scale) + ".json")
                 os.rename(
                     'slowdown_validator.csv',
                     'slowdown_validator_' + mode + "_" + str(scale) + ".csv")
