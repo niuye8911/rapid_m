@@ -8,17 +8,17 @@ from collections import OrderedDict
 
 modes = ['P', 'P_M', 'INDIVIDUAL', 'N']
 budgets = [0.8, 1.0, 1.5]
-apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
+apps = []
+n_groups = 0
 
 mvs = OrderedDict()
 exceeds = OrderedDict()
 misses = OrderedDict()
 datas = {'mv': mvs, 'exceed': exceeds, 'miss_pred': misses}
 
-n_groups = 5
-
 
 def readFile(dir):
+    global n_groups, apps
     for budget in budgets:
         mvs[budget] = {}
         exceeds[budget] = {}
@@ -32,6 +32,9 @@ def readFile(dir):
                 with open(file_name) as json_file:
                     f = json.load(json_file, object_pairs_hook=OrderedDict)
                     for num, values in f.items():
+                        if apps == []:
+                            apps = list(values.keys())
+                            n_groups = len(apps) - 1
                         c = list(values.values())
                         result[budget][mode].append(sum(c) / len(c))
 
@@ -74,5 +77,5 @@ def draw():
         plt.savefig('result_' + str(budget) + '.png')
 
 
-readFile('./sep30')
+readFile('./10_1_without_svm')
 draw()
