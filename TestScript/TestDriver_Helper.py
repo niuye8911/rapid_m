@@ -4,7 +4,7 @@ import pandas as pd
 from Utility import updateAppMinMax
 
 SD_FILE_COLUMNS = [
-    'num', 'app', 'budget', 'ind_exec', 'exec', 'config', 'slowdown_p',
+    'num', 'app', 'alongwith','budget', 'ind_exec', 'exec', 'config', 'slowdown_p',
     'slowdown_gt', 'success_p', 'success_gt', 'raw_qos', 'qos'
 ]
 

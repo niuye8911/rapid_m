@@ -24,7 +24,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-#apps = ['bodytrack', 'swaptions', 'ferret']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
 TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_app_file.txt'
 
@@ -152,6 +151,8 @@ def run_a_comb(apps, budgets, mode):
                 len(apps),
                 'app':
                 app,
+                'alongwith':
+                "/".join(apps),
                 'config':
                 configs[app],
                 'exec':
@@ -216,10 +217,10 @@ def run(combs):
                 # write the slowdowns to a csv
                 os.chdir(
                     '/home/liuliu/Research/rapid_m_backend_server/TestScript')
-                folderName = getFolderName()
-                if not os.path.exists(folderName):
-                    os.mkdir(folderName)
-                folderName += '/'
+                foldername = getFolderName()
+                if not os.path.exists(foldername):
+                    os.mkdir(foldername)
+                foldername += '/'
                 slowdown_file = writeSlowDown(slowdowns)
                 summarize_data(slowdown_file)
                 os.rename(
