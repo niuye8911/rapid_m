@@ -29,9 +29,6 @@ TEST_APP_FILE = '/home/liuliu/Research/rapid_m_backend_server/TestScript/test_ap
 
 app_info = {}
 
-STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL']
-#STRAWMANS = ['P_M']
-
 GEN_SYS = False
 
 PCM_COMMAND = [
@@ -41,6 +38,10 @@ PCM_COMMAND = [
 
 metric_df = None
 
+REPEAT = 4 # run each combination REPEAT times
+STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL'] # strawmans to use
+#STRAWMANS = ['P_M']
+BUDGET_SCALE = [0.8,1.0,1.5]
 
 # preparation
 def genInfo():
@@ -77,7 +78,7 @@ def genRunComb():
     num_of_app = len(apps)
     combs = {}
     total = 0
-    for i in range(2, num_of_app + 1):
+    for i in range(5, num_of_app + 1):
         combs[i] = list(combinations(apps, i))
         total += len(combs[i])
     print('total num:', total)
@@ -188,8 +189,7 @@ def __start_monitor():
 
 def run(combs):
     global metric_df
-    budget_scale = [0.8, 1.0, 1.5]
-    for scale in budget_scale:
+    for scale in BUDGET_SCALE:
         for mode in STRAWMANS:
             if mode == 'P':
                 metric_df = pd.read_csv('./ALL_METRIC.csv')
@@ -208,8 +208,9 @@ def run(combs):
                     else:
                         update_app_file(apps, scale)
                         # sd_entry: all app in current comb
-                        sd_entry = run_a_comb(apps, budgets, mode)
-                        slowdowns = slowdowns + sd_entry
+                        for repeat in range(1,REPEAT+1):
+                            sd_entry = run_a_comb(apps, budgets, mode)
+                            slowdowns = slowdowns + sd_entry
                 if not GEN_SYS:
                     data[num_of_app] = per_data
 
