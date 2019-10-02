@@ -78,7 +78,7 @@ def genRunComb():
     num_of_app = len(apps)
     combs = {}
     total = 0
-    for i in range(5, num_of_app + 1):
+    for i in range(2, num_of_app + 1):
         combs[i] = list(combinations(apps, i))
         total += len(combs[i])
     print('total num:', total)
