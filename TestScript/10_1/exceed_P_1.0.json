@@ -1,0 +1,18 @@
+{
+  "5": {
+    "bodytrack": 1.0,
+    "swaptions": 0.05,
+    "ferret": 0.5,
+    "nn": 0.05,
+    "svm": 1.0,
+    "facedetect": 0.0
+  },
+  "6": {
+    "bodytrack": 1.0,
+    "swaptions": 0.25,
+    "ferret": 0.75,
+    "nn": 0.0,
+    "svm": 1.0,
+    "facedetect": 0.0
+  }
+}

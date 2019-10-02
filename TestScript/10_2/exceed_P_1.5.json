@@ -1,0 +1,42 @@
+{
+  "2": {
+    "swaptions": 0.0,
+    "ferret": 0.0,
+    "bodytrack": 0.0,
+    "svm": 0.0,
+    "nn": 0.0,
+    "facedetect": 0.0
+  },
+  "3": {
+    "swaptions": 0.0,
+    "ferret": 0.0,
+    "bodytrack": 0.0,
+    "svm": 0.0,
+    "nn": 0.0,
+    "facedetect": 0.0
+  },
+  "4": {
+    "swaptions": 0.0,
+    "ferret": 0.0,
+    "bodytrack": 0.0,
+    "svm": 0.0,
+    "nn": 0.0,
+    "facedetect": 0.0
+  },
+  "5": {
+    "bodytrack": 0.3,
+    "swaptions": 0.4,
+    "ferret": 0.2,
+    "nn": 0.0,
+    "svm": 0.0,
+    "facedetect": 0.0
+  },
+  "6": {
+    "bodytrack": 0.75,
+    "swaptions": 1.0,
+    "ferret": 0.75,
+    "nn": 0.0,
+    "svm": 0.0,
+    "facedetect": 0.0
+  }
+}
