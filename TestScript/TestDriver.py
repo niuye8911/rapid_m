@@ -38,10 +38,11 @@ PCM_COMMAND = [
 
 metric_df = None
 
-REPEAT = 4 # run each combination REPEAT times
-STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL'] # strawmans to use
+REPEAT = 4  # run each combination REPEAT times
+STRAWMANS = ['P', 'P_M', 'N', 'INDIVIDUAL']  # strawmans to use
 #STRAWMANS = ['P_M']
-BUDGET_SCALE = [0.8,1.0,1.5]
+BUDGET_SCALE = [0.8, 1.0, 1.5]
+
 
 # preparation
 def genInfo():
@@ -101,9 +102,11 @@ def run_a_comb(apps, budgets, mode):
     if not GEN_SYS:
         if mode == 'P':
             row = getEnvByComb(apps)
-            selections = bucketSelect(TEST_APP_FILE, SELECTOR='P', env=row)
+            selections, buckets = bucketSelect(TEST_APP_FILE,
+                                               SELECTOR='P',
+                                               env=row)
         else:
-            selections = bucketSelect(TEST_APP_FILE, SELECTOR=mode)
+            selections, buckets = bucketSelect(TEST_APP_FILE, SELECTOR=mode)
         slowdowns = selections[3]
         configs = selections[1]
         successes = selections[2]
@@ -208,7 +211,7 @@ def run(combs):
                     else:
                         update_app_file(apps, scale)
                         # sd_entry: all app in current comb
-                        for repeat in range(1,REPEAT+1):
+                        for repeat in range(1, REPEAT + 1):
                             sd_entry = run_a_comb(apps, budgets, mode)
                             slowdowns = slowdowns + sd_entry
                 if not GEN_SYS:
