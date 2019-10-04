@@ -59,7 +59,7 @@ def indiSelect(apps, f_slowdown=1.0):
         slowdowns[app['app'].name] = f_slowdown
         successes[app['app'].name] = success[app['app'].name]
         expectation[app['app'].name] = expected[app['app'].name]
-    return bucket_selection, configs, successes, slowdowns, expectation
+    return [bucket_selection, configs, successes, slowdowns, expectation],buckets
 
 
 def pmSelect(apps):
@@ -73,7 +73,7 @@ def pmSelect(apps):
     buckets = genBuckets(apps, p_models)
     if len(apps) == 1:
         selections = getSelection_batch(None, apps, buckets, single_app=True)
-        return selections
+        return selections, buckets
     # get all combinations of buckets
     bucket_combs = getBucketCombs(buckets)
     # predict the overall envs for each comb
@@ -82,7 +82,7 @@ def pmSelect(apps):
     slowdowns = getSlowdowns_batch(combined_envs, p_models)
     # get the bucket selection based on slow-down
     selections = getSelection_batch(slowdowns, apps, buckets)
-    return selections
+    return selections,buckets
 
 
 def pSelect(apps, measured_env):
@@ -96,7 +96,7 @@ def pSelect(apps, measured_env):
     combined_envs = getEnvs_batch(bucket_combs, P_ONLY=True, env=measured_env)
     # predict the per-app slow-down
     slowdowns = getSlowdowns_batch(combined_envs, p_models)
-    return getSelection_batch(slowdowns, apps, buckets)
+    return getSelection_batch(slowdowns, apps, buckets), buckets
 
 
 def _get_expected(config_dicts, buckets, comb_name):
@@ -131,7 +131,7 @@ def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     success_dict = max_row['success']
     slowdown_t = slowdown_table(max_row, apps)
     expected_exec = _get_expected(config_dict, buckets, comb_name)
-    return comb_name, config_dict, success_dict, slowdown_t, expected_exec
+    return [comb_name, config_dict, success_dict, slowdown_t, expected_exec]
 
 
 def single_app_select(app, budget, buckets, fixed_slowdown=1.0):

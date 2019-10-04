@@ -34,8 +34,13 @@ def updateAppMinMax(app_name, appMethod):
         appMethod.min_mv = min_mv
         appMethod.max_mv = max_mv
 
+def getConfigsInTargetBucket(buckets, app, bucket_name):
+    app_bs = buckets[app]
+    for b in app_bs:
+        if b.b_name == bucket_name:
+            return b.configurations
 
-def writeSelectionToFile(f, comb_name, selection, slowDownTable):
+def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable, buckets):
     output = open(f, 'w')
     result = []
     bucket_list = comb_name.split(',')
@@ -46,8 +51,12 @@ def writeSelectionToFile(f, comb_name, selection, slowDownTable):
             app,
             'bucket':
             bucket,
+            'found':
+            successTable[app],
             'config':
             config,
+            'configs':
+            getConfigsInTargetBucket(buckets, app, bucket),
             'slowdown_p':
             slowDownTable[app],
             'slowdown':
