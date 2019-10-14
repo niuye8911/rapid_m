@@ -34,13 +34,30 @@ def updateAppMinMax(app_name, appMethod):
         appMethod.min_mv = min_mv
         appMethod.max_mv = max_mv
 
+
 def getConfigsInTargetBucket(buckets, app, bucket_name):
     app_bs = buckets[app]
     for b in app_bs:
         if b.b_name == bucket_name:
             return b.configurations
 
-def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable, buckets):
+
+def getConfigVector(config):
+    result = []
+    nodes = config.split('-')
+    k = ""
+    v = ""
+    for i in range(0, len(nodes)):
+        if i % 2 == 0:  #this is a node name
+            k = nodes[i]
+        else:
+            v = nodes[i]
+            result.append(k + ' ' + str(v))
+    return result
+
+
+def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable,
+                         buckets):
     output = open(f, 'w')
     result = []
     bucket_list = comb_name.split(',')
@@ -54,9 +71,11 @@ def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable, b
             'found':
             successTable[app],
             'config':
-            config,
+            getConfigVector(config),
             'configs':
-            getConfigsInTargetBucket(buckets, app, bucket),
+            list(
+                map(lambda x: __rewriteConfigName(x),
+                    getConfigsInTargetBucket(buckets, app, bucket))),
             'slowdown_p':
             slowDownTable[app],
             'slowdown':
@@ -64,6 +83,11 @@ def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable, b
         })
     json.dump(result, output, indent=2)
     output.close()
+
+
+def __rewriteConfigName(config_name):
+    nodes = config_name.split('-')
+    return " ".join(nodes)
 
 
 def printTrainingInfo(d):
