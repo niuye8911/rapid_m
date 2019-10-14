@@ -202,6 +202,7 @@ def run(combs):
             metrics = {}
             budgets = genBudgets(app_info, scale)
             for num_of_app, comb in combs.items():
+                break
                 per_data = {}  # all data for current num_of_app
                 counter = 0
                 for apps in comb:
@@ -225,20 +226,28 @@ def run(combs):
                 if not os.path.exists(foldername):
                     os.mkdir(foldername)
                 foldername += '/'
-                slowdown_file = writeSlowDown(slowdowns)
+                #slowdown_file = writeSlowDown(slowdowns)
+                slowdown_file = foldername + 'slowdown_validator_' + mode + "_" + str(
+                    scale) + ".csv"
                 summarize_data(slowdown_file)
-                os.rename(
-                    'mv.json',
-                    foldername + 'mv_' + mode + "_" + str(scale) + ".json")
-                os.rename(
-                    'miss_pred.json', foldername + 'miss_pred_' + mode + "_" +
-                    str(scale) + ".json")
-                os.rename(
-                    'exceed.json',
-                    foldername + 'exceed_' + mode + "_" + str(scale) + ".json")
-                os.rename(
-                    'slowdown_validator.csv', foldername +
-                    'slowdown_validator_' + mode + "_" + str(scale) + ".csv")
+                try:
+                    os.rename(
+                        'mv.json',
+                        foldername + 'mv_' + mode + "_" + str(scale) + ".json")
+                    os.rename(
+                        'miss_pred.json', foldername + 'miss_pred_' + mode + "_" +
+                        str(scale) + ".json")
+                    os.rename(
+                        'exceed.json',
+                        foldername + 'exceed_' + mode + "_" + str(scale) + ".json")
+                    os.rename(
+                        'exceed_rate.json',
+                        foldername + 'exceed_rate_' + mode + "_" + str(scale) + ".json")
+                    os.rename(
+                        'slowdown_validator.csv', foldername +
+                        'slowdown_validator_' + mode + "_" + str(scale) + ".csv")
+                except:
+                    print('move file error')
             else:
                 gen_metric_csv(metrics)
 

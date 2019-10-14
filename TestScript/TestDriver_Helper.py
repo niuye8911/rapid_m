@@ -4,17 +4,18 @@ import pandas as pd
 from Utility import updateAppMinMax
 
 SD_FILE_COLUMNS = [
-    'num', 'app', 'alongwith','budget', 'ind_exec', 'exec', 'config', 'slowdown_p',
-    'slowdown_gt', 'success_p', 'success_gt', 'raw_qos', 'qos'
+    'num', 'app', 'alongwith', 'budget', 'ind_exec', 'exec', 'config',
+    'slowdown_p', 'slowdown_gt', 'success_p', 'success_gt', 'raw_qos', 'qos'
 ]
 
 MINMAX_FILE = '/home/liuliu/Research/rapidlib-linux/modelConstr/Rapids/outputs/app_min_max.json'
+
 
 def getFolderName():
     now = datetime.datetime.now()
     month = now.month
     day = now.day
-    return str(month)+'_'+str(day)
+    return str(month) + '_' + str(day)
 
 
 def readMinMaxMV():
@@ -113,6 +114,7 @@ def summarize_data(slowdown_file):
     exceeds = {}
     mvs = {}
     miss_preds = {}
+    exceed_rates = {}
     num_of_apps = df.num.unique()
     apps = df.app.unique()
     for num_of_app in num_of_apps:
@@ -121,6 +123,7 @@ def summarize_data(slowdown_file):
         exceeds[str(num_of_app)] = {}
         mvs[str(num_of_app)] = {}
         miss_preds[str(num_of_app)] = {}
+        exceed_rates[str(num_of_app)] = {}
         for app_name in apps:
             # calculate the exceeding rate
             app_df = sub_df.loc[sub_df['app'] == app_name]
@@ -131,16 +134,25 @@ def summarize_data(slowdown_file):
             miss_pred = app_df.apply(lambda row: 1 if not row['success_p'] and
                                      row['success_gt'] else 0,
                                      axis=1).tolist()
+            exceed_rate = app_df.apply(
+                lambda row: 0.0 if not row['success_p'] else max(
+                    0.0, row['exec'] - row['budget']) / row['budget'],
+                axis=1).tolist()
             mv = app_df.apply(lambda row: float(row['qos']) if row['success_p']
                               and row['success_gt'] else 0.0,
                               axis=1).tolist()
             exceeds[str(num_of_app)][app_name] = float(sum(exceed)) / float(
                 len(exceed))
+            exceed_rates[str(num_of_app)][app_name] = float(
+                sum(exceed_rate)) / float(len(exceed_rate))
             miss_preds[str(num_of_app)][app_name] = float(
                 sum(miss_pred)) / float(len(miss_pred))
             # check mvs
             mvs[str(num_of_app)][app_name] = float(sum(mv)) / float(len(mv))
     os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript/')
+    file = open('./exceed_rate.json', 'w')
+    json.dump(exceed_rates, file, indent=2)
+    file.close()
     file = open('./exceed.json', 'w')
     json.dump(exceeds, file, indent=2)
     file.close()

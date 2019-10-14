@@ -14,7 +14,8 @@ n_groups = 0
 mvs = OrderedDict()
 exceeds = OrderedDict()
 misses = OrderedDict()
-datas = {'mv': mvs, 'exceed': exceeds, 'miss_pred': misses}
+exceed_rates = OrderedDict()
+datas = {'mv': mvs, 'exceed': exceeds, 'miss_pred': misses, 'exceed_rate':exceed_rates}
 
 
 def readFile(dir):
@@ -23,6 +24,7 @@ def readFile(dir):
         mvs[budget] = {}
         exceeds[budget] = {}
         misses[budget] = {}
+        exceed_rates[budget] = {}
         # read in all files
         for data, result in datas.items():
             for mode in modes:
@@ -40,10 +42,10 @@ def readFile(dir):
 
 
 def draw():
-    sub_graphs = ['exceed', 'miss_pred', 'mv']
+    sub_graphs = ['exceed', 'miss_pred', 'mv','exceed_rate']
     for budget in budgets:
         id = 0
-        fig, axes = plt.subplots(nrows=3)
+        fig, axes = plt.subplots(nrows=4)
         fig.tight_layout()
         bar_width = 0.2
         opacity = 0.8
@@ -57,6 +59,9 @@ def draw():
             i = 0
             axes[id].set_ylim([0.0, 1.0])
             axes[id].set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
+            if data=='exceed_rate':
+                axes[id].set_ylim([0.0,0.5])
+                axes[id].set_yticks([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
             rects_done = len(rects) > 0
             for mode in modes:
                 rect = axes[id].bar(index + i * bar_width,
@@ -77,5 +82,5 @@ def draw():
         plt.savefig('result_' + str(budget) + '.png')
 
 
-readFile('./10_1_without_svm')
+readFile('./10_4')
 draw()
