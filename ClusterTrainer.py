@@ -17,7 +17,7 @@ def first_cut(appSysProfile):
     Z, c = hCluster(data)
     clusters = fcluster(Z, t=4, criterion='distance')
     cluster_list = get_cluster_list(clusters, appSysProfile.dataFrame)
-    return cluster_list,Z
+    return cluster_list, Z
 
 
 def increment_cluster(appSysProfile, cluster_list, target_id):
@@ -32,11 +32,13 @@ def increment_cluster(appSysProfile, cluster_list, target_id):
                                 appSysProfile.dataFrame, 1), Z
     # else, cluster the target cluster into 2 parts
     subFrame = appSysProfile.scale_tmp(
-        appSysProfile.getSubFrameByConfigs(cluster_list[target_id]))
-    x = appSysProfile.getX()
-    subZ, c = hCluster(subFrame[x])
+        appSysProfile.getSubFrameByConfigs(
+            cluster_list[target_id])[appSysProfile.x])
+    subZ, c = hCluster(subFrame)
     clusters = fcluster(subZ, 2, criterion='maxclust')
-    updated_list = get_cluster_list(clusters, subFrame, 2)
+    updated_list = get_cluster_list(
+        clusters, appSysProfile.getSubFrameByConfigs(cluster_list[target_id]),
+        2)
     # replace the original list by two updated list
     del cluster_list[target_id]
     cluster_list.insert(target_id, updated_list[0])
