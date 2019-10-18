@@ -10,3 +10,4 @@ python3 RapidMain.py --flow INIT --path2app examples/example_app_empty.json --ap
 
 python3 RapidMain.py --flow INIT --path2app examples/example_app_empty.json --apppfs testData/halfandhalf/svm-sys.csv --appdata testData/halfandhalf/svm-perf.csv --dir outputs/svm --test --app svm
 
+python3 RapidMain.py --flow INIT --path2app examples/example_app_empty.json --apppfs testData/halfandhalf/x264-sys.csv --appdata testData/halfandhalf/x264-perf.csv --dir outputs/x264 --test --app x264
