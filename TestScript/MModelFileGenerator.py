@@ -7,7 +7,7 @@
 import pandas as pd
 
 BASE_DIR = '~/Research/rapid_m_backend_server/testData/halfandhalf/'
-APPS = ['ferret', 'swaptions', 'bodytrack', 'svm', 'nn', 'facedetect']
+APPS = ['ferret', 'swaptions', 'bodytrack', 'svm', 'nn', 'facedetect','x264']
 RESULT = '../testData/mmodelfile_w_info.csv'
 
 HEADER_DONE = False
