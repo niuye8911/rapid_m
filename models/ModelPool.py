@@ -3,11 +3,11 @@ from collections import OrderedDict
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
 
-from models.RapidBayesian import *
-from models.RapidEN import *
-from models.RapidLasso import *
-from models.RapidLinear import *
-from models.RapidSVR import *
+from models.RapidBayesian import RapidBayesian
+from models.RapidEN import RapidEN
+from models.RapidLasso import RapidLasso
+from models.RapidLinear import RapidLinear
+from models.RapidSVR import RapidSVR
 from Utility import *
 
 import pandas as pd
@@ -31,7 +31,7 @@ class ModelPool:
         elif name == 'SVR':
             return RapidSVR(file_path=path)
         elif name == 'NN':
-            from models.RapidNN import *
+            from models.RapidNN import RapidNN
             return RapidNN(file_path=path)
 
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,
