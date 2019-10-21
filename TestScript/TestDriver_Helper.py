@@ -49,8 +49,10 @@ def genBudgets(app_info, scale=1.0):
     result = {}
     for app_name, info in app_info.items():
         updateAppMinMax(app_name, info['met'])
-        budget = info['met'].training_units * scale * info[
-            'met'].max_cost / 1000.0
+        cost_max = info['met'].max_cost/1000.0
+        cost_min = info['met'].min_cost/1000.0
+        unit_cost = cost_min + scale *(cost_max-cost_min)
+        budget = info['met'].fullrun_units * unit_cost
         result[app_name] = budget
     return result
 

@@ -72,7 +72,7 @@ def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable,
             'found':
             successTable[app],
             'config':
-            JSON_DELIMITER.join(getConfigVector(config)),
+            "$".join(getConfigVector(config)),
             'configs':
             JSON_DELIMITER.join(list(
                 map(lambda x: __rewriteConfigName(x),
