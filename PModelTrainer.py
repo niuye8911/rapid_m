@@ -7,7 +7,7 @@
 
 import os
 
-from Rapid_M_Classes.PModel import *
+from Rapid_M_Classes.PModel import PModel
 from Utility import *
 
 

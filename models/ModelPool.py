@@ -7,7 +7,6 @@ from models.RapidBayesian import *
 from models.RapidEN import *
 from models.RapidLasso import *
 from models.RapidLinear import *
-from models.RapidNN import *
 from models.RapidSVR import *
 from Utility import *
 
@@ -32,6 +31,7 @@ class ModelPool:
         elif name == 'SVR':
             return RapidSVR(file_path=path)
         elif name == 'NN':
+            from models.RapidNN import *
             return RapidNN(file_path=path)
 
     def selectFeature(self, xdf, ydf, x_train, x_test, y_train, y_test,

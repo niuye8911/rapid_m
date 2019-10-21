@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 import csv
 
+JSON_DELIMITER = "$"
 
 def __get_minmax(file):
     min_v = 999999.0
@@ -71,11 +72,11 @@ def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable,
             'found':
             successTable[app],
             'config':
-            getConfigVector(config),
+            JSON_DELIMITER.join(getConfigVector(config)),
             'configs':
-            list(
+            JSON_DELIMITER.join(list(
                 map(lambda x: __rewriteConfigName(x),
-                    getConfigsInTargetBucket(buckets, app, bucket))),
+                    getConfigsInTargetBucket(buckets, app, bucket)))),
             'slowdown_p':
             slowDownTable[app],
             'slowdown':

@@ -11,10 +11,10 @@ import json
 
 import pandas as pd
 
-from Rapid_M_Classes.App import *
-from Rapid_M_Classes.Bucket import *
-from Rapid_M_Classes.MModel import *
-from Rapid_M_Classes.PModel import *
+from Rapid_M_Classes.App import App
+from Rapid_M_Classes.Bucket import Bucket
+from Rapid_M_Classes.MModel import MModel
+from Rapid_M_Classes.PModel import PModel
 from Utility import *
 from DataUtil import *
 
