@@ -2,6 +2,7 @@
 import threading
 import time
 import os
+import pandas as pd
 import subprocess
 
 
@@ -17,6 +18,7 @@ class Rapid_M_Thread(threading.Thread):
         self.callback = callback
         self.method = target
         self.callback_args = callback_args
+        self.handled = False
 
     def target_with_callback(self, app_time, dir, cmd, app):
         self.method(dir, app_time, cmd, app)
@@ -29,7 +31,7 @@ def rapid_worker(dir, app_time, cmd, app):
     start_time = time.time()
     #os.chdir(dir)
     #os.system(" ".join(cmd))
-    p = subprocess.Popen(" ".join(cmd),shell=True, cwd=dir)
+    p = subprocess.Popen(" ".join(cmd), shell=True, cwd=dir)
     p.wait()
     exec_time = time.time() - start_time
     app_time[app] = exec_time
@@ -43,4 +45,30 @@ def rapid_callback(app, cmd, app_time):
             '/home/liuliu/Research/rapid_m_backend_server/TestScript/tmp/')
         print(app, '****************waiting')
         os.system(" ".join(cmd))
+    return
+
+
+def rapid_dynamic_worker(dir, app_time, cmd, app):
+    # run command under dir and record time
+    print(app, '*****************started')
+    p = subprocess.Popen(" ".join(cmd), shell=True, cwd=dir)
+    p.wait()
+
+
+def rapid_dynamic_callback(app, appmet, rundir, log_entry, mission_log,
+                           active_apps):
+    # get the qos, summarize the result, write to log
+    print(app, '*****************finished')
+    elapsed_time = (time.time() -
+                    log_entry['global_start']) - log_entry['start_time']
+    # this runs after your thread end
+    os.chdir(rundir)
+    mv = appmet.getQoS()
+    if type(mv) is list:
+        mv = mv[-1]
+    log_entry['success'] = appmet.parseLog()['success']
+    log_entry['mv'] = mv
+    log_entry['elapsed'] = elapsed_time
+    mission_log.append(log_entry)
+    active_apps[app] = False
     return
