@@ -2,6 +2,8 @@ import pandas as pd
 from sklearn import preprocessing
 from sklearn.base import clone
 from sklearn.feature_selection import RFE
+from sklearn import metrics
+from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, LassoCV, ElasticNetCV
 from sklearn import linear_model

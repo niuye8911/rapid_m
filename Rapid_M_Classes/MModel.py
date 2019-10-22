@@ -4,6 +4,7 @@ import pandas as pd
 #from keras.wrappers.scikit_learn import KerasRegressor
 import json
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
 from Utility import printTrainingInfo
 from DataUtil import add_postfix,formatEnv_df,reformat_dfs
 from models.ModelPool import ModelPool
