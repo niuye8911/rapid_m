@@ -57,9 +57,15 @@ def getConfigVector(config):
     return result
 
 
-def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable,
+def writeSelectionToFile(result_file, input_file, comb_name, selection, successTable, slowDownTable,
                          buckets):
-    output = open(f, 'w')
+    input = open(input_file,'r')
+    input_json = json.load(input)
+    applications = input_json['applications']
+    budgets = {}
+    for app in applications:
+        budgets[app['id']] = app['budget']
+    output = open(result_file, 'w')
     result = []
     bucket_list = comb_name.split(',')
     for app, config in selection.items():
@@ -67,6 +73,8 @@ def writeSelectionToFile(f, comb_name, selection, successTable, slowDownTable,
         result.append({
             'name':
             app,
+            'budget_per_unit':
+            budgets[app],
             'bucket':
             bucket,
             'found':
