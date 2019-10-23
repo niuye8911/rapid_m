@@ -29,8 +29,6 @@ class Rapid_M_Thread(threading.Thread):
 def rapid_worker(dir, app_time, cmd, app):
     # run command under dir and record time
     start_time = time.time()
-    #os.chdir(dir)
-    #os.system(" ".join(cmd))
     p = subprocess.Popen(" ".join(cmd), shell=True, cwd=dir)
     p.wait()
     exec_time = time.time() - start_time
@@ -41,10 +39,12 @@ def rapid_callback(app, cmd, app_time):
     print(app, '*****************finished')
     # this is run after your thread end
     while -1 in app_time.values():
-        os.chdir(
-            '/home/liuliu/Research/rapid_m_backend_server/TestScript/tmp/')
+        p = subprocess.Popen(
+            " ".join(cmd),
+            shell=True,
+            cwd='/home/liuliu/Research/rapid_m_backend_server/TestScript/tmp/')
+        p.wait()
         print(app, '****************waiting')
-        os.system(" ".join(cmd))
     return
 
 
@@ -55,20 +55,24 @@ def rapid_dynamic_worker(dir, app_time, cmd, app):
     p.wait()
 
 
-def rapid_dynamic_callback(app, appmet, rundir, log_entry, mission_log,
+def rapid_dynamic_callback(app, appmet, rundir, log_entry, mission_logs,
                            active_apps):
     # get the qos, summarize the result, write to log
     print(app, '*****************finished')
     elapsed_time = (time.time() -
                     log_entry['global_start']) - log_entry['start_time']
     # this runs after your thread end
-    os.chdir(rundir)
     mv = appmet.getQoS()
     if type(mv) is list:
         mv = mv[-1]
-    log_entry['success'] = appmet.parseLog()['success']
+    try:
+        mission_log = appmet.parseLog()
+    except:
+        print(app, "Mission log missing")
+        log_entry['success'] = False
+    log_entry['success'] = mission_log['success']
     log_entry['mv'] = mv
     log_entry['elapsed'] = elapsed_time
-    mission_log.append(log_entry)
+    mission_logs.append(log_entry)
     active_apps[app] = False
     return
