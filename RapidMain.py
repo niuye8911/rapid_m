@@ -14,7 +14,7 @@ import ClusterTrainer
 import PModelTrainer
 import warnings
 from AppInit import init
-from BucketSelector import bucketSelect
+from BucketSelector import bucketSelect, getActiveApps
 from MachineInit import trainEnv
 from Utility import not_none, writeSelectionToFile
 from sklearn.exceptions import DataConversionWarning
@@ -73,8 +73,10 @@ def main(argv):
 
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
-        result,buckets = bucketSelect(options.active_apps)
-        writeSelectionToFile(options.result_file, result[0], result[1],result[2],result[3],buckets)
+        result, buckets = bucketSelect(options.active_apps)
+        writeSelectionToFile(options.result_file, options.active_apps,
+                             result[0], result[1], result[2], result[3],
+                             buckets)
 
 
 def checkParams(flow, options):
