@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(RAPIDS_DIR))
 sys.path.append(os.path.dirname(RAPIDS_M_DIR))
 sys.path.append(os.path.dirname(RAPIDS_SOURCE_DIR))
 
-import random
+import random, glob
 import Rapids.App.AppSummary
 from Rapids.util import __get_minmax
 from BucketSelector import bucketSelect
@@ -39,7 +39,7 @@ metric_df = None
 
 STRAWMANS = ['P_M']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
-BUDGET_SCALE = [1.0]
+BUDGET_SCALE = [0.5]
 
 
 #preparation
@@ -64,6 +64,12 @@ def reset_server():
     print("Rapid_M Server Reset Done")
     return True
 
+def resetRunDir():
+    for app in apps:
+        run_dir = app_info[app]['dir']
+        filelist = [f for f in os.listdir(run_dir)]
+        for f in filelist:
+            os.remove(os.path.join(run_dir,f))
 
 def genInfo():
     for app in apps:
@@ -72,10 +78,12 @@ def genInfo():
         module = imp.load_source("", file_loc)
         appMethod = module.appMethods(app, app)
         # run_dir
-        run_dir = os.getcwd() + "/run/" + app
+        run_dir = os.getcwd() + "/run/" + app+'/'
         if not os.path.exists(run_dir):
             os.makedirs(run_dir)
         app_info[app] = {'met': appMethod, 'dir': run_dir}
+        # generate the ground truth first
+        appMethod.runGT(True)
 
 
 def updateAppMinMaxFake(appMethod, app):
@@ -132,6 +140,7 @@ def run_a_mission(target_num_apps, budgets):
         appmet = app_info[app]['met']
         updateAppMinMaxFake(appmet, app)
         appmet.setRunConfigFile(run_config)
+        appmet.setRunDir(app_info[app]['dir'])
         appmet.updateRunConfig(budgets[app], rapid_m=True, debug=True)
         commands[app] = app_info[app]['met'].getRapidsCommand()
         active_apps[app] = False
@@ -172,6 +181,7 @@ def run_a_mission(target_num_apps, budgets):
                                mission_log, active_apps))
             thread_list.append(app_thread)
             app_thread.start()
+        time.sleep(3) # wait for 3 seconds for the next check
     # clear up the thread when all jobs are done
     print("waiting for all remaning apps to finish")
     for t in thread_list:
@@ -193,10 +203,13 @@ def run(target_num_apps):
             budgets = genBudgets(app_info, scale)
             run_a_mission(target_num_apps, budgets)
 
-
+# reset the server
 if not reset_server():
     exit(1)
 genInfo()
+# reset the run dir
+resetRunDir()
+
 #for i in range(2, len(apps) + 1):
 #    run(i)
 run(4)
