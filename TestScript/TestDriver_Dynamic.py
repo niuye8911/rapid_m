@@ -22,9 +22,9 @@ from random import randint
 from sklearn.exceptions import DataConversionWarning
 
 MAX_WAIT_TIME = 20  # wait at most 10 second until the new app be inited
-MISSION_TIME = 60 * 5  # 10 minutes run
+MISSION_TIME = 60 * 10  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
-REPEAT = 2
+REPEAT = 3
 MISSION_PREFIX = "./mission/mission_"
 EXECUTION_PREFIX = "./mission/execution_"
 
@@ -43,9 +43,10 @@ commands = {}
 metric_df = None
 
 #STRAWMANS = ['P_M', 'INDIVIDUAL', 'N']  # strawmans to use
-STRAWMANS = ['INDIVIDUAL','N']  # strawmans to use
-#BUDGET_SCALE = [0.8, 1.0, 1.5]
-BUDGET_SCALE = [1.0]
+STRAWMANS = ['INDIVIDUAL', 'N', 'P_M']  # strawmans to use
+BUDGET_SCALE = [0.8, 1.0, 1.5, 2.0]
+
+#BUDGET_SCALE = [1.0]
 
 
 #preparation
@@ -280,7 +281,7 @@ def wait_and_finish(thread_list, mission_log, log_name):
 
 
 genInfo()
-for num_app in range(2, 4):
+for num_app in range(2, 5):
     for i in range(0, REPEAT):
         # reset the server
         if not reset_server():
