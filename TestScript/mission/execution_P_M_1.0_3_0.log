@@ -1,0 +1,110 @@
+[
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 6.012459754943848,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "1",
+    "mv": 49.4,
+    "elapsed": 50.160995960235596,
+    "rc_by_budget": 7.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 18.020601511001587,
+    "app": "ferret",
+    "budget": 76.92276000976562,
+    "success": "0",
+    "mv": 22.243137254901963,
+    "elapsed": 87.19647479057312,
+    "rc_by_budget": 5.0,
+    "rc_by_rapidm": 2.0,
+    "total_reconfig": 5
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 74.12312364578247,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "1",
+    "mv": 49.4,
+    "elapsed": 53.22802543640137,
+    "rc_by_budget": 4.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 164.1808488368988,
+    "app": "svm",
+    "budget": 34.485599994659424,
+    "success": "1",
+    "mv": 24.12,
+    "elapsed": 37.5929434299469,
+    "rc_by_budget": 7.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 150.21684503555298,
+    "app": "facedetect",
+    "budget": 395.2340021133423,
+    "success": "1",
+    "mv": 0.0,
+    "elapsed": 109.40990495681763,
+    "rc_by_budget": 10.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 207.24083948135376,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "1",
+    "mv": 49.4,
+    "elapsed": 56.81617784500122,
+    "rc_by_budget": 4.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 38.05695629119873,
+    "app": "swaptions",
+    "budget": 219.38838958740234,
+    "success": "1",
+    "mv": 78.6950519730425,
+    "elapsed": 230.48582482337952,
+    "rc_by_budget": 4.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 7
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 282.29005670547485,
+    "app": "svm",
+    "budget": 34.485599994659424,
+    "success": "1",
+    "mv": 24.12,
+    "elapsed": 36.975515842437744,
+    "rc_by_budget": 8.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572018093.0282068,
+    "start_time": 302.28662610054016,
+    "app": "ferret",
+    "budget": 76.92276000976562,
+    "success": "1",
+    "mv": 32.29333333333334,
+    "elapsed": 93.12371063232422,
+    "rc_by_budget": 4.0,
+    "rc_by_rapidm": 2.0,
+    "total_reconfig": 7
+  }
+]
