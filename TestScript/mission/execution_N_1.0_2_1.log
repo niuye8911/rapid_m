@@ -1,0 +1,98 @@
+[
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 12.024569988250732,
+    "app": "svm",
+    "budget": 34.485599994659424,
+    "success": "1",
+    "mv": 24.12,
+    "elapsed": 31.376750469207764,
+    "rc_by_budget": 8.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 61.07557272911072,
+    "app": "bodytrack",
+    "budget": 76.19295423030853,
+    "success": "1",
+    "mv": 4.143496335904572,
+    "elapsed": 53.02883315086365,
+    "rc_by_budget": 11.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 3
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 39.06153082847595,
+    "app": "facedetect",
+    "budget": 395.2340021133423,
+    "success": "1",
+    "mv": 0.0,
+    "elapsed": 91.28895163536072,
+    "rc_by_budget": 10.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 186.16428136825562,
+    "app": "svm",
+    "budget": 34.485599994659424,
+    "success": "2",
+    "mv": 0.0,
+    "elapsed": 5.157838344573975,
+    "rc_by_budget": 0.0,
+    "rc_by_rapidm": 0.0,
+    "total_reconfig": 0
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 160.15467405319214,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "1",
+    "mv": 48.4,
+    "elapsed": 40.488624572753906,
+    "rc_by_budget": 8.0,
+    "rc_by_rapidm": 2.0,
+    "total_reconfig": 2
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 236.20731234550476,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "0",
+    "mv": 46.5,
+    "elapsed": 23.133005142211914,
+    "rc_by_budget": 3.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 251.20470476150513,
+    "app": "bodytrack",
+    "budget": 76.19295423030853,
+    "success": "1",
+    "mv": 4.143496335904572,
+    "elapsed": 54.55770659446716,
+    "rc_by_budget": 11.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 3
+  },
+  {
+    "global_start": 1572020873.3767502,
+    "start_time": 295.2817268371582,
+    "app": "facedetect",
+    "budget": 395.2340021133423,
+    "success": "1",
+    "mv": 0.0,
+    "elapsed": 90.04909944534302,
+    "rc_by_budget": 10.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  }
+]

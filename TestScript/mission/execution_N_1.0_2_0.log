@@ -1,0 +1,74 @@
+[
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 25.036815881729126,
+    "app": "nn",
+    "budget": 46.77276039123535,
+    "success": "2",
+    "mv": 0.0,
+    "elapsed": 4.0158069133758545,
+    "rc_by_budget": 0.0,
+    "rc_by_rapidm": 0.0,
+    "total_reconfig": 0
+  },
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 11.014012098312378,
+    "app": "bodytrack",
+    "budget": 76.19295423030853,
+    "success": "1",
+    "mv": 4.244414488045513,
+    "elapsed": 57.554322719573975,
+    "rc_by_budget": 9.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 5
+  },
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 89.1462197303772,
+    "app": "ferret",
+    "budget": 76.92276000976562,
+    "success": "0",
+    "mv": 11.483921568627451,
+    "elapsed": 43.37284994125366,
+    "rc_by_budget": 1.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 4
+  },
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 123.14962530136108,
+    "app": "bodytrack",
+    "budget": 76.19295423030853,
+    "success": "1",
+    "mv": 4.143496335904572,
+    "elapsed": 53.089850664138794,
+    "rc_by_budget": 11.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 3
+  },
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 225.2401237487793,
+    "app": "facedetect",
+    "budget": 395.2340021133423,
+    "success": "1",
+    "mv": 0.0,
+    "elapsed": 91.20309710502625,
+    "rc_by_budget": 10.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 1
+  },
+  {
+    "global_start": 1572020117.7801688,
+    "start_time": 201.27028489112854,
+    "app": "swaptions",
+    "budget": 219.38838958740234,
+    "success": "1",
+    "mv": 78.68938647297341,
+    "elapsed": 167.9255084991455,
+    "rc_by_budget": 9.0,
+    "rc_by_rapidm": 1.0,
+    "total_reconfig": 7
+  }
+]
