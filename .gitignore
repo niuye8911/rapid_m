@@ -12,3 +12,5 @@ mmodel_valid.csv
 cluter*
 tmp.csv
 train_env.sh
+*.log
+*.txt
