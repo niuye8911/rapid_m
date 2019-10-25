@@ -73,6 +73,9 @@ def rapid_dynamic_callback(app, appmet, rundir, log_entry, mission_logs,
     log_entry['success'] = mission_log['success']
     log_entry['mv'] = mv
     log_entry['elapsed'] = elapsed_time
+    log_entry['rc_by_budget'] = mission_log['rc_by_budget']
+    log_entry['rc_by_rapidm'] = mission_log['rc_by_rapidm']
+    log_entry['total_reconfig'] = mission_log['totReconfig']
     mission_logs.append(log_entry)
     active_apps[app] = False
     return
