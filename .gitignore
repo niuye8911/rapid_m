@@ -13,5 +13,6 @@ cluter*
 tmp.csv
 train_env.sh
 *.log
-*.txt
+**/*.txt
+*/*.txt
 TestScript/MergeJSON.py
