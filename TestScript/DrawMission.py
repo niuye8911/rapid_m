@@ -9,8 +9,8 @@ last_end_time = 0.0
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
 modes = ['N','INDIVIDUAL','P_M']
 budgets = [1.0]
-num_of_apps = [2]
-ids = [0]
+num_of_apps = [3]
+ids = [0,1]
 
 APP_COLOR = {
     'swaptions': 'b',
@@ -96,6 +96,8 @@ def draw_a_mission(num_of_app, buget,id):
                 colid=0
                 rowid+=1
     ax[0,0].set_yticks(range(0,len(apps)+1))
+    ax[0,1].set_yticks(range(0,len(apps)+1))
+    ax[1,1].set_yticks(range(0,len(apps)+1))
     ax[0,0].set_yticklabels(['']+apps,rotation=45)
     ax[1,0].set_yticks(range(0,len(apps)+1))
     ax[1,0].set_yticklabels(['']+apps,rotation=45)

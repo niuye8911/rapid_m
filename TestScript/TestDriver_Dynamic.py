@@ -25,8 +25,8 @@ MAX_WAIT_TIME = 20  # wait at most 10 second until the new app be inited
 MISSION_TIME = 60 * 5  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
 REPEAT = 2
-MISSION_PREFIX = "mission_slot_"
-EXECUTION_PREFIX = "execution_"
+MISSION_PREFIX = "./mission/mission_"
+EXECUTION_PREFIX = "./mission/execution_"
 
 # ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
@@ -43,7 +43,7 @@ commands = {}
 metric_df = None
 
 #STRAWMANS = ['P_M', 'INDIVIDUAL', 'N']  # strawmans to use
-STRAWMANS = ['P_M']  # strawmans to use
+STRAWMANS = ['INDIVIDUAL','N']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
 BUDGET_SCALE = [1.0]
 
@@ -261,6 +261,7 @@ def genMission(target_num_apps, id):
         time.sleep(10)  # wait for 10 seconds for the next check
     # clear up the thread when all jobs are done
     wait_and_finish(thread_list, mission_log, log_name)
+    print("*****************MISSION_GENERATE_DONE************")
 
 
 def wait_and_finish(thread_list, mission_log, log_name):
