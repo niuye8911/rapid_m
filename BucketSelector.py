@@ -59,7 +59,9 @@ def indiSelect(apps, f_slowdown=1.0):
         slowdowns[app['app'].name] = f_slowdown
         successes[app['app'].name] = success[app['app'].name]
         expectation[app['app'].name] = expected[app['app'].name]
-    return [bucket_selection, configs, successes, slowdowns, expectation],buckets
+    return [
+        ','.join(bucket_selection), configs, successes, slowdowns, expectation
+    ], buckets
 
 
 def pmSelect(apps):
@@ -82,7 +84,7 @@ def pmSelect(apps):
     slowdowns = getSlowdowns_batch(combined_envs, p_models)
     # get the bucket selection based on slow-down
     selections = getSelection_batch(slowdowns, apps, buckets)
-    return selections,buckets
+    return selections, buckets
 
 
 def pSelect(apps, measured_env):
@@ -121,10 +123,25 @@ def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     mv_col = results.apply(lambda x: x['mv'])
     configs_col = results.apply(lambda x: x['configs'])
     success_col = results.apply(lambda x: x['success'])
+    all_success_col = results.apply(lambda x: x['all_success'])
+    run_success_col = results.apply(lambda x: x['run_success'])
     slowdowns['success'] = success_col
     slowdowns['mv'] = mv_col
     slowdowns['configs'] = configs_col
-    max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
+    slowdowns['all_success'] = all_success_col
+    slowdowns['run_success'] = run_success_col
+    # first try to get a combination that all apps successes
+    all_success_rows = slowdowns.loc[slowdowns['all_success'] == True]
+    if not all_success_rows.empty:
+        max_row = all_success_rows.loc[all_success_rows['mv'].idxmax()]
+    else:
+        # check if there's any combination that maintains the running apps
+        run_success_rows = slowdowns.loc[slowdowns['run_success'] == True]
+        if not run_success_rows.empty:
+            max_row = run_success_rows.loc[run_success_rows['mv'].idxmax()]
+        else:
+            # sacrifice some apps
+            max_row = slowdowns.loc[slowdowns['mv'].idxmax()]
     # the result
     comb_name = max_row['comb_name']
     config_dict = max_row['configs']
@@ -193,6 +210,8 @@ def mv_per_row(row, apps, buckets):
     total_mv = 0.0
     configs = {}
     successes = {}
+    all_success = True
+    running_apps_all_success = True
     for bucket_name in bucket_list:
         app_name = bucket_name[:-1]  #!!!there should not be > 10 buckets
         bucket = list(
@@ -200,12 +219,23 @@ def mv_per_row(row, apps, buckets):
         slow_down = 1.0 if float(row[app_name]) < 1.0 else row[app_name]
         budget = list(filter(lambda x: x['app'].name == app_name,
                              apps))[0]['budget']
+        status = list(filter(lambda x: x['app'].name == app_name,
+                             apps))[0]['status']
         config, mv, SUCCESS = bucket.getOptimal(float(budget),
                                                 float(slow_down))
+        all_success = all_success and SUCCESS
+        if status == 2:
+            running_apps_all_success = running_apps_all_success and SUCCESS
         configs[app_name] = config[0]
         successes[app_name] = SUCCESS
-        total_mv = total_mv + mv[0] if SUCCESS else +0
-    return {'mv': total_mv, 'configs': configs, 'success': successes}
+        total_mv = (total_mv + mv[0]) if SUCCESS else total_mv
+    return {
+        'mv': total_mv,
+        'configs': configs,
+        'success': successes,
+        'all_success': all_success,
+        'run_success': running_apps_all_success
+    }
 
 
 def getSelection(slowdowns, apps, buckets):
@@ -364,7 +394,8 @@ def getActiveApps(active_apps):
         apps.append({
             'app': application,
             'budget': app['budget'],
-            'dir': app['dir']
+            'dir': app['dir'],
+            'status': status
         })
     return apps
 
