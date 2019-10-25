@@ -21,8 +21,12 @@ import warnings, time
 from random import randint
 from sklearn.exceptions import DataConversionWarning
 
-MAX_WAIT_TIME = 10  # wait at most 10 second until the new app be inited
+MAX_WAIT_TIME = 20  # wait at most 10 second until the new app be inited
 MISSION_TIME = 60 * 5  # 10 minutes run
+SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
+REPEAT = 2
+MISSION_PREFIX = "mission_slot_"
+EXECUTION_PREFIX = "execution_"
 
 # ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
@@ -34,12 +38,14 @@ APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
 APP_OUT_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/outptus/'
 
 app_info = {}
+commands = {}
 
 metric_df = None
 
+#STRAWMANS = ['P_M', 'INDIVIDUAL', 'N']  # strawmans to use
 STRAWMANS = ['P_M']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
-BUDGET_SCALE = [0.5]
+BUDGET_SCALE = [1.0]
 
 
 #preparation
@@ -64,12 +70,14 @@ def reset_server():
     print("Rapid_M Server Reset Done")
     return True
 
+
 def resetRunDir():
     for app in apps:
         run_dir = app_info[app]['dir']
         filelist = [f for f in os.listdir(run_dir)]
         for f in filelist:
-            os.remove(os.path.join(run_dir,f))
+            os.remove(os.path.join(run_dir, f))
+
 
 def genInfo():
     for app in apps:
@@ -78,9 +86,16 @@ def genInfo():
         module = imp.load_source("", file_loc)
         appMethod = module.appMethods(app, app)
         # run_dir
-        run_dir = os.getcwd() + "/run/" + app+'/'
+        run_dir = os.getcwd() + "/run/" + app + '/'
         if not os.path.exists(run_dir):
             os.makedirs(run_dir)
+        # update the run_config
+        run_config = getAppRunConfig(app)
+        appMethod.setRunConfigFile(run_config)
+        appMethod.setRunDir(run_dir)
+        cmd = appMethod.getRapidsCommand()
+        commands[app] = cmd
+        updateAppMinMaxFake(appMethod, app)
         app_info[app] = {'met': appMethod, 'dir': run_dir}
         # generate the ground truth first
         appMethod.runGT(True)
@@ -122,27 +137,89 @@ def getEnvByComb(apps):
     return row
 
 
-def writeMissionToFile(mission_log):
-    with open('./dynamic_mission.log', 'w') as fout:
+def writeMissionToFile(mission_log, log_name):
+    with open(log_name, 'w') as fout:
         json.dump(mission_log, fout, indent=2)
 
 
-def run_a_mission(target_num_apps, budgets):
+def genMissionFromFile(mission_log_file):
+    mission = []
+    with open(mission_log_file, 'r') as mission_log_json:
+        mission_log = json.load(mission_log_json)
+        for entry in mission_log:
+            app = entry['app']
+            start_time = entry['start_time']
+            budget = entry['budget']
+            mission.append({
+                'app': app,
+                'start_time': start_time,
+                'budget': budget
+            })
+    mission = sorted(mission, key=lambda x: x['start_time'])
+    return mission
+
+
+def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
+    log_name = EXECUTION_PREFIX + mode + '_' + str(budget_scale) + '_' + str(
+        num_app) + '_' + str(id) + '.log'
+    # change the server mode
+    with open(SERVER_MODE_FILE, 'w') as mode_file:
+        print(mode)
+        mode_file.write(mode)
+    mission_log = []
+    active_apps = {}
+    start_time = time.time()
+    thread_list = []
+    progress_map = {}
+    for entry in mission:
+        app = entry['app']
+        app_start_time = entry['start_time']
+        budget = budgets[app]
+        # execute the app with target
+        app_cmd = commands[app]
+        appmet = app_info[app]['met']
+        run_dir = app_info[app]['dir']
+        appmet.updateRunConfig(budget, rapid_m=True, debug=True)
+        # sleep until the target time
+        cur_time = time.time() - start_time
+        sleep_time = max(app_start_time - cur_time, 0)
+        time.sleep(sleep_time)
+        app_real_start_time = time.time() - start_time
+        print("starting new app:xxxxxxxxxxx", app, app_real_start_time)
+        log_entry = {
+            'global_start': start_time,
+            'start_time': app_real_start_time,
+            'app': app,
+            'budget': budget
+        }
+        app_thread = Rapid_M_Thread(name=app + "_thread",
+                                    target=rapid_dynamic_worker,
+                                    dir=run_dir,
+                                    cmd=app_cmd,
+                                    app_time=progress_map,
+                                    app=app,
+                                    callback=rapid_dynamic_callback,
+                                    callback_args=(app, appmet, run_dir,
+                                                   log_entry, mission_log,
+                                                   active_apps))
+        thread_list.append(app_thread)
+        app_thread.start()
+    wait_and_finish(thread_list, mission_log, log_name)
+
+
+def genMission(target_num_apps, id):
     '''run at most target_num_apps, each will be executed repeat_times '''
+    log_name = MISSION_PREFIX + str(target_num_apps) + '_' + str(id) + ".log"
+    if os.path.exists(log_name):
+        return
     progress_map = {}
     thread_list = []
     # first get all apps' command
-    commands = {}
     active_apps = {}  # record how many apps are active
     for app in apps:
-        # update the run_config
-        run_config = getAppRunConfig(app)
         appmet = app_info[app]['met']
-        updateAppMinMaxFake(appmet, app)
-        appmet.setRunConfigFile(run_config)
-        appmet.setRunDir(app_info[app]['dir'])
-        appmet.updateRunConfig(budgets[app], rapid_m=True, debug=True)
-        commands[app] = app_info[app]['met'].getRapidsCommand()
+        # maximum budget to reserve slot
+        appmet.updateRunConfig(999999, rapid_m=True, debug=True)
         active_apps[app] = False
     # log the mission progress
     mission_log = []
@@ -164,7 +241,7 @@ def run_a_mission(target_num_apps, budgets):
                 'global_start': start_time,
                 'start_time': new_app_start_time,
                 'app': new_app,
-                'budget': budgets[new_app]
+                'budget': 999999
             }
             active_apps[new_app] = True
             print("starting new app:xxxxxxxxxxx", start_time, new_app,
@@ -181,35 +258,45 @@ def run_a_mission(target_num_apps, budgets):
                                mission_log, active_apps))
             thread_list.append(app_thread)
             app_thread.start()
-        time.sleep(3) # wait for 3 seconds for the next check
+        time.sleep(10)  # wait for 10 seconds for the next check
     # clear up the thread when all jobs are done
+    wait_and_finish(thread_list, mission_log, log_name)
+
+
+def wait_and_finish(thread_list, mission_log, log_name):
     print("waiting for all remaning apps to finish")
     for t in thread_list:
         if not t.isAlive():
             t.handled = True
     thread_list = [t for t in thread_list if not t.handled]
     for t in thread_list:
+        print(t.name)
+    for t in thread_list:
         t.join()
     # write to file
     os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript/')
-    writeMissionToFile(mission_log)
+    writeMissionToFile(mission_log, log_name)
 
 
-def run(target_num_apps):
-    for scale in BUDGET_SCALE:
-        for mode in STRAWMANS:
-            qos = {}
-            data = {}
-            budgets = genBudgets(app_info, scale)
-            run_a_mission(target_num_apps, budgets)
-
-# reset the server
-if not reset_server():
-    exit(1)
 genInfo()
-# reset the run dir
-resetRunDir()
-
-#for i in range(2, len(apps) + 1):
-#    run(i)
-run(4)
+for num_app in range(2, 4):
+    for i in range(0, REPEAT):
+        # reset the server
+        if not reset_server():
+            exit(1)
+        # reset the run dir
+        resetRunDir()
+        # generate a mission
+        genMission(num_app, id=i)
+        for budget in BUDGET_SCALE:
+            budgets = genBudgets(app_info, budget)
+            mission = genMissionFromFile(MISSION_PREFIX + str(num_app) + '_' +
+                                         str(i) + ".log")
+            # follow the mission and run different strawmans
+            for mode in STRAWMANS:
+                # reset the server
+                if not reset_server():
+                    exit(1)
+                # reset the run dir
+                resetRunDir()
+                execute_mission(mission, num_app, mode, budgets, i, budget)
