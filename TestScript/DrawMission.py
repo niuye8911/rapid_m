@@ -7,10 +7,12 @@ start_time = 0.0
 last_end_time = 0.0
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-modes = ['N','INDIVIDUAL','P_M']
+modes = ['N','INDIVIDUAL','P_M','P_M_RUSH']
 budgets = [1.0]
 num_of_apps = [3]
 ids = [0,1]
+
+mode_ax = {}
 
 APP_COLOR = {
     'swaptions': 'b',
@@ -30,7 +32,7 @@ APP_Y = {
     'facedetect': 6.0
 }
 
-def draw_a_mission(num_of_app, buget,id):
+def draw_a_mission(num_of_app, budget,id):
     global last_end_time, start_time
     data_files = OrderedDict()
     # read in files
@@ -40,14 +42,22 @@ def draw_a_mission(num_of_app, buget,id):
         exec_file = './mission/execution_'+mode+'_'+str(budget)+'_'+str(num_of_app)+'_'+str(id)+'.log'
         data_files[mode]=exec_file
     # plot graphs
-    sub_graphs = ['mission'] + modes
-    fig,ax = plt.subplots(2,2,sharex=True, sharey=True,gridspec_kw={'hspace': 0.2, 'wspace': 0.2})
-    fig.tight_layout()
-    fig.text(0.5, 0.02, 'Time (seconds)', ha='center',fontsize=12)
-    rowid = 0
-    colid = 0
-    lines={}
+    fig = plt.figure(constrained_layout=True)
+    gs = fig.add_gridspec(3, 2)
+    mode_ax['mission'] = fig.add_subplot(gs[0, :])
+    mode_ax['mission'].set_title('Mission',fontsize=10)
+    plt.xlabel('Time (Seconds)')
+    mode_ax['INDIVIDUAL'] = fig.add_subplot(gs[1, 0])
+    mode_ax['INDIVIDUAL'].set_title('INDIVIDUAL',fontsize=10)
+    mode_ax['N'] = fig.add_subplot(gs[1, 1])
+    mode_ax['N'].set_title('N',fontsize=10)
+    mode_ax['P_M'] = fig.add_subplot(gs[2, 0])
+    mode_ax['P_M'].set_title('P_M',fontsize=10)
+    mode_ax['P_M_RUSH'] = fig.add_subplot(gs[2,1])
+    mode_ax['P_M_RUSH'].set_title('P_M_RUSH',fontsize=10)
+    plt.tight_layout()
     # first draw mission_
+    print(data_files)
     for mode,file in data_files.items():
         # reset time
         last_end_time = 0.0
@@ -73,37 +83,30 @@ def draw_a_mission(num_of_app, buget,id):
                 last_end_time = max(last_end_time, end_time)
                 left=entry['start_time']
                 right=entry['start_time'] + entry['elapsed']
+                ax = mode_ax[mode]
                 if status==1:
-                    ax[rowid,colid].plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],color=APP_COLOR[entry['app']])
+                    ax.plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],color=APP_COLOR[entry['app']])
                 elif status==2:
                     # reject
-                    ax[rowid,colid].plot([left],[APP_Y[entry['app']]],marker='x',color=APP_COLOR[entry['app']])
+                    ax.plot([left],[APP_Y[entry['app']]],marker='x',color=APP_COLOR[entry['app']])
                 else:
                     #fail during the middle
-                    ax[rowid,colid].plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],'--',color=APP_COLOR[entry['app']])
-                    ax[rowid,colid].plot([right],[APP_Y[entry['app']]],marker='X',color=APP_COLOR[entry['app']])
-                ax[rowid,colid].axvline(x=entry['start_time'],
+                    ax.plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],'--',color=APP_COLOR[entry['app']])
+                    ax.plot([right],[APP_Y[entry['app']]],marker='X',color=APP_COLOR[entry['app']])
+                ax.axvline(x=entry['start_time'],
                            color='grey',
                            linewidth=0.5,
                            linestyle='--')
-                ax[rowid,colid].axvline(x=entry['start_time'] + entry['elapsed'],
+                ax.axvline(x=entry['start_time'] + entry['elapsed'],
                            color='grey',
                            linewidth=0.5,
                            linestyle='--')
-            ax[rowid,colid].set_title(mode,fontsize=10)
-            colid+=1
-            if colid==2:
-                colid=0
-                rowid+=1
-    ax[0,0].set_yticks(range(0,len(apps)+1))
-    ax[0,1].set_yticks(range(0,len(apps)+1))
-    ax[1,1].set_yticks(range(0,len(apps)+1))
-    ax[0,0].set_yticklabels(['']+apps,rotation=45)
-    ax[1,0].set_yticks(range(0,len(apps)+1))
-    ax[1,0].set_yticklabels(['']+apps,rotation=45)
+                if not mode == 'mission':
+                    ax.yaxis.set_visible(False)
+                ax.set_xlim(0,700)
+    mode_ax['mission'].set_yticks(range(0,len(apps)+1))
+    mode_ax['mission'].set_yticklabels(['']+apps,rotation=45)
     plt.show()
 
-for num_of_app in num_of_apps:
-    for budget in budgets:
-        for id in ids:
-            draw_a_mission(num_of_app,budget,id)
+
+draw_a_mission(4,1.0,0)
