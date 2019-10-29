@@ -27,9 +27,12 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
         active_apps = json.load(file)
         # get all the apps
         apps = getActiveApps(active_apps)
+        if len(apps)==0:
+            # no active apps
+            return None,None
         if SELECTOR == 'INDIVIDUAL':
             return indiSelect(apps)
-        if SELECTOR == "P_M":
+        if SELECTOR == "P_M" or "P_M_RUSH":
             return pmSelect(apps)
         if SELECTOR == "N":
             return nSelect(apps)
@@ -357,7 +360,12 @@ def getBucketCombs(buckets):
     bucket_lists = buckets.values()
     combs = list(itertools.product(*bucket_lists))
     return combs
-    # printBucketCombs(combs)
+    # need to redo this for selection
+    bucket_lists_with_none = list(map(lambda x:x+[None],bucket_lists))
+    combs = list(itertools.product(*bucket_lists_with_none))
+    combs_with_none = [list(filter(lambda x: not x==None,y)) for y in combs]
+    combs_with_none.remove([])
+    return combs_with_none
 
 
 def printBucketCombs(combs):

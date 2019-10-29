@@ -22,11 +22,11 @@ from random import randint
 from sklearn.exceptions import DataConversionWarning
 
 MAX_WAIT_TIME = 20  # wait at most 10 second until the new app be inited
-MISSION_TIME = 60 * 10  # 10 minutes run
+MISSION_TIME = 60 * 6  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
 REPEAT = 3
-MISSION_PREFIX = "./mission/mission_"
-EXECUTION_PREFIX = "./mission/execution_"
+MISSION_PREFIX = "./mission_new/mission_"
+EXECUTION_PREFIX = "./mission_new/execution_"
 
 # ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
@@ -35,18 +35,18 @@ warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
 APP_MET_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/appExt/'
-APP_OUT_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/outptus/'
+APP_OUT_PREFIX = '/home/liuliu/Research/rapidlib-linux/modelConstr/Rapids/outputs/'
 
 app_info = {}
 commands = {}
 
 metric_df = None
 
-#STRAWMANS = ['P_M', 'INDIVIDUAL', 'N']  # strawmans to use
-STRAWMANS = ['INDIVIDUAL', 'N', 'P_M']  # strawmans to use
-BUDGET_SCALE = [0.8, 1.0, 1.5, 2.0]
+STRAWMANS = ['P_M', 'P_M_RUSH', 'INDIVIDUAL', 'N']  # strawmans to use
+#STRAWMANS = ['P_M','P_M_RUSH']  # strawmans to use
+#BUDGET_SCALE = [0.8, 1.0, 1.5]
 
-#BUDGET_SCALE = [1.0]
+BUDGET_SCALE = [0.8,1.0,1.5]
 
 
 #preparation
@@ -163,6 +163,8 @@ def genMissionFromFile(mission_log_file):
 def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
     log_name = EXECUTION_PREFIX + mode + '_' + str(budget_scale) + '_' + str(
         num_app) + '_' + str(id) + '.log'
+    if os.path.exists(log_name):
+        return
     # change the server mode
     with open(SERVER_MODE_FILE, 'w') as mode_file:
         print(mode)
@@ -180,7 +182,11 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
         app_cmd = commands[app]
         appmet = app_info[app]['met']
         run_dir = app_info[app]['dir']
-        appmet.updateRunConfig(budget, rapid_m=True, debug=True)
+        if mode=='P_M_RUSH':
+            print('using rush to end')
+            appmet.updateRunConfig(budget, rapid_m=True, debug=True,rush_to_end=True)
+        else:
+            appmet.updateRunConfig(budget, rapid_m=True, debug=True)
         # sleep until the target time
         cur_time = time.time() - start_time
         sleep_time = max(app_start_time - cur_time, 0)
@@ -189,7 +195,7 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
         print("starting new app:xxxxxxxxxxx", app, app_real_start_time)
         log_entry = {
             'global_start': start_time,
-            'start_time': app_real_start_time,
+            'start_time_process': app_real_start_time,
             'app': app,
             'budget': budget
         }
@@ -197,7 +203,7 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
                                     target=rapid_dynamic_worker,
                                     dir=run_dir,
                                     cmd=app_cmd,
-                                    app_time=progress_map,
+                                    app_time=log_entry,
                                     app=app,
                                     callback=rapid_dynamic_callback,
                                     callback_args=(app, appmet, run_dir,
@@ -212,6 +218,7 @@ def genMission(target_num_apps, id):
     '''run at most target_num_apps, each will be executed repeat_times '''
     log_name = MISSION_PREFIX + str(target_num_apps) + '_' + str(id) + ".log"
     if os.path.exists(log_name):
+        print("mission done before:",target_num_apps,str(id))
         return
     progress_map = {}
     thread_list = []
@@ -240,7 +247,7 @@ def genMission(target_num_apps, id):
             new_app_start_time = time.time() - start_time
             log_entry = {
                 'global_start': start_time,
-                'start_time': new_app_start_time,
+                'start_time_from_process': new_app_start_time,
                 'app': new_app,
                 'budget': 999999
             }
@@ -252,7 +259,7 @@ def genMission(target_num_apps, id):
                 target=rapid_dynamic_worker,
                 dir=run_dir,
                 cmd=app_cmd,
-                app_time=progress_map,
+                app_time=log_entry,
                 app=new_app,
                 callback=rapid_dynamic_callback,
                 callback_args=(new_app, appmet, run_dir, log_entry,
@@ -268,20 +275,16 @@ def genMission(target_num_apps, id):
 def wait_and_finish(thread_list, mission_log, log_name):
     print("waiting for all remaning apps to finish")
     for t in thread_list:
-        if not t.isAlive():
-            t.handled = True
-    thread_list = [t for t in thread_list if not t.handled]
-    for t in thread_list:
-        print(t.name)
-    for t in thread_list:
-        t.join()
+        if not t.handled:
+            print('WAITING FOR THREAD:'+t.name)
+            t.join(timeout=300)# 5 mins maximum wait time
     # write to file
     os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript/')
     writeMissionToFile(mission_log, log_name)
 
 
 genInfo()
-for num_app in range(2, 5):
+for num_app in range(2, 6):
     for i in range(0, REPEAT):
         # reset the server
         if not reset_server():

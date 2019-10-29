@@ -73,10 +73,16 @@ def main(argv):
 
     elif flow is Flow.GET_BUCKETS:
         # find the optimal bucket selection for each active application
-        result, buckets = bucketSelect(options.active_apps,SELECTOR=options.mode)
-        writeSelectionToFile(options.result_file, options.active_apps,
-                             result[0], result[1], result[2], result[3],
-                             buckets)
+        result, buckets = bucketSelect(options.active_apps,
+                                       SELECTOR=options.mode)
+        if result == None and buckets == None:
+            # no active apps
+            writeSelectionToFile(options.result_file, options.active_apps,
+                                 None, None, None, None, None)
+        else:
+            writeSelectionToFile(options.result_file, options.active_apps,
+                                 result[0], result[1], result[2], result[3],
+                                 buckets)
 
 
 def checkParams(flow, options):
@@ -108,7 +114,7 @@ def genParser():
     # for bucket selection
     parser.add_option('--apps', dest="active_apps")
     parser.add_option('--result', dest='result_file')
-    parser.add_option('--mode',dest='mode', default='P_M')
+    parser.add_option('--mode', dest='mode', default='P_M')
     # for mode
     parser.add_option('--flow', dest="flow")
     # for server maintainance
