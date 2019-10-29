@@ -6,7 +6,7 @@ import json
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 from Utility import printTrainingInfo
-from DataUtil import add_postfix,formatEnv_df,reformat_dfs
+from DataUtil import add_postfix, formatEnv_df, reformat_dfs
 from models.ModelPool import ModelPool
 from Rapid_M_Classes.Bucket import Bucket
 from collections import OrderedDict
@@ -249,9 +249,13 @@ class MModel:
                 converted_m))
         # predict the envs cumulatively
         env = env_dfs[0]
-        for i in range(0, len(converted_m) - 1):
-            env = self.predict_batch(add_postfix(env, '-1'),
-                                     add_postfix(env_dfs[i + 1], '-2'))
+        if len(converted_m) == 1:
+            # only 1 bucket in the comb
+            env = formatEnv_df(env, self.features, REMOVE_POSTFIX=False)
+        else:
+            for i in range(0, len(converted_m) - 1):
+                env = self.predict_batch(add_postfix(env, '-1'),
+                                         add_postfix(env_dfs[i + 1], '-2'))
         env['comb_name'] = comb_names
         return env
 
@@ -274,21 +278,21 @@ class MModel:
             y_pred_feature = self.models[feature]['model'].predict(x_input)
             y_pred[feature] = y_pred_feature
         df = pd.DataFrame(data=y_pred)
-        df = self.__fine_tune(load1,load2,df)
+        df = self.__fine_tune(load1, load2, df)
         return pd.DataFrame(data=y_pred)
 
     def __fine_tune(self, load1, load2, pred):
         ''' fine tune the output so that the output does not have neg values '''
         for col in pred.columns:
-            if (pred[col]>0).all():
+            if (pred[col] > 0).all():
                 continue
-            neg_index = pred.index[pred[col]<0].tolist()
+            neg_index = pred.index[pred[col] < 0].tolist()
             # for each index update the value to greater
-            load1_v = load1.loc[neg_index, col+'-1']
-            load2_v = load2.loc[neg_index, col+'-2']
+            load1_v = load1.loc[neg_index, col + '-1']
+            load2_v = load2.loc[neg_index, col + '-2']
             for id in neg_index:
-                new_v = max(load1_v[id], load2_v[id] )
-                pred.at[id, col]=new_v
+                new_v = max(load1_v[id], load2_v[id])
+                pred.at[id, col] = new_v
         return pred
 
     def predict(self, vec1, vec2):

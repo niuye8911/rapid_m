@@ -27,12 +27,12 @@ def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
         active_apps = json.load(file)
         # get all the apps
         apps = getActiveApps(active_apps)
-        if len(apps)==0:
+        if len(apps) == 0:
             # no active apps
-            return None,None
+            return None, None
         if SELECTOR == 'INDIVIDUAL':
             return indiSelect(apps)
-        if SELECTOR == "P_M" or "P_M_RUSH":
+        if SELECTOR == "P_M" or SELECTOR == "P_M_RUSH":
             return pmSelect(apps)
         if SELECTOR == "N":
             return nSelect(apps)
@@ -213,25 +213,31 @@ def mv_per_row(row, apps, buckets):
     total_mv = 0.0
     configs = {}
     successes = {}
-    all_success = True
-    running_apps_all_success = True
+    statuss = {}
+    for app in apps:
+        successes[app['app'].name] = False
+        statuss[app['app'].name] = app['status']
     for bucket_name in bucket_list:
         app_name = bucket_name[:-1]  #!!!there should not be > 10 buckets
         bucket = list(
             filter(lambda x: x.b_name == bucket_name, buckets[app_name]))[0]
-        slow_down = 1.0 if float(row[app_name]) < 1.0 else row[app_name]
+        slow_down = 1.2 if float(row[app_name]) < 1.0 else float(row[app_name])
+        slow_down = min(slow_down,3.0)
         budget = list(filter(lambda x: x['app'].name == app_name,
                              apps))[0]['budget']
         status = list(filter(lambda x: x['app'].name == app_name,
                              apps))[0]['status']
         config, mv, SUCCESS = bucket.getOptimal(float(budget),
                                                 float(slow_down))
-        all_success = all_success and SUCCESS
-        if status == 2:
-            running_apps_all_success = running_apps_all_success and SUCCESS
         configs[app_name] = config[0]
         successes[app_name] = SUCCESS
         total_mv = (total_mv + mv[0]) if SUCCESS else total_mv
+    all_success = True
+    running_apps_all_success = True
+    for app, suc in successes.items():
+        all_success = all_success and suc
+        if statuss[app] == 2:  # running app
+            running_apps_all_success = running_apps_all_success and suc
     return {
         'mv': total_mv,
         'configs': configs,
@@ -285,10 +291,13 @@ def getSlowdowns_batch(combined_envs, p_models):
             # get the df containing the bucekt name
             sub_df = combined_envs.loc[combined_envs['comb_name'].str.contains(
                 bucket)]
+            sub_df_only_one = combined_envs.loc[combined_envs['comb_name'] ==
+                                                bucket]
             # apply the p_model to get the slowdown
             slowdown = p_model.predict(sub_df[env_ids])
             # set the corresponding rows to slowdown
             combined_envs.loc[sub_df.index.values, [app]] = slowdown
+            combined_envs.loc[sub_df_only_one.index.values, [app]] = 1.0
     return combined_envs
 
 
@@ -311,7 +320,18 @@ def getSlowdowns(combined_envs, p_models, features):
 def getEnvs_batch(bucket_combs, mmodel=None, P_ONLY=False, env=[]):
     result = {}
     if not P_ONLY:
-        envs = mmodel.predict_seq(bucket_combs)
+        envs = []
+        combs = {}
+        for comb in bucket_combs:
+            length = len(comb)
+            if length not in combs:
+                combs[length] = []
+            combs[length].append(comb)
+        for num, comb in combs.items():
+            envs_of_num = mmodel.predict_seq(comb)
+            envs.append(envs_of_num)
+        overall_envs = pd.concat(envs, ignore_index=True)
+        return overall_envs
     else:
         comb_names = list(
             map(lambda comb: (list(map(lambda x: x.b_name, comb))),
@@ -358,12 +378,12 @@ def mReducer(env1, env2, mmodel):
 
 def getBucketCombs(buckets):
     bucket_lists = buckets.values()
-    combs = list(itertools.product(*bucket_lists))
-    return combs
+    #combs = list(itertools.product(*bucket_lists))
+    #return combs
     # need to redo this for selection
-    bucket_lists_with_none = list(map(lambda x:x+[None],bucket_lists))
+    bucket_lists_with_none = list(map(lambda x: x + [None], bucket_lists))
     combs = list(itertools.product(*bucket_lists_with_none))
-    combs_with_none = [list(filter(lambda x: not x==None,y)) for y in combs]
+    combs_with_none = [list(filter(lambda x: not x == None, y)) for y in combs]
     combs_with_none.remove([])
     return combs_with_none
 
