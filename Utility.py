@@ -10,6 +10,7 @@ import csv
 
 JSON_DELIMITER = "$"
 
+
 def __get_minmax(file):
     min_v = 999999.0
     max_v = -999999.0
@@ -57,15 +58,20 @@ def getConfigVector(config):
     return result
 
 
-def writeSelectionToFile(result_file, input_file, comb_name, selection, successTable, slowDownTable,
-                         buckets):
-    input = open(input_file,'r')
+def writeSelectionToFile(result_file, input_file, comb_name, selection,
+                         successTable, slowDownTable, buckets):
+    input = open(input_file, 'r')
     input_json = json.load(input)
     applications = input_json['applications']
     budgets = {}
     for app in applications:
         budgets[app['id']] = app['budget']
     output = open(result_file, 'w')
+    if comb_name == None:
+        # no combination available
+        output.write('')
+        output.close()
+        return
     result = []
     bucket_list = comb_name.split(',')
     for app, config in selection.items():
@@ -82,9 +88,10 @@ def writeSelectionToFile(result_file, input_file, comb_name, selection, successT
             'config':
             "$".join(getConfigVector(config)),
             'configs':
-            JSON_DELIMITER.join(list(
-                map(lambda x: __rewriteConfigName(x),
-                    getConfigsInTargetBucket(buckets, app, bucket)))),
+            JSON_DELIMITER.join(
+                list(
+                    map(lambda x: __rewriteConfigName(x),
+                        getConfigsInTargetBucket(buckets, app, bucket)))),
             'slowdown_p':
             slowDownTable[app],
             'slowdown':
