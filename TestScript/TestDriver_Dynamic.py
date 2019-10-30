@@ -20,13 +20,15 @@ from TestDriver_Helper import *
 import warnings, time
 from random import randint
 from sklearn.exceptions import DataConversionWarning
+from resultViewer_dynamic import *
 
-MAX_WAIT_TIME = 20  # wait at most 10 second until the new app be inited
-MISSION_TIME = 60 * 6  # 10 minutes run
+MAX_WAIT_TIME = 15  # wait at most 10 second until the new app be inited
+MISSION_TIME = 60 * 10  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
-REPEAT = 3
-MISSION_PREFIX = "./mission_new/mission_"
-EXECUTION_PREFIX = "./mission_new/execution_"
+REPEAT = 2
+MISSION_PREFIX = "./mission_oct29/mission_"
+EXECUTION_PREFIX = "./mission_oct29/execution_"
+APP_RANGE = range(2, 6)
 
 # ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
@@ -42,11 +44,11 @@ commands = {}
 
 metric_df = None
 
-STRAWMANS = ['P_M', 'P_M_RUSH', 'INDIVIDUAL', 'N']  # strawmans to use
+STRAWMANS = ['INDIVIDUAL', 'N', 'P_M', 'P_M_RUSH']  # strawmans to use
 #STRAWMANS = ['P_M','P_M_RUSH']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
 
-BUDGET_SCALE = [0.8,1.0,1.5]
+BUDGET_SCALE = [0.6, 0.8, 1.0]
 
 
 #preparation
@@ -182,9 +184,12 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
         app_cmd = commands[app]
         appmet = app_info[app]['met']
         run_dir = app_info[app]['dir']
-        if mode=='P_M_RUSH':
+        if mode == 'P_M_RUSH':
             print('using rush to end')
-            appmet.updateRunConfig(budget, rapid_m=True, debug=True,rush_to_end=True)
+            appmet.updateRunConfig(budget,
+                                   rapid_m=True,
+                                   debug=True,
+                                   rush_to_end=True)
         else:
             appmet.updateRunConfig(budget, rapid_m=True, debug=True)
         # sleep until the target time
@@ -218,7 +223,7 @@ def genMission(target_num_apps, id):
     '''run at most target_num_apps, each will be executed repeat_times '''
     log_name = MISSION_PREFIX + str(target_num_apps) + '_' + str(id) + ".log"
     if os.path.exists(log_name):
-        print("mission done before:",target_num_apps,str(id))
+        print("mission done before:", target_num_apps, str(id))
         return
     progress_map = {}
     thread_list = []
@@ -276,15 +281,19 @@ def wait_and_finish(thread_list, mission_log, log_name):
     print("waiting for all remaning apps to finish")
     for t in thread_list:
         if not t.handled:
-            print('WAITING FOR THREAD:'+t.name)
-            t.join(timeout=300)# 5 mins maximum wait time
+            print('WAITING FOR THREAD:' + t.name)
+            t.join(timeout=300)  # 5 mins maximum wait time
     # write to file
     os.chdir('/home/liuliu/Research/rapid_m_backend_server/TestScript/')
     writeMissionToFile(mission_log, log_name)
 
 
 genInfo()
-for num_app in range(2, 6):
+# estimate the overall time
+overall_time = len(APP_RANGE) * REPEAT * len(BUDGET_SCALE) * len(
+    STRAWMANS) * MISSION_TIME / 60
+print("estimating time in minutes:", overall_time)
+for num_app in APP_RANGE:
     for i in range(0, REPEAT):
         # reset the server
         if not reset_server():
@@ -305,3 +314,5 @@ for num_app in range(2, 6):
                 # reset the run dir
                 resetRunDir()
                 execute_mission(mission, num_app, mode, budgets, i, budget)
+readFile('./mission_oct29', APP_RANGE, STRAWMANS, BUDGET_SCALE,
+         range(0, REPEAT), app_info)
