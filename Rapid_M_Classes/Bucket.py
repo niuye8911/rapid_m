@@ -15,7 +15,9 @@ class Bucket:
         self.max_mv = 0.0
         self.min_mv = 99999
         self.min_cost = 9999999
+        self.global_min_cost = 9999999
         self.lowest_setting = ''
+        self.global_lowest_setting = ''
         self.genSubProfile(cost_fact, mv_fact)
         # convert rep_env back to float
         for f, v in self.rep_env.items():
@@ -43,6 +45,9 @@ class Bucket:
                 # max_mv should be global max mv
                 if MV and value > self.max_mv:
                     self.max_mv = value
+                if not MV and value < self.global_min_cost:
+                    self.global_lowest_setting = configuration
+                    self.global_min_cost = value
                 if configuration not in self.configurations:
                     # filter out non-bucket configs
                     continue
