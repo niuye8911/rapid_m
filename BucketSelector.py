@@ -22,33 +22,40 @@ MACHINE_FILE = '/home/liuliu/Research/rapid_m_backend_server/examples/example_ma
 DELIMITER = ","  # bucket comb delimiter
 
 
-def bucketSelect(active_apps_file, SELECTOR="P_M", env=[]):
+def bucketSelect(active_apps_file, SELECTOR="P_M", P_MODELS=None, M_MODEL=None, BUCKETS=None, env=[]):
     with open(active_apps_file, 'r') as file:
+        SELECTOR = SELECTOR.strip()
         active_apps = json.load(file)
         # get all the apps
         apps = getActiveApps(active_apps)
         if len(apps) == 0:
+            print("no apps active")
             # no active apps
             return None, None
         if SELECTOR == 'INDIVIDUAL':
-            return indiSelect(apps)
-        if SELECTOR == "P_M" or SELECTOR == "P_M_RUSH":
-            return pmSelect(apps)
-        if SELECTOR == "N":
-            return nSelect(apps)
-        if SELECTOR == "P":
-            return pSelect(apps, env)
+            return indiSelect(apps,p_models=P_MODELS,buckets=BUCKETS)
+        elif SELECTOR == "P_M" or SELECTOR == "P_M_RUSH":
+            return pmSelect(apps,P_MODELS,M_MODEL,BUCKETS)
+        elif SELECTOR == "N":
+            return nSelect(apps,p_models=P_MODELS,buckets=BUCKETS)
+        elif SELECTOR == "P":
+            return pSelect(apps, env,P_MODELS,M_MODEL,BUCKETS)
+        else:
+            print('none of selectors matched')
+            return None,None
 
-
-def nSelect(apps):
+def nSelect(apps,p_models = None, buckets=None):
     num_of_apps = len(apps)
-    return indiSelect(apps, float(num_of_apps))
+    return indiSelect(apps, float(num_of_apps),p_models,buckets)
 
 
-def indiSelect(apps, f_slowdown=1.0):
-    p_models = loadAppModels(apps)
-    # convert apps to buckets
-    buckets = genBuckets(apps, p_models)
+def indiSelect(apps, f_slowdown=1.0, p_models = None, buckets=None):
+    if p_models == None:
+        p_models = loadAppModels(apps)
+    if buckets == None:# convert apps to buckets
+        buckets = genBuckets(apps, p_models)
+    active_p_models = {k['app'].name:p_models[k['app'].name] for k in apps}
+    active_buckets = {k['app'].name:buckets[k['app'].name] for k in apps}
     bucket_selection = []
     configs = {}
     slowdowns = {}
@@ -56,7 +63,7 @@ def indiSelect(apps, f_slowdown=1.0):
     successes = {}
     for app in apps:
         bucket, config, success, slow, expected = single_app_select(
-            app['app'], app['budget'], buckets, fixed_slowdown=f_slowdown)
+            app['app'], app['budget'], active_buckets, fixed_slowdown=f_slowdown)
         bucket_selection.append(bucket)
         configs[app['app'].name] = config[app['app'].name]
         slowdowns[app['app'].name] = f_slowdown
@@ -67,27 +74,30 @@ def indiSelect(apps, f_slowdown=1.0):
     ], buckets
 
 
-def pmSelect(apps):
-    # get the M-Model
-    m_model = MModel(MACHINE_FILE)
+def pmSelect(apps, p_models=None,m_model=None,buckets=None):
+    if m_model==None:
+        m_model = MModel(MACHINE_FILE)
+    if p_models == None:
+        p_models = loadAppModels(apps)
+    if buckets == None:# convert apps to buckets
+        buckets = genBuckets(apps, p_models)
     features = m_model.features
-    RAPID_info('M-Model Loader: ', m_model.TRAINED)
-    # get all the P_models {app_name: {bucket_name: model }}
-    p_models = loadAppModels(apps)
-    # convert apps to buckets
-    buckets = genBuckets(apps, p_models)
+    # get all the active P_models {app_name: {bucket_name: model }}
+    # select the corresponding p_models
+    active_p_models = {k['app'].name:p_models[k['app'].name] for k in apps}
+    active_buckets = {k['app'].name:buckets[k['app'].name] for k in apps}
     if len(apps) == 1:
-        selections = getSelection_batch(None, apps, buckets, single_app=True)
-        return selections, buckets
+        selections = getSelection_batch(None, apps, active_buckets, single_app=True)
+        return selections, active_buckets
     # get all combinations of buckets
-    bucket_combs = getBucketCombs(buckets)
+    bucket_combs = getBucketCombs(active_buckets)
     # predict the overall envs for each comb
     combined_envs = getEnvs_batch(bucket_combs, mmodel=m_model)
     # predict the per-app slow-down
-    slowdowns = getSlowdowns_batch(combined_envs, p_models)
+    slowdowns = getSlowdowns_batch(combined_envs, active_p_models)
     # get the bucket selection based on slow-down
-    selections = getSelection_batch(slowdowns, apps, buckets)
-    return selections, buckets
+    selections = getSelection_batch(slowdowns, apps, active_buckets)
+    return selections, active_buckets
 
 
 def pSelect(apps, measured_env):
@@ -152,7 +162,6 @@ def getSelection_batch(slowdowns, apps, buckets, single_app=False):
     slowdown_t = slowdown_table(max_row, apps)
     expected_exec = _get_expected(config_dict, buckets, comb_name)
     return [comb_name, config_dict, success_dict, slowdown_t, expected_exec]
-
 
 def single_app_select(app, budget, buckets, fixed_slowdown=1.0):
     #only 1 app active
