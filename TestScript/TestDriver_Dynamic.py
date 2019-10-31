@@ -25,9 +25,10 @@ from resultViewer_dynamic import *
 MAX_WAIT_TIME = 15  # wait at most 10 second until the new app be inited
 MISSION_TIME = 60 * 10  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
-REPEAT = 2
-MISSION_PREFIX = "./mission_oct29/mission_"
-EXECUTION_PREFIX = "./mission_oct29/execution_"
+REPEAT = 1
+MISSION_DIR = "./mission_oct31/"
+MISSION_PREFIX = MISSION_DIR+"mission_"
+EXECUTION_PREFIX = MISSION_DIR+"execution_"
 APP_RANGE = range(2, 6)
 
 # ignore the TF debug info
@@ -44,11 +45,11 @@ commands = {}
 
 metric_df = None
 
-STRAWMANS = ['INDIVIDUAL', 'N', 'P_M', 'P_M_RUSH']  # strawmans to use
+STRAWMANS = ['INDIVIDUAL', 'N', 'P_M', 'P_M_RUSH', 'P_SAVING']  # strawmans to use
 #STRAWMANS = ['P_M','P_M_RUSH']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
 
-BUDGET_SCALE = [0.6, 0.8, 1.0]
+BUDGET_SCALE = [0.6]
 
 
 #preparation
@@ -116,6 +117,24 @@ def updateAppMinMaxFake(appMethod, app):
         appMethod.min_mv = min_mv
         appMethod.max_mv = max_mv
 
+# update the mission value based on real execution
+def get_mv_from_file(file_name):
+    result = {}
+    with open(file_name) as json_file:
+        f = json.load(json_file)
+        for entry in f:
+            # check if it successes
+            app = entry['app']
+            if not app in result:
+                result[app] = entry['mv']
+    return result
+
+def update_mvs(max_mv,min_mv):
+    for app in max_mv.keys():
+        mv_max = max_mv[app]
+        mv_min = min_mv[app]
+        app_info[app]['met'].max_mv = max(mv_max,mv_min)
+        app_info[app]['met'].min_mv = min(mv_min,mv_max)
 
 # get a random app
 def getNewApp(active_apps):
@@ -184,7 +203,9 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
         app_cmd = commands[app]
         appmet = app_info[app]['met']
         run_dir = app_info[app]['dir']
-        if mode == 'P_M_RUSH':
+        if mode == "P_SAVING":
+            appmet.updateRunConfig(budget,rapid_m=False,debug=True,power_saving=True)
+        elif mode == 'P_M_RUSH':
             print('using rush to end')
             appmet.updateRunConfig(budget,
                                    rapid_m=True,
@@ -220,6 +241,9 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
 
 
 def genMission(target_num_apps, id):
+    # change the server mode
+    with open(SERVER_MODE_FILE, 'w') as mode_file:
+        mode_file.write('INDIVIDUAL')
     '''run at most target_num_apps, each will be executed repeat_times '''
     log_name = MISSION_PREFIX + str(target_num_apps) + '_' + str(id) + ".log"
     if os.path.exists(log_name):
@@ -288,31 +312,42 @@ def wait_and_finish(thread_list, mission_log, log_name):
     writeMissionToFile(mission_log, log_name)
 
 
-genInfo()
-# estimate the overall time
-overall_time = len(APP_RANGE) * REPEAT * len(BUDGET_SCALE) * len(
-    STRAWMANS) * MISSION_TIME / 60
-print("estimating time in minutes:", overall_time)
-for num_app in APP_RANGE:
-    for i in range(0, REPEAT):
-        # reset the server
-        if not reset_server():
-            exit(1)
-        # reset the run dir
-        resetRunDir()
-        # generate a mission
-        genMission(num_app, id=i)
-        for budget in BUDGET_SCALE:
-            budgets = genBudgets(app_info, budget)
-            mission = genMissionFromFile(MISSION_PREFIX + str(num_app) + '_' +
-                                         str(i) + ".log")
-            # follow the mission and run different strawmans
-            for mode in STRAWMANS:
-                # reset the server
-                if not reset_server():
-                    exit(1)
-                # reset the run dir
-                resetRunDir()
-                execute_mission(mission, num_app, mode, budgets, i, budget)
-readFile('./mission_oct29', APP_RANGE, STRAWMANS, BUDGET_SCALE,
-         range(0, REPEAT), app_info)
+def main(argv):
+    if not os.path.exists(MISSION_DIR):
+        os.mkdir(MISSION_DIR)
+    genInfo()
+    # estimate the overall time
+    overall_time = len(APP_RANGE) * REPEAT * len(BUDGET_SCALE) * len(
+        STRAWMANS) * MISSION_TIME / 60
+    print("estimating time in minutes:", overall_time)
+    for num_app in APP_RANGE:
+        for i in range(0, REPEAT):
+            # reset the server
+            if not reset_server():
+                exit(1)
+            # reset the run dir
+            resetRunDir()
+            # generate a mission
+            genMission(num_app, id=i)
+            for budget in BUDGET_SCALE:
+                budgets = genBudgets(app_info, budget)
+                mission = genMissionFromFile(MISSION_PREFIX + str(num_app) + '_' +
+                                             str(i) + ".log")
+                # follow the mission and run different strawmans
+                for mode in STRAWMANS:
+                    # reset the server
+                    if not reset_server():
+                        exit(1)
+                    # reset the run dir
+                    resetRunDir()
+                    execute_mission(mission, num_app, mode, budgets, i, budget)
+    max_mvs = get_mv_from_file(MISSION_DIR+'mission_2_0.log')
+    min_mvs = get_mv_from_file(MISSION_DIR+'execution_P_SAVING_1.5_2_0.log')
+    print(max_mvs,min_mvs)
+    update_mvs(max_mvs,min_mvs)
+    readFile(MISSION_DIR, APP_RANGE, STRAWMANS, BUDGET_SCALE,
+             range(0, REPEAT), app_info)
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
