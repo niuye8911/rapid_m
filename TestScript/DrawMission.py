@@ -36,10 +36,10 @@ def draw_a_mission(num_of_app, budget,id):
     global last_end_time, start_time
     data_files = OrderedDict()
     # read in files
-    mission_file = './mission/mission_'+str(num_of_app)+'_'+str(id)+'.log'
+    mission_file = './mission_oct29/mission_'+str(num_of_app)+'_'+str(id)+'.log'
     data_files['mission']=mission_file
     for mode in modes:
-        exec_file = './mission/execution_'+mode+'_'+str(budget)+'_'+str(num_of_app)+'_'+str(id)+'.log'
+        exec_file = './mission_oct29/execution_'+mode+'_'+str(budget)+'_'+str(num_of_app)+'_'+str(id)+'.log'
         data_files[mode]=exec_file
     # plot graphs
     fig = plt.figure(constrained_layout=True)
@@ -109,4 +109,4 @@ def draw_a_mission(num_of_app, budget,id):
     plt.show()
 
 
-draw_a_mission(4,1.0,0)
+draw_a_mission(5,0.8,0)
