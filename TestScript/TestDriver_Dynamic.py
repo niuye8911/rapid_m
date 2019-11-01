@@ -342,7 +342,7 @@ def main(argv):
                     resetRunDir()
                     execute_mission(mission, num_app, mode, budgets, i, budget)
     max_mvs = get_mv_from_file(MISSION_DIR+'mission_2_0.log')
-    min_mvs = get_mv_from_file(MISSION_DIR+'execution_P_SAVING_1.5_2_0.log')
+    min_mvs = get_mv_from_file(MISSION_DIR+'execution_P_SAVING_0.6_2_0.log')
     print(max_mvs,min_mvs)
     update_mvs(max_mvs,min_mvs)
     readFile(MISSION_DIR, APP_RANGE, STRAWMANS, BUDGET_SCALE,

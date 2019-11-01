@@ -25,6 +25,11 @@ def list_avg(l):
     else:
         return sum(l) / len(l)
 
+mode_mapping = {'INDIVIDUAL':'CO',
+'N':'ES',
+'P_M':'RM',
+'P_M_RUSH':'RM_RUSH',
+'P_SAVING':'PS'}
 
 def draw(summary, num_of_apps, budgets, modes):
     ngroup = len(num_of_apps)
@@ -63,7 +68,8 @@ def draw(summary, num_of_apps, budgets, modes):
             plt.xticks(index + bar_width, range(2, ngroup + 2))
             id += 1
         #axes[0].axis("off")
-        fig.legend(rects, modes, loc='upper center', ncol=4)
+        legends = [mode_mapping[k] for k in modes]
+        fig.legend(rects, legends, loc='upper center', ncol=len(legends))
         plt.subplots_adjust(bottom=0.1, left=0.1, top=0.9)
         plt.savefig('result_' + str(budget) + '.png')
 
