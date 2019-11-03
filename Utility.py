@@ -256,19 +256,21 @@ def elbow(Z):
     return k
 
 
-def draw(Z, simplified=True):
+def draw(Z, simplified=False):
     # view of basic Dendrogram with all clusters
     cluster_fig = plt.figure(figsize=(25, 10))
     if not simplified:
         # show full dendrogram
-        plt.xlabel('sample index')
-        plt.ylabel('distance')
+        plt.xlabel('Configuration Index\n x: the x-th config, (X): a set of X configs',
+                   fontsize=18)
+        plt.ylabel('Distance', fontsize=18)
         dendrogram(
             Z,
             leaf_rotation=90.,  # rotates the x axis labels
             leaf_font_size=8.,  # font size for the x axis labels
             truncate_mode='lastp',
         )
+        plt.tick_params(labelsize=14)
     else:
         simplified_dendrogram(
             Z,
