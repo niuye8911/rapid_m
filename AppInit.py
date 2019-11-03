@@ -13,7 +13,7 @@ from Rapid_M_Classes.SlowDownProfile import SlowDownProfile
 from Rapid_M_Classes.AppSysProfile import AppSysProfile
 
 MAX_ITERATION = 10
-SLOWDOWN_THRESHOLD = .07
+SLOWDOWN_THRESHOLD = .06
 
 INCREMENTAL = "incremental"
 DIRECT_K = "direct_k"
@@ -42,6 +42,8 @@ def init(app_file,
         app.maxes = maxes
         pModelTrainer, cluster_list, Z = determine_k_incremental(
             slowDownProfile, appSysProfile, directory, app)
+        #pModelTrainer, cluster_list, Z = determine_k(
+        #    slowDownProfile, appSysProfile, directory, app)
         # calculate the average envs
         rep_env = gen_rep_env(profile_file, cluster_list)
 
