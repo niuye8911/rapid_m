@@ -7,7 +7,7 @@ start_time = 0.0
 last_end_time = 0.0
 
 apps = ['swaptions', 'ferret', 'bodytrack', 'svm', 'nn', 'facedetect']
-modes = ['N','INDIVIDUAL','P_M','P_M_RUSH']
+modes = ['N','INDIVIDUAL','P_M','P_M_RUSH','P_SAVING']
 budgets = [1.0]
 num_of_apps = [3]
 ids = [0,1]
@@ -43,21 +43,23 @@ def draw_a_mission(num_of_app, budget,id):
         data_files[mode]=exec_file
     # plot graphs
     fig = plt.figure(constrained_layout=True)
-    gs = fig.add_gridspec(3, 2)
-    mode_ax['mission'] = fig.add_subplot(gs[0, :])
-    mode_ax['mission'].set_title('Mission',fontsize=10)
-    plt.xlabel('Time (Seconds)')
+    gs = fig.add_gridspec(2, 3)
+    mode_ax['mission'] = fig.add_subplot(gs[0, 0])
+    mode_ax['mission'].set_title('Mission',fontsize=14)
+    mode_ax['P_SAVING'] = fig.add_subplot(gs[0, 1])
+    mode_ax['P_SAVING'].set_title('LOW',fontsize=14)
+    mode_ax['N'] = fig.add_subplot(gs[0, 2])
+    mode_ax['N'].set_title('ES',fontsize=14)
     mode_ax['INDIVIDUAL'] = fig.add_subplot(gs[1, 0])
-    mode_ax['INDIVIDUAL'].set_title('INDIVIDUAL',fontsize=10)
-    mode_ax['N'] = fig.add_subplot(gs[1, 1])
-    mode_ax['N'].set_title('N',fontsize=10)
-    mode_ax['P_M'] = fig.add_subplot(gs[2, 0])
-    mode_ax['P_M'].set_title('P_M',fontsize=10)
-    mode_ax['P_M_RUSH'] = fig.add_subplot(gs[2,1])
-    mode_ax['P_M_RUSH'].set_title('P_M_RUSH',fontsize=10)
+    mode_ax['INDIVIDUAL'].set_title('CO',fontsize=14)
+    mode_ax['P_M'] = fig.add_subplot(gs[1, 1])
+    mode_ax['P_M'].set_title('RM',fontsize=14)
+    mode_ax['P_M_RUSH'] = fig.add_subplot(gs[1,2])
+    mode_ax['P_M_RUSH'].set_title('RM_RUSH',fontsize=14)
     plt.tight_layout()
+    gs.update(wspace=0.05, hspace=0.2)
     # first draw mission_
-    print(data_files)
+    legend_apps = []
     for mode,file in data_files.items():
         # reset time
         last_end_time = 0.0
@@ -85,7 +87,13 @@ def draw_a_mission(num_of_app, budget,id):
                 right=entry['start_time'] + entry['elapsed']
                 ax = mode_ax[mode]
                 if status==1:
-                    ax.plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],color=APP_COLOR[entry['app']])
+                    if entry['app'] not in legend_apps:
+                        ax.plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],color=APP_COLOR[entry['app']],label=entry['app'])
+                        legend_apps.append(entry['app'])
+                    else:
+                        ax.plot([left,right],[APP_Y[entry['app']],APP_Y[entry['app']]],color=APP_COLOR[entry['app']])
+                    #if entry['app'] not in lines:
+                    #    lines[entry['app']]=line
                 elif status==2:
                     # reject
                     ax.plot([left],[APP_Y[entry['app']]],marker='x',color=APP_COLOR[entry['app']])
@@ -101,12 +109,13 @@ def draw_a_mission(num_of_app, budget,id):
                            color='grey',
                            linewidth=0.5,
                            linestyle='--')
-                if not mode == 'mission':
-                    ax.yaxis.set_visible(False)
+                ax.yaxis.set_visible(False)
                 ax.set_xlim(0,700)
-    mode_ax['mission'].set_yticks(range(0,len(apps)+1))
-    mode_ax['mission'].set_yticklabels(['']+apps,rotation=45)
+    #mode_ax['mission'].set_yticks(range(0,len(apps)+1))
+    #mode_ax['mission'].set_yticklabels(['']+apps,rotation=45)
+    plt.figlegend(loc='upper center', ncol=len(apps),fontsize=14)
+    fig.text(0.5, 0.02, 'Time (Secs)', ha='center',fontsize=14)
     plt.show()
 
 
-draw_a_mission(5,0.8,0)
+draw_a_mission(4,1.0,0)
