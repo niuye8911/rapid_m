@@ -21,15 +21,16 @@ import warnings, time
 from random import randint
 from sklearn.exceptions import DataConversionWarning
 from resultViewer_dynamic import *
+from shutil import copyfile
 
 MAX_WAIT_TIME = 15  # wait at most 10 second until the new app be inited
 MISSION_TIME = 60 * 10  # 10 minutes run
 SERVER_MODE_FILE = '/home/liuliu/SERVER_MODE'
-REPEAT = 1
+REPEAT = 3
 MISSION_DIR = "./mission_oct31/"
 MISSION_PREFIX = MISSION_DIR+"mission_"
 EXECUTION_PREFIX = MISSION_DIR+"execution_"
-APP_RANGE = range(2, 6)
+APP_RANGE = range(2, 7)
 
 # ignore the TF debug info
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
@@ -45,11 +46,11 @@ commands = {}
 
 metric_df = None
 
-STRAWMANS = ['INDIVIDUAL', 'N', 'P_M', 'P_M_RUSH', 'P_SAVING']  # strawmans to use
+STRAWMANS = ['P_SAVING','N','INDIVIDUAL',  'P_M', 'P_M_RUSH']  # strawmans to use
 #STRAWMANS = ['P_M','P_M_RUSH']  # strawmans to use
 #BUDGET_SCALE = [0.8, 1.0, 1.5]
 
-BUDGET_SCALE = [0.6]
+BUDGET_SCALE = [0.6,0.8,1.0]
 
 
 #preparation
@@ -133,8 +134,8 @@ def update_mvs(max_mv,min_mv):
     for app in max_mv.keys():
         mv_max = max_mv[app]
         mv_min = min_mv[app]
-        app_info[app]['met'].max_mv = max(mv_max,mv_min)
-        app_info[app]['met'].min_mv = min(mv_min,mv_max)
+        app_info[app]['met'].max_mv = mv_max
+        app_info[app]['met'].min_mv = mv_min
 
 # get a random app
 def getNewApp(active_apps):
@@ -186,6 +187,13 @@ def execute_mission(mission, num_app, mode, budgets, id, budget_scale):
         num_app) + '_' + str(id) + '.log'
     if os.path.exists(log_name):
         return
+    # save some time, if it's executing the same mission for PS, just use the old data
+    if mode == 'P_SAVING':
+        first_log = EXECUTION_PREFIX + mode + '_0.6' + '_' + str(
+            num_app) + '_' + str(id) + '.log'
+        if os.path.exists(first_log):
+            copyfile(first_log, log_name)
+            return
     # change the server mode
     with open(SERVER_MODE_FILE, 'w') as mode_file:
         print(mode)
